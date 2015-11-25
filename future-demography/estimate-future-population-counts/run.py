@@ -63,7 +63,7 @@ def get_growth_models(name_packs, yearly_growth_percent):
 def estimate_future_population_counts(
         target_year, name_packs, growth_models):
     extended_name_packs = []
-    make_whole_numbers = np.vectorize(lambda x: int(ceil(x) if x > 0 else 0))
+    make_whole_numbers = np.vectorize(lambda x: int(ceil(x)) if x > 0 else 0)
     for (name, old_year_packs), growth_model in zip(name_packs, growth_models):
         year, population = sorted(old_year_packs)[-1]
         years = range(year + 1, target_year + 1)
