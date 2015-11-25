@@ -1,2 +1,4 @@
-Cite http://data.un.org/Data.aspx?d=POP&f=tableCode:240
+Cite sources for data in markdown
+    Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
+    Cite "Demographic Yearbook" http://unstats.un.org/unsd/demographic/products/dyb/dyb2.htm
 Replace NaN with blank

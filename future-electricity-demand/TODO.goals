@@ -1,0 +1,5 @@
+Cite sources for data
+    Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+    Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
+Decide between using current population (requires projection into future) or future population (precalculated)
+Use regression to project electricty demand per capita
