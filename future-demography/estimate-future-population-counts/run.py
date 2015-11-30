@@ -14,8 +14,9 @@ prepare_data = lambda x: np.array(x).reshape((len(x), 1))
 
 
 def run(
-        target_folder, target_year, population_table,
-        name_column, population_column, year_column, yearly_growth_percent):
+        target_folder, population_table,
+        name_column, population_column, year_column,
+        target_year, yearly_growth_percent):
     name_packs = get_name_packs(
         population_table, name_column, year_column, population_column)
     growth_models = get_growth_models(name_packs, yearly_growth_percent)
@@ -26,9 +27,9 @@ def run(
     ])[population_table.columns].sort_values([name_column, year_column])
     population_table_path = join(target_folder, 'populations.csv')
     population_table.to_csv(population_table_path, index=False)
-    return {
-        'population_table_path': population_table_path,
-    }
+    return [
+        ('population_table_path', population_table_path),
+    ]
 
 
 def get_name_packs(
@@ -88,19 +89,19 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder', metavar='FOLDER', type=make_folder)
     argument_parser.add_argument(
-        '--target_year', metavar='YEAR', type=int,
-        required=True)
-    argument_parser.add_argument(
         '--population_table_path', metavar='PATH',
         required=True)
     argument_parser.add_argument(
         '--name_column', metavar='COLUMN',
         required=True)
     argument_parser.add_argument(
+        '--population_column', metavar='COLUMN',
+        required=True)
+    argument_parser.add_argument(
         '--year_column', metavar='COLUMN',
         required=True)
     argument_parser.add_argument(
-        '--population_column', metavar='COLUMN',
+        '--target_year', metavar='YEAR', type=int,
         required=True)
     argument_parser.add_argument(
         '--yearly_growth_percent', metavar='PERCENT', type=float,
@@ -108,10 +109,10 @@ if __name__ == '__main__':
     args = argument_parser.parse_args()
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
-        args.target_year,
         TableType().load(args.population_table_path),
         args.name_column,
         args.population_column,
         args.year_column,
+        args.target_year,
         args.yearly_growth_percent)
     print(format_summary(d))
