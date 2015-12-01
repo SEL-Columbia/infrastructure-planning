@@ -1,2 +1,18 @@
-Consider rearranging as a package with scripts templates libraries
+Consider rearranging as a package
+
+    infrastructure_planning
+        demography
+            estimate_ # current
+            forecast_ # future
+        electricity
+            demand
+                residential
+                commercial
+                industrial
+            cost
+                grid
+                off_grid
+                mini_grid
+    cc.ini
+
 Create wizard that recommends appropriate tool based on user's goals
