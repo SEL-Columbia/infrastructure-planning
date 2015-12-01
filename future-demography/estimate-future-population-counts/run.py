@@ -65,9 +65,10 @@ def estimate_future_population_counts(
         target_year, name_packs, growth_models):
     extended_name_packs = []
     make_whole_numbers = np.vectorize(lambda x: int(ceil(x)) if x > 0 else 0)
-    for (name, old_year_packs), growth_model in zip(name_packs, growth_models):
-        year, population = sorted(old_year_packs)[-1]
-        years = range(year + 1, target_year + 1)
+    for (name, year_packs), growth_model in zip(name_packs, growth_models):
+        years = get_future_years(target_year, year_packs)
+        if not years:
+            continue
         populations = make_whole_numbers(
             growth_model.predict(prepare_data(years)))
         extended_name_packs.append((name, zip(years, populations)))
@@ -82,6 +83,14 @@ def get_population_table(
             rows.append([name, year, population])
     return DataFrame(rows, columns=[
         name_column, year_column, population_column])
+
+
+def get_future_years(target_year, year_packs):
+    past_years = sorted(x[0] for x in year_packs)
+    future_years = range(past_years[-1] + 1, target_year)
+    if target_year not in past_years:
+        future_years.append(target_year)
+    return future_years
 
 
 if __name__ == '__main__':
