@@ -1,3 +1,0 @@
-Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
-Use regression to project electricty consumption per capita
-+ Decide between using current population (requires projection into future) or future population (precalculated)

@@ -1,4 +1,4 @@
-Consider rearranging as a package
+= Consider rearranging as a package
 
     infrastructure_planning
         demography
@@ -14,5 +14,35 @@ Consider rearranging as a package
                 off_grid
                 mini_grid
     cc.ini
+
+    # from infrastructure_planning.demography import future
+    # future.run
+    # python future.py
+
+    # from infrastructure_planning.demography.forecast import forecast_population_count
+    # forecast_population_count.run
+    # python forecast_population_count.py
+
+    from infrastructure_planning.demography import forecast
+    forecast.forecast_population_count.run
+    forecast.population_count.forecast
+    python population_count.py
+
+    from infrastructure_planning.demography.forecast import population_count
+    from infrastructure_planning.demography.forecast import population_count_abc as population_count
+    from infrastructure_planning.demography.forecast import population_count_xyz as population_count
+    population_count.forecast
+    population_count.forecast_population_count
+
+    from infrastructure_planning import demography
+    demography.forecast.population_count.run
+
+    from infrastructure_planning.electricity.demand.residential import forecast
+    from infrastructure_planning.electricity.demand import residential
+    residential.estimate
+    residential.forecast
+    residential.forecast_residential_electricity_demand
+    residential.forecast_residential_demand
+    residential.forecast_demand
 
 Create wizard that recommends appropriate tool based on user's goals
