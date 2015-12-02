@@ -13,13 +13,14 @@ from sklearn.linear_model import LinearRegression
 prepare_data = lambda x: np.array(x).reshape((len(x), 1))
 
 
-def run(
+def forecast_population(
         target_folder, population_table,
         name_column, population_column, year_column,
-        target_year, yearly_growth_percent):
+        target_year, yearly_population_growth_percent):
     name_packs = get_name_packs(
         population_table, name_column, year_column, population_column)
-    growth_models = get_growth_models(name_packs, yearly_growth_percent)
+    growth_models = get_growth_models(
+        name_packs, yearly_population_growth_percent)
     name_packs = estimate_future_population_counts(
         target_year, name_packs, growth_models)
     population_table = concat([population_table, get_population_table(
@@ -113,15 +114,15 @@ if __name__ == '__main__':
         '--target_year', metavar='YEAR', type=int,
         required=True)
     argument_parser.add_argument(
-        '--yearly_growth_percent', metavar='PERCENT', type=float,
+        '--yearly_population_growth_percent', metavar='PERCENT', type=float,
         required=True)
     args = argument_parser.parse_args()
-    d = run(
+    d = forecast_population(
         args.target_folder or make_enumerated_folder_for(__file__),
         TableType().load(args.population_table_path),
         args.name_column,
         args.population_column,
         args.year_column,
         args.target_year,
-        args.yearly_growth_percent)
+        args.yearly_population_growth_percent)
     print(format_summary(d))
