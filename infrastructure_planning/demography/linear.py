@@ -9,30 +9,30 @@ from sklearn.linear_model import LinearRegression
 prepare_data = lambda x: np.array(x).reshape((len(x), 1))
 
 
-def forecast_population(
-        target_folder, population_table,
+def forecast_demographic(
+        target_folder, demographic_table,
         name_column, population_column, year_column,
         target_year, yearly_population_growth_percent):
     name_packs = get_name_packs(
-        population_table, name_column, year_column, population_column)
+        demographic_table, name_column, year_column, population_column)
     growth_models = get_growth_models(
         name_packs, yearly_population_growth_percent)
     name_packs = estimate_future_population_counts(
         target_year, name_packs, growth_models)
-    population_table = concat([population_table, get_population_table(
+    demographic_table = concat([demographic_table, get_demographic_table(
         name_packs, name_column, year_column, population_column),
-    ])[population_table.columns].sort_values([name_column, year_column])
-    population_table_path = join(target_folder, 'populations.csv')
-    population_table.to_csv(population_table_path, index=False)
+    ])[demographic_table.columns].sort_values([name_column, year_column])
+    demographic_table_path = join(target_folder, 'demographic.csv')
+    demographic_table.to_csv(demographic_table_path, index=False)
     return [
-        ('population_table_path', population_table_path),
+        ('demographic_table_path', demographic_table_path),
     ]
 
 
 def get_name_packs(
-        population_table, name_column, year_column, population_column):
+        demographic_table, name_column, year_column, population_column):
     year_packs_by_name = defaultdict(list)
-    for index, row in population_table.sort_values(year_column).iterrows():
+    for index, row in demographic_table.sort_values(year_column).iterrows():
         name = row[name_column]
         year = row[year_column]
         population = row[population_column]
@@ -72,7 +72,7 @@ def estimate_future_population_counts(
     return extended_name_packs
 
 
-def get_population_table(
+def get_demographic_table(
         name_packs, name_column, year_column, population_column):
     rows = []
     for name, year_packs in name_packs:

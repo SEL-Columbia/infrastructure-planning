@@ -12,7 +12,7 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder', metavar='FOLDER', type=make_folder)
     argument_parser.add_argument(
-        '--population_table_path', metavar='PATH', required=True)
+        '--demographic_table_path', metavar='PATH', required=True)
     argument_parser.add_argument(
         '--name_column', metavar='COLUMN', required=True)
     argument_parser.add_argument(
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     args = argument_parser.parse_args()
     d = forecast_electricity_consumption(
         args.target_folder or make_enumerated_folder_for(__file__),
-        TableType().load(args.population_table_path),
+        TableType().load(args.demographic_table_path),
         args.name_column,
         args.population_column,
         args.year_column,

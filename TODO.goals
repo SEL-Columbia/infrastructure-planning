@@ -1,26 +1,10 @@
-Rename population to demographic
+= Rename population to demographic
 Decide demographic table naming convention
-
-    # demography_table_path
-    # demography_name
 
     demographic_table_path
     demographic_name_column
     demographic_year_column
     demographic_count_column
-
-    population_name_column
-    population_year_column
-    population_count_column
-
-    # name_population_column
-    # year_population_column
-    # count_population_column
-
-    # population_column_name
-    # population_column_year
-    # population_column_population
-    # population_column_count
 
 Round up and make integer for population int(ceil(x))
 Use regression to project electricity consumption per capita
