@@ -22,6 +22,7 @@ Decide demographic table naming convention
     # population_column_population
     # population_column_count
 
+Round up and make integer for population int(ceil(x))
 Use regression to project electricity consumption per capita
 Replace NaN with blank
 Cite sources for data in interface markdown
