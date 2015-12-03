@@ -99,20 +99,15 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder', metavar='FOLDER', type=make_folder)
     argument_parser.add_argument(
-        '--population_table_path', metavar='PATH',
-        required=True)
+        '--population_table_path', metavar='PATH', required=True)
     argument_parser.add_argument(
-        '--name_column', metavar='COLUMN',
-        required=True)
+        '--name_column', metavar='COLUMN', required=True)
     argument_parser.add_argument(
-        '--population_column', metavar='COLUMN',
-        required=True)
+        '--population_column', metavar='COLUMN', required=True)
     argument_parser.add_argument(
-        '--year_column', metavar='COLUMN',
-        required=True)
+        '--year_column', metavar='COLUMN', required=True)
     argument_parser.add_argument(
-        '--target_year', metavar='YEAR', type=int,
-        required=True)
+        '--target_year', metavar='YEAR', type=int, required=True)
     argument_parser.add_argument(
         '--yearly_population_growth_percent', metavar='PERCENT', type=float,
         required=True)

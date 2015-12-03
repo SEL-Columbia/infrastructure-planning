@@ -3,12 +3,21 @@ from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 
+from ..demography import forecast_population
+
 
 def run(
         target_folder, population_table,
         name_column, population_column, year_column,
-        target_year, yearly_growth_percent,
-        electricity_consumption_table):
+        target_year, yearly_population_growth_percent,
+        electricity_consumption_in_kwh_per_capita_table):
+
+    # get future population
+    # get future consumption in kWh per capita
+    # multiply the two to get future consumption
+    # save the consumption table,
+    # adding another column that is called electricity consumption in kWh
+
     return [
     ]
 
@@ -18,26 +27,21 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder', metavar='FOLDER', type=make_folder)
     argument_parser.add_argument(
-        '--population_table_path', metavar='PATH',
+        '--population_table_path', metavar='PATH', required=True)
+    argument_parser.add_argument(
+        '--name_column', metavar='COLUMN', required=True)
+    argument_parser.add_argument(
+        '--population_column', metavar='COLUMN', required=True)
+    argument_parser.add_argument(
+        '--year_column', metavar='COLUMN', required=True)
+    argument_parser.add_argument(
+        '--target_year', metavar='YEAR', type=int, required=True)
+    argument_parser.add_argument(
+        '--yearly_population_growth_percent', metavar='PERCENT', type=float,
         required=True)
     argument_parser.add_argument(
-        '--name_column', metavar='COLUMN',
-        required=True)
-    argument_parser.add_argument(
-        '--population_column', metavar='COLUMN',
-        required=True)
-    argument_parser.add_argument(
-        '--year_column', metavar='COLUMN',
-        required=True)
-    argument_parser.add_argument(
-        '--target_year', metavar='YEAR', type=int,
-        required=True)
-    argument_parser.add_argument(
-        '--yearly_growth_percent', metavar='PERCENT', type=float,
-        required=True)
-    argument_parser.add_argument(
-        '--electricity_consumption_table_path', metavar='PATH',
-        required=True)
+        '--electricity_consumption_in_kwh_per_capita_table_path',
+        metavar='PATH', required=True)
     args = argument_parser.parse_args()
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
@@ -46,6 +50,7 @@ if __name__ == '__main__':
         args.population_column,
         args.year_column,
         args.target_year,
-        args.yearly_growth_percent,
-        TableType().load(args.electricity_consumption_table_path))
+        args.yearly_population_growth_percent,
+        TableType().load(
+            args.electricity_consumption_in_kwh_per_capita_table_path))
     print(format_summary(d))
