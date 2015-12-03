@@ -1,20 +1,31 @@
-= Consider rearranging as a package
+Rename population to demographic
+Decide demographic table naming convention
 
-    infrastructure_planning
-        demography
-            linear
-                forecast_population
-        electricity
-            demand
-                residential
-                commercial
-                industrial
-            cost
-                grid
-                off_grid
-                mini_grid
-    cc.ini
+    # demography_table_path
+    # demography_name
 
-    from infrastructure_planning.demography.linear import forecast_population
+    demographic_table_path
+    demographic_name_column
+    demographic_year_column
+    demographic_count_column
 
+    population_name_column
+    population_year_column
+    population_count_column
+
+    # name_population_column
+    # year_population_column
+    # count_population_column
+
+    # population_column_name
+    # population_column_year
+    # population_column_population
+    # population_column_count
+
+Use regression to project electricity consumption per capita
+Replace NaN with blank
+Cite sources for data in interface markdown
+    Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
+    Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
+    Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
 Create wizard that recommends appropriate tool based on user's goals

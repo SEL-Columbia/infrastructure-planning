@@ -1,5 +1,0 @@
-Cite sources for data in markdown
-    Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
-    Cite "Demographic Yearbook" http://unstats.un.org/unsd/demographic/products/dyb/dyb2.htm
-    Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
-Replace NaN with blank
