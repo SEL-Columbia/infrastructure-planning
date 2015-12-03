@@ -1,7 +1,6 @@
 import numpy as np
 from collections import defaultdict
 from math import ceil
-from os.path import join
 from pandas import DataFrame, concat
 from sklearn.linear_model import LinearRegression
 
@@ -10,8 +9,7 @@ prepare_data = lambda x: np.array(x).reshape((len(x), 1))
 
 
 def forecast_demographic(
-        target_folder, demographic_table,
-        name_column, population_column, year_column,
+        demographic_table, name_column, population_column, year_column,
         target_year, yearly_population_growth_percent):
     name_packs = get_name_packs(
         demographic_table, name_column, year_column, population_column)
@@ -19,14 +17,9 @@ def forecast_demographic(
         name_packs, yearly_population_growth_percent)
     name_packs = estimate_future_population_counts(
         target_year, name_packs, growth_models)
-    demographic_table = concat([demographic_table, get_demographic_table(
+    return concat([demographic_table, get_demographic_table(
         name_packs, name_column, year_column, population_column),
     ])[demographic_table.columns].sort_values([name_column, year_column])
-    demographic_table_path = join(target_folder, 'demographic.csv')
-    demographic_table.to_csv(demographic_table_path, index=False)
-    return [
-        ('demographic_table_path', demographic_table_path),
-    ]
 
 
 def get_name_packs(

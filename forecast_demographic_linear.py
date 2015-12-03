@@ -3,6 +3,16 @@ from crosscompute_table import TableType
 from infrastructure_planning.demography.linear import forecast_demographic
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
+from os.path import join
+
+
+def run(target_folder, *args):
+    demographic_table = forecast_demographic(*args)
+    demographic_table_path = join(target_folder, 'demographic.csv')
+    demographic_table.to_csv(demographic_table_path, index=False)
+    return [
+        ('demographic_table_path', demographic_table_path),
+    ]
 
 
 if __name__ == '__main__':
@@ -23,7 +33,7 @@ if __name__ == '__main__':
         '--yearly_population_growth_percent', metavar='PERCENT', type=float,
         required=True)
     args = argument_parser.parse_args()
-    d = forecast_demographic(
+    d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
         TableType().load(args.demographic_table_path),
         args.name_column,

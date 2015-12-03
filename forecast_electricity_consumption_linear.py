@@ -4,7 +4,15 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 
 from infrastructure_planning.electricity.consumption.linear import (
-    forecast_electricity_consumption)
+    forecast_yearly_electricity_consumption_from_population)
+
+
+def run(target_folder, *args):
+    yearly_electricity_consumption_per_capita_table_path = ''
+    return [(
+        'yearly_electricity_consumption_per_capita_table_path',
+        yearly_electricity_consumption_per_capita_table_path,
+    )]
 
 
 if __name__ == '__main__':
@@ -25,10 +33,10 @@ if __name__ == '__main__':
         '--yearly_population_growth_percent', metavar='PERCENT', type=float,
         required=True)
     argument_parser.add_argument(
-        '--electricity_consumption_per_capita_table_path', metavar='PATH',
-        required=True)
+        '--yearly_electricity_consumption_per_capita_table_path',
+        metavar='PATH', required=True)
     args = argument_parser.parse_args()
-    d = forecast_electricity_consumption(
+    d = forecast_yearly_electricity_consumption_from_population(
         args.target_folder or make_enumerated_folder_for(__file__),
         TableType().load(args.demographic_table_path),
         args.name_column,
@@ -36,5 +44,6 @@ if __name__ == '__main__':
         args.year_column,
         args.target_year,
         args.yearly_population_growth_percent,
-        TableType().load(args.electricity_consumption_per_capita_table_path))
+        TableType().load(
+            args.yearly_electricity_consumption_per_capita_table_path))
     print(format_summary(d))
