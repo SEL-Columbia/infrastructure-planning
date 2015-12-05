@@ -1,35 +1,87 @@
-# from infrastructure_planning.demography.linear import forecast_demographic
+from pandas import DataFrame, concat, merge
+
+from ...demography.linear import forecast_demographic
+from ...growth import get_future_years, get_linear_model, prepare_xs
 
 
-def forecast_yearly_electricity_consumption_from_population(
-        demographic_table, name_column, population_column, year_column,
-        target_year, yearly_population_growth_percent,
-        yearly_electricity_consumption_per_capita_table,
-        yearly_electricity_consumption_growth_percent):
-    """
+def forecast_electricity_consumption_from_demographic(
+        target_year,
+        demographic_table,
+        demographic_name_column,
+        demographic_population_column,
+        demographic_year_column,
+        default_yearly_population_growth_percent,
+        electricity_consumption_per_capita_table,
+        electricity_consumption_per_capita_year_column,
+        electricity_consumption_per_capita_consumption_per_capita_column,
+        default_yearly_electricity_consumption_growth_percent):
+
     demographic_table = forecast_demographic(
-        demographic_table, name_column, population_column, year_column,
-        target_year, yearly_population_growth_percent)
-    yearly_electricity_consumption_per_capita_table = \
-        forecast_yearly_electricity_consumption_per_capita()
+        target_year,
+        demographic_table,
+        demographic_name_column,
+        demographic_population_column,
+        demographic_year_column,
+        default_yearly_population_growth_percent)
 
-    yearly_electricity_consumption_table = None
+    electricity_consumption_per_capita_table = \
+        forecast_electricity_consumption_per_capita(
+            target_year,
+            electricity_consumption_per_capita_table,
+            electricity_consumption_per_capita_year_column,
+            electricity_consumption_per_capita_consumption_per_capita_column,
+            default_yearly_electricity_consumption_growth_percent)
 
-    # multiply the two to get future consumption
-    # add column that is called electricity consumption
+    electricity_consumption_table = merge(
+        demographic_table,
+        electricity_consumption_per_capita_table,
+        left_on=demographic_year_column,
+        right_on=electricity_consumption_per_capita_year_column)
 
-    return yearly_electricity_consumption_table
-    """
-    pass
+    electricity_consumption_table['Electricity Consumption'] = \
+        electricity_consumption_table[
+            electricity_consumption_per_capita_consumption_per_capita_column
+        ] * electricity_consumption_table[demographic_population_column]
+
+    return electricity_consumption_table.sort_values([
+        demographic_name_column,
+        demographic_year_column])
 
 
-def forecast_yearly_electricity_consumption_per_capita():
-    pass
+def forecast_electricity_consumption_per_capita(
+        target_year,
+        electricity_consumption_per_capita_table,
+        electricity_consumption_per_capita_year_column,
+        electricity_consumption_per_capita_consumption_per_capita_column,
+        default_yearly_electricity_consumption_growth_percent):
 
+    electricity_consumption_per_capita_table[
+        electricity_consumption_per_capita_year_column
+    ] = electricity_consumption_per_capita_table[
+        electricity_consumption_per_capita_year_column
+    ].astype(int)
 
-# Add yearly_population_growth_percent
-# Check that arguments match between function and script
-# Decide whether to use demographic_table or yearly_demographic_table
+    year_packs = electricity_consumption_per_capita_table[[
+        electricity_consumption_per_capita_year_column,
+        electricity_consumption_per_capita_consumption_per_capita_column,
+    ]].values
 
-# Decide whether to use electricity_consumption_per_capita_table
-# or yearly_electricity_consumption_per_capita_table
+    growth_model = get_linear_model(
+        year_packs, default_yearly_electricity_consumption_growth_percent)
+
+    years = get_future_years(target_year, year_packs)
+    if not years:
+        return electricity_consumption_per_capita_table
+    values = growth_model.predict(prepare_xs(years))
+
+    return concat([
+        electricity_consumption_per_capita_table,
+        DataFrame(zip(years, values), columns=[
+            electricity_consumption_per_capita_year_column,
+            electricity_consumption_per_capita_consumption_per_capita_column])
+    ])[[
+        electricity_consumption_per_capita_year_column,
+        electricity_consumption_per_capita_consumption_per_capita_column,
+    ]].sort_values([
+        electricity_consumption_per_capita_year_column,
+    ])
