@@ -8,27 +8,27 @@ from ..growth import get_future_years, get_linear_model, prepare_xs
 make_whole_number = lambda x: int(x) if x > 0 else 0
 
 
-def forecast_demographic(
+def forecast_demographic_from_series(
         target_year,
-        demographic_table,
-        demographic_name_column,
-        demographic_population_column,
-        demographic_year_column,
+        demographic_by_year_table,
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column,
         default_yearly_population_growth_percent):
 
-    demographic_table[[
-        demographic_population_column,
-        demographic_year_column,
-    ]] = demographic_table[[
-        demographic_population_column,
-        demographic_year_column,
+    demographic_by_year_table[[
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column,
+    ]] = demographic_by_year_table[[
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column,
     ]].astype(int)
 
     name_packs = _get_name_packs(
-        demographic_table,
-        demographic_name_column,
-        demographic_year_column,
-        demographic_population_column)
+        demographic_by_year_table,
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column)
 
     growth_models = [get_linear_model(
         year_packs, default_yearly_population_growth_percent,
@@ -37,20 +37,21 @@ def forecast_demographic(
     name_packs = _estimate_future_population_counts(
         target_year, name_packs, growth_models)
 
-    return concat([demographic_table, get_demographic_table(
+    return concat([demographic_by_year_table, _get_demographic_by_year_table(
         name_packs,
-        demographic_name_column,
-        demographic_year_column,
-        demographic_population_column),
-    ])[demographic_table.columns].sort_values([
-        demographic_name_column,
-        demographic_year_column])
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column),
+    ])[demographic_by_year_table.columns].sort([
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column])
 
 
 def _get_name_packs(
-        demographic_table, name_column, year_column, population_column):
+        demographic_by_year_table,
+        name_column, year_column, population_column):
     year_packs_by_name = defaultdict(list)
-    for index, row in demographic_table.sort_values(year_column).iterrows():
+    for index, row in demographic_by_year_table.sort(year_column).iterrows():
         name = row[name_column]
         year = row[year_column]
         population = make_whole_number(row[population_column])
@@ -72,7 +73,7 @@ def _estimate_future_population_counts(
     return extended_name_packs
 
 
-def get_demographic_table(
+def _get_demographic_by_year_table(
         name_packs, name_column, year_column, population_column):
     rows = []
     for name, year_packs in name_packs:

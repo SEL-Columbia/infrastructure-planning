@@ -1,2 +1,2 @@
-# infrastructure-planning
-Composable infrastructure planning modules
+# Infrastructure Planning
+Here are composable modules for planning infrastructure.
