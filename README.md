@@ -1,40 +1,40 @@
 # Infrastructure Planning
 Here are composable modules for planning infrastructure.
 
-## Forecast demographic from series
+## Goals
+
+- Make extensive use of open data from the UN and World Bank
+- Have simple models with few parameters (be easy to understand)
+- Leave room for future improvements (such as alternate sources of energy)
+
+## Tools
+
+### Forecast demographic from series
 Forecast population from historical population data
 
-## Estimate electricity consumption from series
+### Estimate electricity consumption from series
 Estimate kWh from historical consumption data
 
-## Get electricity consumption by population curve
+### Get electricity consumption by population curve (12/22/2015)
 Generate consumption by population curve from historical consumption data by region, country, income
-12/22/2015
 
-## Estimate electricity consumption from curve
+### Estimate electricity consumption from curve (12/23/2015)
 Estimate kWh from consumption by population curve
-12/23/2015
 
-## Estimate electricity demand
+### Estimate electricity demand (12/31/2015)
 Estimate kW (formerly peak demand)
-12/31/2015
 
-## Estimate grid electricity local cost
+### Estimate grid electricity local cost (1/7/2015)
 Estimate local cost for grid
-1/7/2015
 
-## Estimate mini grid electricity local cost
+### Estimate mini grid electricity local cost (1/15/2015)
 Estimate local cost for mini-grid
-1/15/2015
 
-## Estimate off grid electricity local cost
+### Estimate off grid electricity local cost (1/21/2015)
 Estimate local cost for off-grid
-1/21/2015
 
-## Optimize medium voltage network for cost
+### Optimize medium voltage network for cost (2/4/2015)
 Optimize medium voltage network using mvMax
-2/4/2015
 
-## Compare electrification scenarios
+### Compare electrification scenarios (2/11/2015)
 Compare connections, technologies, costs
-2/11/2015
