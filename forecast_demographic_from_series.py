@@ -7,16 +7,38 @@ from invisibleroads_macros.log import format_summary
 from os.path import join
 
 
-def run(target_folder, *args):
+def run(
+        target_folder,
+        target_year,
+        demographic_by_year_table,
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column,
+        default_yearly_population_growth_percent):
+    d = []
     demographic_by_year_table = forecast_demographic_from_series(*args)
     demographic_by_year_table_path = join(
         target_folder, 'demographic-by-year.csv')
     demographic_by_year_table.to_csv(
         demographic_by_year_table_path, index=False)
-    return [(
+    d.append((
         'demographic_by_year_table_path',
-        demographic_by_year_table_path
-    )]
+        demographic_by_year_table_path))
+
+    columns = demographic_by_year_table.columns
+    if 'Longitude' in columns and 'Latitude' in columns:
+        demographic_by_year_geotable_path = join(
+            target_folder, 'demographic-by-year.msg')
+        demographic_by_year_geotable = demographic_by_year_table
+        demographic_by_year_geotable['Weight'] = \
+            demographic_by_year_geotable[
+                demographic_by_year_table_population_column]
+        demographic_by_year_geotable.to_msgpack(
+            demographic_by_year_geotable_path, compress='blosc')
+        d.insert(0, (
+            'demographic_by_year_geotable_path',
+            demographic_by_year_geotable_path))
+    return d
 
 
 if __name__ == '__main__':

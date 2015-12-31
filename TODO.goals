@@ -1,6 +1,11 @@
+Return geotable if table has longitude and latitude
 Cite sources for data in interface markdown
     Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
     Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
 Create wizard that recommends appropriate tool based on user's goals
+
+Make tool to get population-consumption curve points by world, country, region or income group
+Consider letting user choose country for population forecasting (or in separate tool)
+Consider letting user choose country for consumption forecasting (or in separate tool)

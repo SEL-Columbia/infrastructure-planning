@@ -1,13 +1,20 @@
 from argparse import ArgumentParser
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from os.path import join
 
 
 def run(target_folder, *args):
-    # electricity_consumption_by_year_table = \
-    # estimate_electricity_consumption_from_curve(*args)
-    return [
-    ]
+    electricity_consumption_by_year_table = \
+        estimate_consumption_from_curve(*args)
+    electricity_consumption_by_year_table_path = join(
+        target_folder, 'electricity-consumption-by-year.csv')
+    electricity_consumption_by_year_table.to_csv(
+        electricity_consumption_by_year_table_path, index=False)
+    return [(
+        'electricity_consumption_by_year_table_path',
+        electricity_consumption_by_year_table_path,
+    )]
 
 
 def estimate_consumption_from_curve(
