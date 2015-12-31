@@ -57,13 +57,13 @@ if __name__ == '__main__':
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
 
-        TableType().load(
+        TableType.load(
             args.demographic_by_year_table_path),
         args.demographic_by_year_table_name_column,
         args.demographic_by_year_table_year_column,
         args.demographic_by_year_table_population_column,
 
-        TableType().load(
+        TableType.load(
             args.electricity_consumption_per_capita_by_year_table_path),
         args.electricity_consumption_per_capita_by_year_table_year_column,
         args.electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa

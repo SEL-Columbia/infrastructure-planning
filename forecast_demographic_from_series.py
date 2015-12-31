@@ -49,7 +49,7 @@ if __name__ == '__main__':
         args.target_folder or make_enumerated_folder_for(__file__),
         args.target_year,
 
-        TableType().load(
+        TableType.load(
             args.demographic_by_year_table_path),
         args.demographic_by_year_table_name_column,
         args.demographic_by_year_table_year_column,

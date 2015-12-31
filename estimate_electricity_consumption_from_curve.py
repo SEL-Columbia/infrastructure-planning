@@ -4,8 +4,8 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 
 
 def run(target_folder, *args):
-    electricity_consumption_by_year_table = \
-        estimate_electricity_consumption_from_curve(*args)
+    # electricity_consumption_by_year_table = \
+    # estimate_electricity_consumption_from_curve(*args)
     return [
     ]
 
@@ -18,7 +18,8 @@ def estimate_consumption_from_curve(
         consumption_by_population_table,
         consumption_by_population_table_population_column,
         consumption_by_population_table_consumption_column):
-    return consumption_by_year_table
+    # return consumption_by_year_table
+    pass
 
 
 if __name__ == '__main__':
@@ -54,13 +55,13 @@ if __name__ == '__main__':
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
 
-        TableType().load(
+        TableType.load(
             args.demographic_by_year_table_path),
         args.demographic_by_year_table_name_column,
         args.demographic_by_year_table_year_column,
         args.demographic_by_year_table_population_column,
 
-        TableType().load(
+        TableType.load(
             args.electricity_consumption_by_population_table_path),
         args.electricity_consumption_by_population_table_population_column,
         args.electricity_consumption_by_population_table_consumption_column)
