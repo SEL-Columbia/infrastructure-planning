@@ -1,4 +1,18 @@
-Prototype tool to get population-consumption curve points by world, region, income group
+= Prototype tool to get population-consumption curve points by world, region, income group
+
+Get electricity consumption by population curve (1/7/2016)
+Estimate electricity consumption from curve (1/7/2015)
+Estimate electricity demand (1/8/2015)
+Estimate grid electricity local cost (1/15/2016)
+
+Estimate mini grid electricity local cost (1/28/2016)
+Estimate off grid electricity local cost (2/4/2016)
+Optimize medium voltage network for cost (2/11/2016)
+Compare electrification scenarios (2/18/2016)
+
+Consider letting user choose country for population forecasting
+Consider letting user choose country for consumption forecasting
+Make script for each technology that only does modelling for that technology
 
 Return geotable if table has longitude and latitude
 Return geotable if table has city or address
@@ -9,17 +23,3 @@ Cite sources for data in interface markdown
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
 Create wizard that recommends appropriate tool based on user's goals
-
-Consider letting user choose country for population forecasting (or in separate tool)
-Consider letting user choose country for consumption forecasting (or in separate tool)
-
-Make script for each technology that only does modelling for that technology
-
-Get electricity consumption by population curve (12/22/2015)
-Estimate electricity consumption from curve (12/23/2015)
-Estimate electricity demand (12/31/2015)
-Estimate grid electricity local cost (1/7/2015)
-Estimate mini grid electricity local cost (1/15/2015)
-Estimate off grid electricity local cost (1/21/2015)
-Optimize medium voltage network for cost (2/4/2015)
-Compare electrification scenarios (2/11/2015)

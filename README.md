@@ -15,26 +15,26 @@ Forecast population from historical population data
 ### Estimate electricity consumption from series
 Estimate kWh from historical consumption data
 
-### Get electricity consumption by population curve (12/22/2015)
+### Get electricity consumption by population curve (1/7/2016)
 Generate consumption by population curve from historical consumption data by region, country, income
 
-### Estimate electricity consumption from curve (12/23/2015)
+### Estimate electricity consumption from curve (1/7/2016)
 Estimate kWh from consumption by population curve
 
-### Estimate electricity demand (12/31/2015)
+### Estimate electricity demand (1/8/2016)
 Estimate kW (formerly peak demand)
 
-### Estimate grid electricity local cost (1/7/2015)
+### Estimate grid electricity local cost (1/15/2016)
 Estimate local cost for grid
 
-### Estimate mini grid electricity local cost (1/15/2015)
+### Estimate mini grid electricity local cost (1/28/2016)
 Estimate local cost for mini-grid
 
-### Estimate off grid electricity local cost (1/21/2015)
+### Estimate off grid electricity local cost (2/4/2016)
 Estimate local cost for off-grid
 
-### Optimize medium voltage network for cost (2/4/2015)
+### Optimize medium voltage network for cost (2/11/2016)
 Optimize medium voltage network using mvMax
 
-### Compare electrification scenarios (2/11/2015)
+### Compare electrification scenarios (2/18/2016)
 Compare connections, technologies, costs
