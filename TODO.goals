@@ -1,4 +1,5 @@
 Return geotable if table has longitude and latitude
+Return geotable if table has city or address
 Cite sources for data in interface markdown
     Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
     Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
