@@ -1,5 +1,7 @@
 = Prototype tool to get population-consumption curve points by world, region, income group
 
+Make forecast_population use new spline fitting model
+
 Get electricity consumption by population curve (1/7/2016)
 Estimate electricity consumption from curve (1/7/2015)
 Estimate electricity demand (1/8/2015)
