@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 
-prepare_xs = lambda x: np.array(x).reshape((len(x), 1))
+prepare_xs = lambda x: np.array(x).reshape(-1, 1)
 
 
 def get_future_years(target_year, year_packs):
