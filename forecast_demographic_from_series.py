@@ -16,7 +16,13 @@ def run(
         demographic_by_year_table_population_column,
         default_yearly_population_growth_percent):
     d = []
-    demographic_by_year_table = forecast_demographic_from_series(*args)
+    demographic_by_year_table = forecast_demographic_from_series(
+        target_year,
+        demographic_by_year_table,
+        demographic_by_year_table_name_column,
+        demographic_by_year_table_year_column,
+        demographic_by_year_table_population_column,
+        default_yearly_population_growth_percent)
     demographic_by_year_table_path = join(
         target_folder, 'demographic-by-year.csv')
     demographic_by_year_table.to_csv(

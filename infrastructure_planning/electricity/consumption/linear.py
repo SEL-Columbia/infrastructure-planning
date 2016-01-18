@@ -1,6 +1,7 @@
 from pandas import DataFrame, concat, merge
 
-from ...growth import get_future_years, get_linear_model, prepare_xs
+from ...growth import get_future_years
+from ...growth.fitted import get_fitted_linear_function
 
 
 def estimate_electricity_consumption_from_series(
@@ -58,13 +59,13 @@ def forecast_electricity_consumption_per_capita_from_series(
         electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa
     ]].values
 
-    growth_model = get_linear_model(
+    estimate_electricity_consumption = get_fitted_linear_function(
         year_packs, default_yearly_electricity_consumption_growth_percent)
 
-    years = get_future_years(target_year, year_packs)
+    years = get_future_years(target_year, [x[0] for x in year_packs])
     if not years:
         return electricity_consumption_per_capita_by_year_table
-    values = growth_model.predict(prepare_xs(years))
+    values = estimate_electricity_consumption(years)
 
     return concat([
         electricity_consumption_per_capita_by_year_table,

@@ -1,4 +1,4 @@
-= Prototype tool to get population-consumption curve points by world, region, income group
+Prototype tool to get population-consumption curve points by world, region, income group
 
 Make forecast_population use new spline fitting model
 
