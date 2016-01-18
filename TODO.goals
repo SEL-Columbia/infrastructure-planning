@@ -1,6 +1,6 @@
-Prototype tool to get population-consumption curve points by world, region, income group
-
 Make forecast_population use new spline fitting model
+
+Prototype tool to get population-consumption curve points by world, region, income group
 
 Get electricity consumption by population curve (1/7/2016)
 Estimate electricity consumption from curve (1/7/2015)
@@ -25,3 +25,5 @@ Cite sources for data in interface markdown
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
 Create wizard that recommends appropriate tool based on user's goals
+
+Consider estimating population using exponential growth
