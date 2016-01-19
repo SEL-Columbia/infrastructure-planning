@@ -3,7 +3,7 @@ from collections import defaultdict
 from pandas import DataFrame, concat
 
 from ..growth import get_default_slope, get_future_years
-from ..growth.fitted import get_fitted_linear_function
+from ..growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_population  # noqa
 
 
 make_whole_number = lambda x: int(x) if x > 0 else 0
@@ -31,7 +31,7 @@ def forecast_demographic_from_series(
         demographic_by_year_table_year_column,
         demographic_by_year_table_population_column)
 
-    estimate_populations = [get_fitted_linear_function(
+    estimate_populations = [get_estimate_population(
         year_packs, get_default_slope(
             default_yearly_population_growth_percent, year_packs),
     ) for name, year_packs in name_packs]

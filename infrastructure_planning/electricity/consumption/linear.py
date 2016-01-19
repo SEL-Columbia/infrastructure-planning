@@ -1,7 +1,7 @@
 from pandas import DataFrame, concat, merge
 
 from ...growth import get_default_slope, get_future_years
-from ...growth.fitted import get_fitted_linear_function
+from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
 
 
 def estimate_electricity_consumption_from_series(
@@ -57,9 +57,9 @@ def forecast_electricity_consumption_per_capita_from_series(
     year_packs = electricity_consumption_per_capita_by_year_table[[
         electricity_consumption_per_capita_by_year_table_year_column,
         electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa
-    ]].values
+    ]].values.tolist()
 
-    estimate_electricity_consumption = get_fitted_linear_function(
+    estimate_electricity_consumption = get_estimate_electricity_consumption(
         year_packs, get_default_slope(
             default_yearly_electricity_consumption_growth_percent, year_packs))
 

@@ -1,10 +1,9 @@
-Make forecast_population use new spline fitting model
-
-Prototype tool to get population-consumption curve points by world, region, income group
-
 Get electricity consumption by population curve (1/7/2016)
+    Prototype tool to get population-consumption curve points by world, region, income group
 Estimate electricity consumption from curve (1/7/2015)
-Estimate electricity demand (1/8/2015)
+
++ Make forecast_population use new spline fitting model
+
 Estimate grid electricity local cost (1/15/2016)
 
 Estimate mini grid electricity local cost (1/28/2016)
