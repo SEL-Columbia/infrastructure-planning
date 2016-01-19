@@ -1,15 +1,15 @@
-Get electricity consumption by population curve (1/7/2016)
+Get electricity consumption by population curve
     Prototype tool to get population-consumption curve points by world, region, income group
-Estimate electricity consumption from curve (1/7/2015)
+Estimate electricity consumption from curve
 
 + Make forecast_population use new spline fitting model
 
-Estimate grid electricity local cost (1/15/2016)
+Estimate grid electricity local cost
+Optimize medium voltage network for cost
+Compare electrification scenarios
 
-Estimate mini grid electricity local cost (1/28/2016)
-Estimate off grid electricity local cost (2/4/2016)
-Optimize medium voltage network for cost (2/11/2016)
-Compare electrification scenarios (2/18/2016)
+Estimate mini grid electricity local cost
+Estimate off grid electricity local cost
 
 Consider letting user choose country for population forecasting
 Consider letting user choose country for consumption forecasting

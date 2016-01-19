@@ -32,14 +32,6 @@ Estimate grid electricity local cost (1/28/2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Estimate local cost for grid
 
-Optimize medium voltage network for cost (2/10/2016)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Optimize medium voltage network using mvMax
-
-Compare electrification scenarios (2/23/2016)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Compare connections, technologies, costs
-
 Estimate mini grid electricity local cost (3/2/2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Estimate local cost for mini-grid
@@ -47,3 +39,11 @@ Estimate local cost for mini-grid
 Estimate off grid electricity local cost (3/16/2016)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Estimate local cost for off-grid
+
+Optimize medium voltage network for cost (2/10/2016)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Optimize medium voltage network using mvMax
+
+Compare electrification scenarios (2/23/2016)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Compare connections, technologies, costs
