@@ -2,7 +2,7 @@ import numpy as np
 from collections import defaultdict
 from pandas import DataFrame, concat
 
-from ..growth import get_future_years
+from ..growth import get_default_slope, get_future_years
 from ..growth.fitted import get_fitted_linear_function
 
 
@@ -32,7 +32,8 @@ def forecast_demographic_from_series(
         demographic_by_year_table_population_column)
 
     estimate_populations = [get_fitted_linear_function(
-        year_packs, default_yearly_population_growth_percent,
+        year_packs, get_default_slope(
+            default_yearly_population_growth_percent, year_packs),
     ) for name, year_packs in name_packs]
 
     name_packs = _estimate_future_population_counts(
@@ -66,7 +67,7 @@ def _estimate_future_population_counts(
     make_whole_numbers = np.vectorize(make_whole_number)
     for (name, year_packs), estimate_population in zip(
             name_packs, estimate_populations):
-        years = get_future_years(target_year, [x[0] for x in year_packs])
+        years = get_future_years(target_year, year_packs)
         if not years:
             continue
         populations = make_whole_numbers(estimate_population(years))
