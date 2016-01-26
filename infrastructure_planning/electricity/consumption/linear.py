@@ -57,7 +57,7 @@ def forecast_electricity_consumption_per_capita_from_series(
     year_packs = electricity_consumption_per_capita_by_year_table[[
         electricity_consumption_per_capita_by_year_table_year_column,
         electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa
-    ]].values
+    ]].values.tolist()
 
     estimate_electricity_consumption = get_fitted_linear_function(
         year_packs, get_default_slope(
