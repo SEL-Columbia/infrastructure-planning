@@ -25,8 +25,6 @@ def run(target_folder, target_year):
         d.append(plot_electricity_consumption_by_population(
             target_folder, _format_label_for_income_group(
                 income_group_name), table))
-
-    # Save one table with all countries and column for region and income group
     return d
 
 
