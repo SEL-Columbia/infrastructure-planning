@@ -89,8 +89,7 @@ def estimate_population(target_year, united_nations_country_name):
         country_t['Variant'] == 'Low variant']['Year(s)'])
     # Get actual populations
     year_packs = country_t[country_t['Year(s)'] < earliest_estimated_year][[
-        'Year(s)', 'Value',
-    ]].values
+        'Year(s)', 'Value']].values
     # Estimate population for the given year
     estimate_population = get_interpolated_spline_extrapolated_linear_function(
         year_packs)
