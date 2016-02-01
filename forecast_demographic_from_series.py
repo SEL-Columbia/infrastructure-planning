@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from crosscompute_table import TableType
 from infrastructure_planning.demography.linear import (
     forecast_demographic_from_series)
+from infrastructure_planning.exceptions import EmptyDataset
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
@@ -16,13 +17,16 @@ def run(
         demographic_by_year_table_population_column,
         default_yearly_population_growth_percent):
     d = []
-    demographic_by_year_table = forecast_demographic_from_series(
-        target_year,
-        demographic_by_year_table,
-        demographic_by_year_table_name_column,
-        demographic_by_year_table_year_column,
-        demographic_by_year_table_population_column,
-        default_yearly_population_growth_percent)
+    try:
+        demographic_by_year_table = forecast_demographic_from_series(
+            target_year,
+            demographic_by_year_table,
+            demographic_by_year_table_name_column,
+            demographic_by_year_table_year_column,
+            demographic_by_year_table_population_column,
+            default_yearly_population_growth_percent)
+    except EmptyDataset as e:
+        exit('demographic_by_year_table.error = %s' % e)
     demographic_by_year_table_path = join(
         target_folder, 'demographic-by-year.csv')
     demographic_by_year_table.to_csv(

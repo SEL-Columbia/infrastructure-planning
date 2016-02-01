@@ -6,11 +6,15 @@ from os.path import join
 
 from infrastructure_planning.electricity.consumption.linear import (
     estimate_electricity_consumption_from_series)
+from infrastructure_planning.exceptions import EmptyDataset
 
 
 def run(target_folder, *args):
-    electricity_consumption_by_year_table = \
-        estimate_electricity_consumption_from_series(*args)
+    try:
+        electricity_consumption_by_year_table = \
+            estimate_electricity_consumption_from_series(*args)
+    except EmptyDataset as e:
+        exit('electricity_consumption_per_capita_by_year_table.error = %s' % e)
     electricity_consumption_by_year_table_path = join(
         target_folder, 'electricity-consumption-by-year.csv')
     electricity_consumption_by_year_table.to_csv(

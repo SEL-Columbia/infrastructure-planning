@@ -1,7 +1,11 @@
 import numpy as np
 
+from ..exceptions import EmptyDataset
+
 
 def get_default_slope(growth_percent, year_packs):
+    if hasattr(year_packs, 'tolist'):
+        year_packs = year_packs.tolist()
     return sorted(year_packs)[-1][1] * growth_percent / float(100)
 
 
@@ -14,7 +18,10 @@ def get_future_years(target_year, year_packs):
 
 
 def split_xys(xys, default_slope=0):
-    xs, ys = zip(*xys)
+    try:
+        xs, ys = zip(*xys)
+    except ValueError:
+        raise EmptyDataset('must have at least one row')
     if len(set(xs)) == 1:
         xs = list(xs) + [xs[0] + 1]
         ys = list(ys) + [np.mean(ys) + default_slope]
