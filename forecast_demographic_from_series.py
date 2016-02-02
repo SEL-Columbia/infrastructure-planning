@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from crosscompute_table import TableType
-from infrastructure_planning.demography.linear import (
+from infrastructure_planning.demography.model.linear import (
     forecast_demographic_from_series)
 from infrastructure_planning.exceptions import EmptyDataset
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder

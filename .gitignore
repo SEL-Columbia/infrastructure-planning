@@ -4,3 +4,4 @@
 .cache
 .eggs
 .ipynb_checkpoints
+.~lock.*
