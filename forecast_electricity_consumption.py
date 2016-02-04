@@ -1,3 +1,7 @@
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
 import numpy as np
 from argparse import ArgumentParser
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
@@ -35,7 +39,6 @@ def run(target_folder, target_year):
     d.append(plot_electricity_consumption_by_population(
         target_folder, 'world', t))
     # Region
-    """
     for region_name, table in t.groupby('Region Name'):
         d.append(plot_electricity_consumption_by_population(
             target_folder, _format_label_for_region(
@@ -45,7 +48,6 @@ def run(target_folder, target_year):
         d.append(plot_electricity_consumption_by_population(
             target_folder, _format_label_for_income_group(
                 income_group_name), table))
-    """
     return d
 
 
@@ -84,7 +86,21 @@ def plot_electricity_consumption_by_population(target_folder, label, table):
     variable_name = variable_nickname + '_image_path'
     target_path = join(
         target_folder, variable_nickname.replace('_', '-') + '.jpg')
-    # Plot consumption vs population for the selected target_year
+
+    # !!! plot per capita too
+
+    xs = table['Population'].values
+    ys = table['Electricity Consumption (kWh)'].values
+    zs = table['Country Name']
+
+    figure = plt.figure()
+    axes = figure.add_subplot(111)
+    axes.scatter(xs, ys)
+    axes.set_xlabel('Population')
+    axes.set_ylabel('Electricity Consumption (kWh)')
+    for index, country_name in enumerate(zs):
+        axes.annotate(country_name, (xs[index], ys[index]))
+    figure.savefig(target_path)
     return variable_name, target_path
 
 
@@ -188,13 +204,19 @@ def _get_alternate_country_name(country_name):
 
 
 def _format_label_for_region(region_name):
-    label = ''
-    return label
+    x = region_name.lower()
+    x = x.replace(' ', '-')
+    x = x.replace('&', 'and')
+    return 'region-%s' % x
 
 
 def _format_label_for_income_group(income_group_name):
-    label = ''
-    return label
+    x = income_group_name.lower()
+    x = x.replace(' ', '-')
+    x = x.replace(':', '')
+    x = x.replace('non', 'non-')
+    x = x.replace('-income', '')
+    return 'income-%s' % x
 
 
 if __name__ == '__main__':
