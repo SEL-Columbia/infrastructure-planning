@@ -9,7 +9,7 @@ from ..growth.interpolated import get_interpolated_spline_extrapolated_linear_fu
 make_whole_number = lambda x: int(x) if x > 0 else 0
 
 
-def forecast_demographic_from_series(
+def forecast_demographic_using_recent_records(
         target_year,
         demographic_by_year_table,
         demographic_by_year_table_name_column,

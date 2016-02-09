@@ -65,6 +65,7 @@ def get_population_electricity_consumption_table(target_year):
             country_name,
             get_region_name_for(country_name),
             get_income_group_name_for(country_name),
+            target_year,
             population,
             electricity_consumption_per_capita,
             electricity_consumption))
@@ -72,6 +73,7 @@ def get_population_electricity_consumption_table(target_year):
         'Country Name',
         'Region Name',
         'Income Group Name',
+        'Year',
         'Population',
         'Electricity Consumption Per Capita (kWh)',
         'Electricity Consumption (kWh)',
@@ -149,7 +151,7 @@ def get_income_group_name_for(country_name):
 
 
 def _plot_against_population(target_folder, label, table, prefix, column):
-    variable_nickname = '%s_%s' % (prefix, label)
+    variable_nickname = '%s_for_%s' % (prefix, label)
     variable_name = variable_nickname + '_image_path'
     target_path = join(
         target_folder, variable_nickname.replace('_', '-') + '.jpg')
@@ -235,7 +237,7 @@ def _format_label_for_income_group(income_group_name):
     x = x.replace(':', '')
     x = x.replace('non', 'non-')
     x = x.replace('-income', '')
-    return 'income-%s' % x
+    return 'income-group-%s' % x
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from crosscompute_table import TableType
 from infrastructure_planning.demography.model.linear import (
-    forecast_demographic_from_series)
+    forecast_demographic_using_recent_records)
 from infrastructure_planning.exceptions import EmptyDataset
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
@@ -18,7 +18,7 @@ def run(
         default_yearly_population_growth_percent):
     d = []
     try:
-        demographic_by_year_table = forecast_demographic_from_series(
+        demographic_by_year_table = forecast_demographic_using_recent_records(
             target_year,
             demographic_by_year_table,
             demographic_by_year_table_name_column,

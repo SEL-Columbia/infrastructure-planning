@@ -1,6 +1,5 @@
-Estimate electricity consumption from curve
-
 + Make forecast_population use new spline fitting model
++ Estimate electricity consumption from curve
 
 Estimate grid electricity local cost
 Optimize medium voltage network for cost

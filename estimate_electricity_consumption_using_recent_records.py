@@ -5,14 +5,14 @@ from invisibleroads_macros.log import format_summary
 from os.path import join
 
 from infrastructure_planning.electricity.consumption.linear import (
-    estimate_electricity_consumption_from_series)
+    estimate_electricity_consumption_using_recent_records)
 from infrastructure_planning.exceptions import EmptyDataset
 
 
 def run(target_folder, *args):
     try:
         electricity_consumption_by_year_table = \
-            estimate_electricity_consumption_from_series(*args)
+            estimate_electricity_consumption_using_recent_records(*args)
     except EmptyDataset as e:
         exit('electricity_consumption_per_capita_by_year_table.error = %s' % e)
     electricity_consumption_by_year_table_path = join(
