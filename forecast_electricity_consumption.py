@@ -36,18 +36,15 @@ def run(target_folder, target_year):
     t.to_csv(t_path, encoding='utf-8', index=False)
     d.append(('electricity_consumption_by_population_table_path', t_path))
     # World
-    d.append(plot_electricity_consumption_by_population(
-        target_folder, 'world', t))
+    d.extend(make_plots(target_folder, 'world', t))
     # Region
     for region_name, table in t.groupby('Region Name'):
-        d.append(plot_electricity_consumption_by_population(
-            target_folder, _format_label_for_region(
-                region_name), table))
+        d.extend(make_plots(target_folder, _format_label_for_region(
+            region_name), table))
     # Income
     for income_group_name, table in t.groupby('Income Group Name'):
-        d.append(plot_electricity_consumption_by_population(
-            target_folder, _format_label_for_income_group(
-                income_group_name), table))
+        d.extend(make_plots(target_folder, _format_label_for_income_group(
+            income_group_name), table))
     return d
 
 
@@ -81,27 +78,15 @@ def get_population_electricity_consumption_table(target_year):
     ])
 
 
-def plot_electricity_consumption_by_population(target_folder, label, table):
-    variable_nickname = 'electricity_consumption_%s' % label
-    variable_name = variable_nickname + '_image_path'
-    target_path = join(
-        target_folder, variable_nickname.replace('_', '-') + '.jpg')
-
-    # !!! plot per capita too
-
-    xs = table['Population'].values
-    ys = table['Electricity Consumption (kWh)'].values
-    zs = table['Country Name']
-
-    figure = plt.figure()
-    axes = figure.add_subplot(111)
-    axes.scatter(xs, ys)
-    axes.set_xlabel('Population')
-    axes.set_ylabel('Electricity Consumption (kWh)')
-    for index, country_name in enumerate(zs):
-        axes.annotate(country_name, (xs[index], ys[index]))
-    figure.savefig(target_path)
-    return variable_name, target_path
+def make_plots(target_folder, label, table):
+    return [
+        _plot_against_population(
+            target_folder, label, table, 'electricity_consumption',
+            'Electricity Consumption (kWh)'),
+        _plot_against_population(
+            target_folder, label, table, 'electricity_consumption_per_capita',
+            'Electricity Consumption Per Capita (kWh)'),
+    ]
 
 
 def yield_country_name():
@@ -161,6 +146,40 @@ def get_income_group_name_for(country_name):
     t = COUNTRY_REGION_INCOME_TABLE
     country_t = _get_country_table(t, 'Country Name', country_name)
     return country_t['IncomeGroup'].values[0]
+
+
+def _plot_against_population(target_folder, label, table, prefix, column):
+    variable_nickname = '%s_%s' % (prefix, label)
+    variable_name = variable_nickname + '_image_path'
+    target_path = join(
+        target_folder, variable_nickname.replace('_', '-') + '.jpg')
+    xs = table['Population'].values
+    ys = table[column].values
+    zs = table['Country Name']
+    figure = plt.figure()
+    ax = figure.add_subplot(111)
+    ax.scatter(xs, ys)
+    ax.set_xlabel('Population')
+    ax.set_ylabel(column)
+    ax.set_xlim(left=0)
+    ax.set_ylim(bottom=0)
+    ax.set_title(_get_plot_title(label))
+    for index, country_name in enumerate(zs):
+        ax.annotate(country_name, (xs[index], ys[index]))
+    figure.savefig(target_path)
+    plt.close(figure)
+    return variable_name, target_path
+
+
+def _get_plot_title(x):
+    x = x.replace('region', 'Region:')
+    x = x.replace('income', 'Income Group:')
+    x = x.replace('-', ' ')
+    x = x.title()
+    x = x.replace('Non Oecd', 'non-OECD')
+    x = x.replace('Oecd', 'OECD')
+    x = x.replace('And', 'and')
+    return x
 
 
 def _prepare_country_names():
