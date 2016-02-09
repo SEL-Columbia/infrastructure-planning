@@ -1,12 +1,17 @@
+= Estimate grid electricity local cost
+    + Review grid electricity cost model from mvMax4
+    = Draft workflow in notebook
+
 + Make forecast_population use new spline fitting model
 + Estimate electricity consumption from curve
 
-Estimate grid electricity local cost
 Optimize medium voltage network for cost
 Compare electrification scenarios
 
 Estimate mini grid electricity local cost
 Estimate off grid electricity local cost
+
+Consider estimating population using simple exponential growth
 
 Consider letting user choose country for population forecasting
 Consider letting user choose country for consumption forecasting
@@ -21,5 +26,3 @@ Cite sources for data in interface markdown
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
 Create wizard that recommends appropriate tool based on user's goals
-
-Consider estimating population using exponential growth
