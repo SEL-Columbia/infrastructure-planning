@@ -1,6 +1,10 @@
-= Estimate grid electricity local cost
+Make tool to compute discounted present value
+Make tool to compute levelized cost of electricity
+
+= Estimate grid electricity internal cost
     + Review grid electricity cost model from mvMax4
     = Draft workflow in notebook
+    Accept table of consumption for each year
 
 + Make forecast_population use new spline fitting model
 + Estimate electricity consumption from curve
@@ -8,8 +12,8 @@
 Optimize medium voltage network for cost
 Compare electrification scenarios
 
-Estimate mini grid electricity local cost
-Estimate off grid electricity local cost
+Estimate mini grid electricity internal cost
+Estimate off grid electricity internal cost
 
 Consider estimating population using simple exponential growth
 

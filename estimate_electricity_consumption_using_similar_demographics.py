@@ -1,7 +1,6 @@
 from argparse import ArgumentParser
 from crosscompute_table import TableType
-from infrastructure_planning.growth.interpolated import (
-    get_interpolated_spline_extrapolated_linear_function)
+from infrastructure_planning.growth.fitted import get_fitted_linear_function
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from os.path import join
 
@@ -28,9 +27,8 @@ def estimate_consumption_using_similar_demographics(
     population_consumption_packs = consumption_by_population_table[[
         consumption_by_population_table_population_column,
         consumption_by_population_table_consumption_column]].values
-    estimate_consumption = \
-        get_interpolated_spline_extrapolated_linear_function(
-            population_consumption_packs)
+    estimate_consumption = get_fitted_linear_function(
+        population_consumption_packs)
     consumption_by_year_table = demographic_by_year_table.copy()
     consumption_by_year_table[
         consumption_by_population_table_consumption_column
