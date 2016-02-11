@@ -36,15 +36,17 @@ def run(target_folder, target_year):
     t.to_csv(t_path, encoding='utf-8', index=False)
     d.append(('electricity_consumption_by_population_table_path', t_path))
     # World
-    d.extend(make_plots(target_folder, 'world', t))
+    d.extend(make_plots(target_folder, target_year, 'world', t))
     # Region
     for region_name, table in t.groupby('Region Name'):
-        d.extend(make_plots(target_folder, _format_label_for_region(
-            region_name), table))
+        d.extend(make_plots(
+            target_folder, target_year,
+            _format_label_for_region(region_name), table))
     # Income
     for income_group_name, table in t.groupby('Income Group Name'):
-        d.extend(make_plots(target_folder, _format_label_for_income_group(
-            income_group_name), table))
+        d.extend(make_plots(
+            target_folder, target_year,
+            _format_label_for_income_group(income_group_name), table))
     return d
 
 
@@ -80,13 +82,15 @@ def get_population_electricity_consumption_table(target_year):
     ])
 
 
-def make_plots(target_folder, label, table):
+def make_plots(target_folder, target_year, label, table):
     return [
         _plot_against_population(
-            target_folder, label, table, 'electricity_consumption',
+            target_folder, target_year, label, table,
+            'electricity_consumption',
             'Electricity Consumption (kWh)'),
         _plot_against_population(
-            target_folder, label, table, 'electricity_consumption_per_capita',
+            target_folder, target_year, label, table,
+            'electricity_consumption_per_capita',
             'Electricity Consumption Per Capita (kWh)'),
     ]
 
@@ -150,7 +154,8 @@ def get_income_group_name_for(country_name):
     return country_t['IncomeGroup'].values[0]
 
 
-def _plot_against_population(target_folder, label, table, prefix, column):
+def _plot_against_population(
+        target_folder, target_year, label, table, prefix, column):
     variable_nickname = '%s_for_%s' % (prefix, label)
     variable_name = variable_nickname + '_image_path'
     target_path = join(
@@ -165,7 +170,7 @@ def _plot_against_population(target_folder, label, table, prefix, column):
     ax.set_ylabel(column)
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
-    ax.set_title(_get_plot_title(label))
+    ax.set_title(_get_plot_title(label) + ' in %s' % target_year)
     for index, country_name in enumerate(zs):
         ax.annotate(country_name, (xs[index], ys[index]))
     figure.savefig(target_path)
