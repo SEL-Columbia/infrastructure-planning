@@ -1,5 +1,3 @@
-= Make tool to compute net present value
-    = Add arguments
 Make tool to compute levelized cost of electricity
 
 Estimate grid electricity internal cost
@@ -7,8 +5,11 @@ Estimate grid electricity internal cost
     Draft workflow in notebook
     Accept table of consumption for each year
 
+Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
+
 + Make forecast_population use new spline fitting model
 + Estimate electricity consumption from curve
++ Make tool to compute net present value
 
 Optimize medium voltage network for cost
 Compare electrification scenarios

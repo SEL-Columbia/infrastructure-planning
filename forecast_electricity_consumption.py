@@ -59,7 +59,7 @@ def get_population_electricity_consumption_table(target_year):
                 estimate_electricity_consumption_per_capita(
                     target_year, country_name)
         except EmptyDataset as e:
-            print('Skipping %s: %s' % (country_name, e))
+            print('Skipping %s: %s' % (country_name.encode('utf-8'), e))
             continue
         electricity_consumption = \
             electricity_consumption_per_capita * population
@@ -156,10 +156,9 @@ def get_income_group_name_for(country_name):
 
 def _plot_against_population(
         target_folder, target_year, label, table, prefix, column):
-    variable_nickname = '%s_for_%s' % (prefix, label)
-    variable_name = variable_nickname + '_image_path'
-    target_path = join(
-        target_folder, variable_nickname.replace('_', '-') + '.jpg')
+    variable_nickname = ('%s-for-%s' % (prefix, label)).replace('_', '-')
+    variable_name = variable_nickname.replace('-', '_') + '_image_path'
+    target_path = join(target_folder, variable_nickname + '.jpg')
     xs = table['Population'].values
     ys = table[column].values
     zs = table['Country Name']
