@@ -8,7 +8,10 @@ from infrastructure_planning.finance.valuation import (
     compute_internal_return_rate)
 
 
-def run(time_value_table, time_column, value_column, discount_rate_percent):
+def run(
+        time_value_table,
+        time_column, value_column,
+        discount_rate_percent):
     time_value_packs = time_value_table[[time_column, value_column]].values
     discounted_cash_flow = compute_discounted_cash_flow(
         time_value_packs, discount_rate_percent)

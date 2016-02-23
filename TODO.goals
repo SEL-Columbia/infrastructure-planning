@@ -1,28 +1,21 @@
-Make tool to compute levelized cost of electricity
-
-Estimate grid electricity internal cost
-    + Review grid electricity cost model from mvMax4
-    Draft workflow in notebook
+= Estimate grid electricity internal cost
+    = Draft workflow in notebook
     Accept table of consumption for each year
+    + Review grid electricity cost model from mvMax4
 
-Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
+Optimize medium voltage network for cost
+Compare electrification scenarios
+Estimate mini grid electricity internal cost
+Estimate off grid electricity internal cost
+Estimate population using simple exponential growth
 
 + Make forecast_population use new spline fitting model
 + Estimate electricity consumption from curve
 + Make tool to compute net present value
++ Make tool to compute levelized cost of electricity
 
-Optimize medium voltage network for cost
-Compare electrification scenarios
-
-Estimate mini grid electricity internal cost
-Estimate off grid electricity internal cost
-
-Consider estimating population using simple exponential growth
-
-Consider letting user choose country for population forecasting
-Consider letting user choose country for consumption forecasting
 Make script for each technology that only does modelling for that technology
-
+Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
 Return geotable if table has longitude and latitude
 Return geotable if table has city or address
 Cite sources for data in interface markdown
