@@ -1,5 +1,5 @@
 import numpy as np
-from dateutil.parser import parse as parse_date
+from invisibleroads_macros.date import parse_date_safely
 from scipy.optimize import fsolve
 
 
@@ -46,4 +46,4 @@ def compute_internal_return_rate(time_value_packs):
 
 
 def sort_time_packs(time_packs):
-    return sorted(time_packs, key=lambda x: parse_date(str(x[0])))
+    return sorted(time_packs, key=lambda x: parse_date_safely(str(x[0])))
