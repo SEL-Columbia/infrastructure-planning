@@ -1,13 +1,11 @@
 = Estimate grid electricity internal cost
     = Draft workflow in notebook
         + Compute discounted cost
-        = Compute levelized cost
-        Build cost by year table
-            Get year
-            Get production cost
-            Get medium voltage line labor cost
-            Get medium voltage line material cost
-            Get low voltage transformer labor cost
+        + Compute levelized cost
+        = Build cost by year table
+            + Get year
+            + Get production cost
+            = Get low voltage transformer labor cost
             Get low voltage transformer material cost
             Get low voltage line labor cost
             Get low voltage line material cost

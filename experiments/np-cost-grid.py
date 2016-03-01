@@ -1,22 +1,3 @@
-class DistributionLoss(V):
-
-    section = 'system (grid)'
-    option = 'distribution loss'
-    aliases = ['gr_dist_lss', 'gr_loss']
-    c = dict(check=store.assertLessThanOne)
-    default = 0.15
-    units = 'fraction'
-
-
-class GridElectricityCostPerKilowattHour(V):
-
-    section = 'system (grid)'
-    option = 'electricity cost per kilowatt-hour'
-    aliases = ['gr_elec_cst_pr_kw_hr', 'gr_el_ckwh']
-    default = 0.17
-    units = 'dollars per kilowatt-hour'
-
-
 class GridTransformerAvailableSystemCapacities(V):
 
     section = 'system (grid)'
@@ -34,16 +15,6 @@ class GridTransformerCostPerGridSystemKilowatt(V):
     aliases = ['gr_tfmr_cst_prgr_sys_kw', 'gr_tr_ckw']
     default = 1000
     units = 'dollars per kilowatt'
-
-    
-class GridTransformerLifetime(V):
-
-    section = 'system (grid)'
-    option = 'transformer lifetime'
-    aliases = ['gr_tfmr_life', 'gr_tr_life']
-    c = dict(check=store.assertPositive)
-    default = 10
-    units = 'years'
 
 
 class GridTransformerOperationsAndMaintenanceCostPerYearAsFractionOfTransformerCost(V):
@@ -224,37 +195,6 @@ class GridTransformerOperationsAndMaintenanceCostPerYear(V):
         return self.get(GridTransformerOperationsAndMaintenanceCostPerYearAsFractionOfTransformerCost) * self.get(GridTransformerCost)
 
 
-class GridTransformerReplacementCostPerYear(V):
-
-    section = 'system (grid)'
-    option = 'transformer replacement cost per year'
-    aliases = ['gr_tfmr_rpmt_cst_pr_yr', 'gr_tr_rep']
-    dependencies = [
-        GridTransformerCost,
-        GridTransformerLifetime,
-    ]
-    units = 'dollars per year'
-
-    def compute(self):
-        return self.get(GridTransformerCost) / float(self.get(GridTransformerLifetime))
-
-
-class GridElectricityCostPerYear(V):
-
-    section = 'system (grid)'
-    option = 'electricity cost per year'
-    aliases = ['gr_elec_cst_pr_yr', 'gr_el']
-    dependencies = [
-        GridElectricityCostPerKilowattHour,
-        demand.ProjectedNodalDemandPerYear,
-        DistributionLoss,
-    ]
-    units = 'dollars per year'
-
-    def compute(self):
-        return self.get(GridElectricityCostPerKilowattHour) * self.get(demand.ProjectedNodalDemandPerYear) / float(1 - self.get(DistributionLoss))
-
-
 class GridInternalSystemInitialCost(V):
 
     section = 'system (grid)'
@@ -299,39 +239,3 @@ class GridInternalSystemRecurringCostPerYear(V):
             self.get(LowVoltageLineEquipmentOperationsAndMaintenanceCostPerYear),
             self.get(costDistribution.LowVoltageLineRecurringCostPerYear),
         ])
-
-
-class GridInternalSystemNodalDiscountedCost(V):
-
-    section = 'system (grid)'
-    option = 'internal system nodal discounted cost'
-    aliases = ['gr_int_sys_ndl_disc_cst', 'gi_nod_d']
-    dependencies = [
-        demand.ProjectedNodalDemandPerYear,
-        GridInternalSystemInitialCost,
-        GridInternalSystemRecurringCostPerYear,
-        finance.DiscountedCashFlowFactor,
-    ]
-    units = 'dollars'
-
-    def compute(self):
-        if self.get(demand.ProjectedNodalDemandPerYear) == 0:
-            return 0
-        return self.get(GridInternalSystemInitialCost) + self.get(GridInternalSystemRecurringCostPerYear) * self.get(finance.DiscountedCashFlowFactor)
-
-
-class GridInternalSystemNodalLevelizedCost(V):
-
-    section = 'system (grid)'
-    option = 'internal system nodal levelized cost'
-    aliases = ['gr_int_sys_ndl_lvlzd_cst', 'gi_nod_lev']
-    dependencies = [
-        demand.ProjectedNodalDiscountedDemand,
-        GridInternalSystemNodalDiscountedCost,
-    ]
-    units = 'dollars per kilowatt-hour'
-
-    def compute(self):
-        if self.get(demand.ProjectedNodalDiscountedDemand) == 0:
-            return 0
-        return self.get(GridInternalSystemNodalDiscountedCost) / float(self.get(demand.ProjectedNodalDiscountedDemand))
