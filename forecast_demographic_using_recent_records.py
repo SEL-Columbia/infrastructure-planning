@@ -36,13 +36,27 @@ def run(
         demographic_by_year_table_path))
 
     columns = demographic_by_year_table.columns
-    if 'Longitude' in columns and 'Latitude' in columns:
+    if 'Latitude' in columns and 'Longitude' in columns:
         demographic_by_year_geotable_path = join(
             target_folder, 'demographic-by-year.msg')
-        demographic_by_year_geotable = demographic_by_year_table
-        demographic_by_year_geotable['Weight'] = \
+        demographic_by_year_geotable = demographic_by_year_table.fillna(
+            method='ffill').groupby(
+            demographic_by_year_table_name_column).last()
+        # Set radius
+        demographic_by_year_geotable['RadiusInPixelsRange10-50FromSum'] = \
             demographic_by_year_geotable[
                 demographic_by_year_table_population_column]
+        # Set fill color
+        forecast_populations = demographic_by_year_table.groupby(
+            demographic_by_year_table_name_column).last()[
+                demographic_by_year_table_population_column]
+        original_populations = demographic_by_year_table.groupby(
+            demographic_by_year_table_name_column).first()[
+                demographic_by_year_table_population_column]
+        demographic_by_year_geotable['FillColor'] = (
+            forecast_populations - original_populations).apply(
+                lambda x: 'r' if x > 0 else 'b')
+        # Save table
         demographic_by_year_geotable.to_msgpack(
             demographic_by_year_geotable_path, compress='blosc')
         d.insert(0, (
