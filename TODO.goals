@@ -1,17 +1,20 @@
 = Estimate grid electricity internal cost
-    = Draft workflow in notebook
+    = Assemble example consumption by year by name table
+    Draft workflow in notebook
         + Compute discounted cost
         + Compute levelized cost
-        = Build cost by year table
+        + Build cost by year table
             + Get year
             + Get production cost
-            = Get low voltage transformer labor cost
-            Get low voltage transformer material cost
-            Get low voltage line labor cost
-            Get low voltage line material cost
+            + Get low voltage transformer labor cost
+            + Get low voltage transformer material cost
+            + Get low voltage line labor cost
+            + Get low voltage line material cost
         Check that we have accounted for all variables in old grid cost model
     Accept table of consumption for each year
     + Review grid electricity cost model from mvMax4
+
+Consider accepting net present value vs consumption curve for energy source X
 
 Optimize medium voltage network for cost
 Compare electrification scenarios
@@ -34,4 +37,8 @@ Cite sources for data in interface markdown
     Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+    Cite "Electric Sales, Revenue, and Average Price" 
+        http://www.eia.gov/electricity/sales_revenue_price/index.cfm
+        http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
+
 Create wizard that recommends appropriate tool based on user's goals
