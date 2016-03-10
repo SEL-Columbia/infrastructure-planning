@@ -1,5 +1,8 @@
 = Estimate grid electricity internal cost
-    = Assemble example consumption by year by name table
+    Change transformer table to list using kVA
+    Consider adding power factor
+    Add explanation of relationship between kVA and kW
+
     Draft workflow in notebook
         + Compute discounted cost
         + Compute levelized cost
@@ -11,8 +14,9 @@
             + Get low voltage line labor cost
             + Get low voltage line material cost
         Check that we have accounted for all variables in old grid cost model
-    Accept table of consumption for each year
+    + Accept table of consumption for each year
     + Review grid electricity cost model from mvMax4
+    + Assemble example consumption by year by name table
 
 Consider accepting net present value vs consumption curve for energy source X
 
