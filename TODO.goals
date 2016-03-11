@@ -1,3 +1,7 @@
+Change finance units to years explicitly
+Define loan_year in compute discounted cost
+Check whether different loan year affects breakeven time (whether we need to add loan year)
+
 = Estimate grid electricity internal cost
     Change transformer table to list using kVA
     Consider adding power factor
