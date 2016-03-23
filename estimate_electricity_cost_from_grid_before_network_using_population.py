@@ -1,53 +1,151 @@
+import inspect
 from argparse import ArgumentParser
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
+from pandas import DataFrame, MultiIndex, Series, concat
+
+from infrastructure_planning.exceptions import InfrastructurePlanningError
 
 
-NAME_COLUMN = 'Name'
-
-
-def run(
-        target_folder,
-        # Finance
-        time_horizon_in_years,
-        discount_rate_as_percent_per_year,
-        # Demography
-        demographic_table,
+def make_population_by_year(
+        population,
+        population_year,
         population_growth_rate_as_percent_per_year,
-        # Consumption
-        connection_count_per_thousand_people,
-        consumption_per_connection_in_kwh):
+        financing_year,
+        time_horizon_in_years):
+    # TODO: Support the case when financing_year is less than population_year
+    if financing_year < population_year:
+        raise InfrastructurePlanningError(M[
+            'financing_year_less_than_population_year'] % (
+                financing_year, population_year))
+    # Compute the population at financing_year
+    base_population = grow_exponentially(
+        population,
+        population_growth_rate_as_percent_per_year,
+        financing_year - population_year)
+    # Compute the population over time_horizon_in_years
+    population_by_year = OrderedDict()
+    for year in xrange(
+            financing_year,
+            financing_year + time_horizon_in_years + 1):
+        population_by_year[year] = grow_exponentially(
+            base_population,
+            population_growth_rate_as_percent_per_year,
+            year - financing_year)
+    return [
+        ('population_by_year', population_by_year),
+    ]
+
+
+def grow_exponentially(value, growth_rate_as_percent, growth_count):
+    return value * (1 + growth_rate_as_percent / 100.) ** growth_count
+
+
+def load_abbreviations(locale):
+    return {
+        'name': 'name',
+        'population': 'population',
+        'year': 'year',
+    }
+
+
+def load_messages(locale):
+    return {
+        'financing_year_less_than_population_year': (
+            'financing year (%s) must be greater than or equal to '
+            'population year (%s)'),
+    }
+
+
+A = load_abbreviations('en-US')
+M = load_messages('en-US')
+FUNCTIONS = [
+    make_population_by_year,
+]
+
+
+def run(target_folder, g):
+    # Prepare
+    t = g['demographic_table']
+    t.columns = normalize_column_names(t.columns, g['locale'])
+    # Compute with node-level override
+    l_by_name = {}
+    for name, table in t.groupby('name'):
+        l = get_local_arguments(table)
+        for f in FUNCTIONS:
+            try:
+                l.update(compute(f, l, g))
+            except InfrastructurePlanningError as e:
+                exit('%s : %s : %s' % (name.encode('utf-8'), f.func_name, e))
+        l_by_name[name] = l
+    l_by_name, g = sift(l_by_name, g)
+    # Save
+    # save_common_values(target_folder, g)
+    # save_unique_values(target_folder, l_by_name)
+    save_yearly_values(target_folder, l_by_name)
+
+    # Add location information if it doesn't exist
+    # Build the network
+
     d = OrderedDict()
-
-    target_path = join(target_folder, 'demographic_table.csv')
-    demographic_table.to_csv(target_path, index=False)
-    d['demographic_table_path'] = target_path
-
-    target_path = join(target_folder, 'demographic_geotable.csv')
-    demographic_geotable = demographic_table.copy()
-    demographic_geotable['RadiusInPixelsRange10-50FromSum'] = \
-        demographic_geotable['Population']
-    demographic_geotable['FillGreens'] = \
-        demographic_geotable['Year']
-    demographic_geotable.to_csv(target_path, index=False)
-    d['demographic_streets_satellite_geotable_path'] = target_path
-
-    """
-    # for name, table in demographic_table.groupby(NAME_COLUMN):
-        # pass
-
-        # Get cost breakdown
-        # Get discounted cost
-        # Get levelized cost
-
-    # Get aggregated cost breakdown
-    # Get aggregated discounted cost
-    # Get aggregated levelized cost
-    """
+    # Summarize
     return d
+
+
+def normalize_column_names(columns, locale):
+    'Translate each column name into English'
+    return [x.lower() for x in columns]
+
+
+def get_local_arguments(table):
+    'Convert the table into local arguments'
+    # TODO: Support specifying different overrides for different years
+    d = OrderedDict(table.ix[table.index[0]])
+    d['population_year'] = d['year']  # Let year be population_year
+    return d
+
+
+def compute(f, l, g):
+    'Compute the function using local arguments if possible'
+    kw = {}
+    for argument_name in inspect.getargspec(f).args:
+        kw[argument_name] = l.get(argument_name, g.get(argument_name))
+    return f(**kw)
+
+
+def sift(l_by_name, g):
+    'Move local arguments with common values into global arguments'
+    # TODO
+    return l_by_name, g
+
+
+def save_common_values(target_folder, g):
+    pass
+
+
+def save_unique_values(target_folder, l_by_name):
+    pass
+
+
+def save_yearly_values(target_folder, l_by_name):
+    target_path = join(target_folder, 'yearly_values.csv')
+    columns = defaultdict(list)
+    for name, l in l_by_name.items():
+        for k, v in l.items():
+            if not k.endswith('_by_year'):
+                continue
+            column = Series(v)
+            column.index = MultiIndex.from_tuples([(
+                name, x) for x in column.index], names=[A['name'], A['year']])
+            columns[k.replace('_by_year', '')].append(column)
+    table = DataFrame()
+    for name, columns in columns.items():
+        table[name] = concat(columns)
+    table.to_csv(target_path)
+    return target_path
 
 
 if __name__ == '__main__':
@@ -55,7 +153,13 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder',
         metavar='FOLDER', type=make_folder)
+    argument_parser.add_argument(
+        '--locale',
+        metavar='LOCALE', default='en-US')
 
+    argument_parser.add_argument(
+        '--financing_year',
+        metavar='YEAR', required=True, type=int)
     argument_parser.add_argument(
         '--time_horizon_in_years',
         metavar='INTEGER', required=True, type=int)
@@ -67,6 +171,9 @@ if __name__ == '__main__':
         '--demographic_table_path',
         metavar='PATH', required=True)
     argument_parser.add_argument(
+        '--population_year',
+        metavar='YEAR', required=True, type=int)
+    argument_parser.add_argument(
         '--population_growth_rate_as_percent_per_year',
         metavar='INTEGER', required=True, type=int)
 
@@ -74,20 +181,13 @@ if __name__ == '__main__':
         '--connection_count_per_thousand_people',
         metavar='INTEGER', required=True, type=float)
     argument_parser.add_argument(
-        '--consumption_per_connection_in_kwh',
+        '--consumption_per_connection_in_kilowatt_hours',
         metavar='INTEGER', required=True, type=float)
 
     args = argument_parser.parse_args()
-    d = run(
-        args.target_folder or make_enumerated_folder_for(__file__),
-
-        args.time_horizon_in_years,
-        args.discount_rate_as_percent_per_year,
-
-        TableType.load(
-            args.demographic_table_path),
-        args.population_growth_rate_as_percent_per_year,
-
-        args.connection_count_per_thousand_people,
-        args.consumption_per_connection_in_kwh)
+    A = load_abbreviations(args.locale)
+    M = load_messages(args.locale)
+    g = args.__dict__.copy()
+    g['demographic_table'] = TableType.load(args.demographic_table_path)
+    d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
     print(format_summary(d))
