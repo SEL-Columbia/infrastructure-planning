@@ -3,24 +3,8 @@ Define loan_year in compute discounted cost
 Check whether different loan year affects breakeven time (whether we need to add loan year)
 
 = Estimate grid electricity internal cost
-    Change transformer table to list using kVA
-    Consider adding power factor
-    Add explanation of relationship between kVA and kW
-
     Draft workflow in notebook
-        + Compute discounted cost
-        + Compute levelized cost
-        + Build cost by year table
-            + Get year
-            + Get production cost
-            + Get low voltage transformer labor cost
-            + Get low voltage transformer material cost
-            + Get low voltage line labor cost
-            + Get low voltage line material cost
         Check that we have accounted for all variables in old grid cost model
-    + Accept table of consumption for each year
-    + Review grid electricity cost model from mvMax4
-    + Assemble example consumption by year by name table
 
 Consider accepting net present value vs consumption curve for energy source X
 
@@ -29,11 +13,6 @@ Compare electrification scenarios
 Estimate mini grid electricity internal cost
 Estimate off grid electricity internal cost
 Estimate population using simple exponential growth
-
-+ Make forecast_population use new spline fitting model
-+ Estimate electricity consumption from curve
-+ Make tool to compute net present value
-+ Make tool to compute levelized cost of electricity
 
 Make script for each technology that only does modelling for that technology
 Explain that net present value is a special case of discounted cash flow when there is spending in the first few years

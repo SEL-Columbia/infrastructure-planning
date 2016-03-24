@@ -10,7 +10,7 @@ from pandas import DataFrame, MultiIndex, Series, concat
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 
 
-def make_population_by_year(
+def estimate_population_by_year(
         population,
         population_year,
         population_growth_rate_as_percent_per_year,
@@ -18,7 +18,7 @@ def make_population_by_year(
         time_horizon_in_years):
     # TODO: Support the case when financing_year is less than population_year
     if financing_year < population_year:
-        raise InfrastructurePlanningError(M[
+        raise InfrastructurePlanningError('financing_year', M[
             'financing_year_less_than_population_year'] % (
                 financing_year, population_year))
     # Compute the population at financing_year
@@ -38,6 +38,18 @@ def make_population_by_year(
     return [
         ('population_by_year', population_by_year),
     ]
+
+
+def estimate_consumption_by_year(
+        population_by_year,
+        connection_count_per_thousand_people,
+        consumption_per_connection_in_kilowatt_hours):
+    return [
+    ]
+
+
+def estimate_peak_demand():
+    return []
 
 
 def grow_exponentially(value, growth_rate_as_percent, growth_count):
@@ -63,7 +75,9 @@ def load_messages(locale):
 A = load_abbreviations('en-US')
 M = load_messages('en-US')
 FUNCTIONS = [
-    make_population_by_year,
+    estimate_population_by_year,
+    estimate_consumption_by_year,
+    estimate_peak_demand,
 ]
 
 
@@ -79,7 +93,8 @@ def run(target_folder, g):
             try:
                 l.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
-                exit('%s : %s : %s' % (name.encode('utf-8'), f.func_name, e))
+                exit('%s.error = %s : %s : %s' % (
+                    e[0], name.encode('utf-8'), f.func_name, e[1]))
         l_by_name[name] = l
     l_by_name, g = sift(l_by_name, g)
     # Save
