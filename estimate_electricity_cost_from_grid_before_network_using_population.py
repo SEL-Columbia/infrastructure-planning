@@ -1,8 +1,9 @@
 import inspect
 from argparse import ArgumentParser
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from invisibleroads_macros.iterable import OrderedDefaultDict
 from invisibleroads_macros.log import format_summary
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
@@ -23,33 +24,48 @@ def estimate_population_by_year(
                 financing_year, population_year))
     # Compute the population at financing_year
     base_population = grow_exponentially(
-        population,
-        population_growth_rate_as_percent_per_year,
+        population, population_growth_rate_as_percent_per_year,
         financing_year - population_year)
     # Compute the population over time_horizon_in_years
-    population_by_year = OrderedDict()
-    for year in xrange(
-            financing_year,
-            financing_year + time_horizon_in_years + 1):
-        population_by_year[year] = grow_exponentially(
-            base_population,
-            population_growth_rate_as_percent_per_year,
-            year - financing_year)
+    year_increments = Series(range(time_horizon_in_years + 1))
+    years = financing_year + year_increments
+    populations = grow_exponentially(
+        base_population, population_growth_rate_as_percent_per_year,
+        year_increments)
+    populations.index = years
     return [
-        ('population_by_year', population_by_year),
+        ('population_by_year', populations),
     ]
 
 
-def estimate_consumption_by_year(
+def estimate_consumption_in_kwh_by_year(
         population_by_year,
         connection_count_per_thousand_people,
-        consumption_per_connection_in_kilowatt_hours):
+        consumption_per_connection_in_kwh):
+    t = DataFrame({'population': population_by_year})
+    t['connection_count'] = connection_count_per_thousand_people * t[
+        'population'] / 1000.
+    t['consumption_in_kwh'] = consumption_per_connection_in_kwh * t[
+        'connection_count']
     return [
+        ('connection_count_by_year', t['connection_count']),
+        ('consumption_in_kwh_by_year', t['consumption_in_kwh']),
     ]
 
 
-def estimate_peak_demand():
-    return []
+def estimate_peak_demand_in_kw(
+        consumption_in_kwh_by_year,
+        consumption_during_peak_hours_as_percent_of_total_consumption,
+        peak_hours_of_consumption_per_year):
+    maximum_consumption_per_year_in_kwh = consumption_in_kwh_by_year.max()
+    consumption_during_peak_hours_in_kwh = \
+        maximum_consumption_per_year_in_kwh * \
+        consumption_during_peak_hours_as_percent_of_total_consumption / 100.
+    peak_demand_in_kw = consumption_during_peak_hours_in_kwh / float(
+        peak_hours_of_consumption_per_year)
+    return [
+        ('peak_demand_in_kw', peak_demand_in_kw),
+    ]
 
 
 def grow_exponentially(value, growth_rate_as_percent, growth_count):
@@ -76,8 +92,8 @@ A = load_abbreviations('en-US')
 M = load_messages('en-US')
 FUNCTIONS = [
     estimate_population_by_year,
-    estimate_consumption_by_year,
-    estimate_peak_demand,
+    estimate_consumption_in_kwh_by_year,
+    estimate_peak_demand_in_kw,
 ]
 
 
@@ -86,7 +102,7 @@ def run(target_folder, g):
     t = g['demographic_table']
     t.columns = normalize_column_names(t.columns, g['locale'])
     # Compute with node-level override
-    l_by_name = {}
+    l_by_name = OrderedDict()
     for name, table in t.groupby('name'):
         l = get_local_arguments(table)
         for f in FUNCTIONS:
@@ -147,7 +163,7 @@ def save_unique_values(target_folder, l_by_name):
 
 def save_yearly_values(target_folder, l_by_name):
     target_path = join(target_folder, 'yearly_values.csv')
-    columns = defaultdict(list)
+    columns = OrderedDefaultDict(list)
     for name, l in l_by_name.items():
         for k, v in l.items():
             if not k.endswith('_by_year'):
@@ -194,10 +210,17 @@ if __name__ == '__main__':
 
     argument_parser.add_argument(
         '--connection_count_per_thousand_people',
-        metavar='INTEGER', required=True, type=float)
+        metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
-        '--consumption_per_connection_in_kilowatt_hours',
-        metavar='INTEGER', required=True, type=float)
+        '--consumption_per_connection_in_kwh',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--consumption_during_peak_hours_as_percent_of_total_consumption',
+        metavar='PERCENT', required=True, type=float)
+    argument_parser.add_argument(
+        '--peak_hours_of_consumption_per_year',
+        metavar='FLOAT', required=True, type=float)
 
     args = argument_parser.parse_args()
     A = load_abbreviations(args.locale)
