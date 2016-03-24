@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
-from invisibleroads_macros.iterable import OrderedDefaultDict
+from invisibleroads_macros.iterable import (
+    OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
@@ -68,6 +69,51 @@ def estimate_peak_demand_in_kw(
     ]
 
 
+def estimate_system_cost_by_technology(**kw):
+    'Estimate system cost for each technology independently'
+    keys = [
+        'discounted_system_cost',
+        'levelized_system_cost',
+    ]
+    d = OrderedDefaultDict(OrderedDict)
+    for technology, estimate_system_cost in [
+        ('grid', estimate_grid_system_cost),
+        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
+        ('solar_home', estimate_solar_home_system_cost),
+    ]:
+        v_by_k = OrderedDict(compute(estimate_system_cost, kw))
+        d.update(('%s_%s' % (technology, k), v) for k, v in v_by_k.items())
+        for key in keys:
+            d['%s_by_technology' % key][technology] = v_by_k[key]
+    return d
+
+
+def estimate_grid_system_cost():
+    return [
+        ('discounted_system_cost', 0),
+        ('levelized_system_cost', 0),
+    ]
+
+
+def estimate_diesel_mini_grid_system_cost():
+    return [
+        ('discounted_system_cost', 0),
+        ('levelized_system_cost', 0),
+    ]
+
+
+def estimate_solar_home_system_cost():
+    return [
+        ('discounted_system_cost', 0),
+        ('levelized_system_cost', 0),
+    ]
+
+
+def estimate_network_budget(
+        system_cost_by_technology):
+    return []
+
+
 def grow_exponentially(value, growth_rate_as_percent, growth_count):
     return value * (1 + growth_rate_as_percent / 100.) ** growth_count
 
@@ -94,6 +140,8 @@ FUNCTIONS = [
     estimate_population_by_year,
     estimate_consumption_in_kwh_by_year,
     estimate_peak_demand_in_kw,
+    estimate_system_cost_by_technology,
+    # estimate_network_budget,
 ]
 
 
@@ -112,17 +160,17 @@ def run(target_folder, g):
                 exit('%s.error = %s : %s : %s' % (
                     e[0], name.encode('utf-8'), f.func_name, e[1]))
         l_by_name[name] = l
-    l_by_name, g = sift(l_by_name, g)
+    l_by_name, g = sift_common_values(l_by_name, g)
+    # Add location information if it doesn't exist
+    # Build the network
+
     # Save
     # save_common_values(target_folder, g)
     # save_unique_values(target_folder, l_by_name)
     save_yearly_values(target_folder, l_by_name)
 
-    # Add location information if it doesn't exist
-    # Build the network
-
-    d = OrderedDict()
     # Summarize
+    d = OrderedDict()
     return d
 
 
@@ -139,15 +187,22 @@ def get_local_arguments(table):
     return d
 
 
-def compute(f, l, g):
+def compute(f, l, g=None):
     'Compute the function using local arguments if possible'
+    if not g:
+        g = {}
+    # If the function wants every argument, provide every argument
+    argument_specification = inspect.getargspec(f)
+    if argument_specification.keywords:
+        return f(**merge_dictionaries(g, l))
+    # Otherwise, provide only requested arguments
     kw = {}
-    for argument_name in inspect.getargspec(f).args:
+    for argument_name in argument_specification.args:
         kw[argument_name] = l.get(argument_name, g.get(argument_name))
     return f(**kw)
 
 
-def sift(l_by_name, g):
+def sift_common_values(l_by_name, g):
     'Move local arguments with common values into global arguments'
     # TODO
     return l_by_name, g

@@ -1,4 +1,4 @@
-Name,Latitude,Longitude,Year,Population
-Addis Ababa,8.9806034,38.7577605,2008,3385000
-Dire Dawa,9.6008747,41.8501420,2008,607321
-Mek'ele,13.4926682,39.4791634,2015,410217
+Name,Year,Population
+Addis Ababa,2008,3385000
+Dire Dawa,2008,607321
+Mek'ele,2015,410217
