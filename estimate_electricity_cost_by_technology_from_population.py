@@ -1,4 +1,5 @@
 import inspect
+import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
 from crosscompute_table import TableType
@@ -15,23 +16,22 @@ from infrastructure_planning.exceptions import InfrastructurePlanningError
 def estimate_population_by_year(
         population,
         population_year,
-        population_growth_rate_as_percent_per_year,
+        population_growth_as_percent_of_population_per_year,
         financing_year,
         time_horizon_in_years):
     # TODO: Support the case when financing_year is less than population_year
     if financing_year < population_year:
         raise InfrastructurePlanningError('financing_year', M[
-            'financing_year_less_than_population_year'] % (
-                financing_year, population_year))
+            'bad_financing_year'] % (financing_year, population_year))
     # Compute the population at financing_year
     base_population = grow_exponentially(
-        population, population_growth_rate_as_percent_per_year,
+        population, population_growth_as_percent_of_population_per_year,
         financing_year - population_year)
     # Compute the population over time_horizon_in_years
     year_increments = Series(range(time_horizon_in_years + 1))
     years = financing_year + year_increments
     populations = grow_exponentially(
-        base_population, population_growth_rate_as_percent_per_year,
+        base_population, population_growth_as_percent_of_population_per_year,
         year_increments)
     populations.index = years
     return [
@@ -78,8 +78,8 @@ def estimate_system_cost_by_technology(**kw):
     d = OrderedDefaultDict(OrderedDict)
     for technology, estimate_system_cost in [
         ('grid', estimate_grid_system_cost),
-        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
-        ('solar_home', estimate_solar_home_system_cost),
+        # ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
+        # ('solar_home', estimate_solar_home_system_cost),
     ]:
         v_by_k = OrderedDict(compute(estimate_system_cost, kw))
         d.update(('%s_%s' % (technology, k), v) for k, v in v_by_k.items())
@@ -95,15 +95,30 @@ def estimate_grid_system_cost(**kw):
     ], kw)
 
 
-def estimate_grid_electricity_production_cost():
+def estimate_grid_electricity_production_cost(
+        consumption_in_kwh_by_year,
+        grid_system_loss_as_percent_of_total_production,
+        grid_medium_voltage_transformer_load_power_factor,
+        grid_electricity_production_cost_per_kwh):
+    if not -1 <= grid_medium_voltage_transformer_load_power_factor <= 1:
+        raise InfrastructurePlanningError(
+            'grid_medium_voltage_transformer_load_power_factor', M[
+                'bad_power_factor'
+            ] % grid_medium_voltage_transformer_load_power_factor)
+    production_in_kwh_by_year = adjust_for_losses(
+        consumption_in_kwh_by_year,
+        grid_system_loss_as_percent_of_total_production / 100.,
+        1 - grid_medium_voltage_transformer_load_power_factor)
     d = OrderedDict()
-    d['electricity_production_cost_by_year'] = {}
+    d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
+    d['electricity_production_cost_by_year'] = \
+        grid_electricity_production_cost_per_kwh * production_in_kwh_by_year
     return d
 
 
 def estimate_grid_electricity_distribution_cost():
     d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = {}
+    d['electricity_distribution_cost_by_year'] = Series()
     return d
 
 
@@ -116,13 +131,13 @@ def estimate_diesel_mini_grid_system_cost(**kw):
 
 def estimate_diesel_mini_grid_electricity_production_cost():
     d = OrderedDict()
-    d['electricity_production_cost_by_year'] = {}
+    d['electricity_production_cost_by_year'] = Series()
     return d
 
 
 def estimate_diesel_mini_grid_electricity_distribution_cost():
     d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = {}
+    d['electricity_distribution_cost_by_year'] = Series()
     return d
 
 
@@ -135,13 +150,13 @@ def estimate_solar_home_system_cost(**kw):
 
 def estimate_solar_home_electricity_production_cost():
     d = OrderedDict()
-    d['electricity_production_cost_by_year'] = {}
+    d['electricity_production_cost_by_year'] = Series()
     return d
 
 
 def estimate_solar_home_electricity_distribution_cost():
     d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = {}
+    d['electricity_distribution_cost_by_year'] = Series()
     return d
 
 
@@ -154,11 +169,14 @@ def prepare_system_cost(fs, kw):
         d['electricity_production_cost_by_year'],
         d['electricity_distribution_cost_by_year'],
     ])
-    discount_rate_as_percent = kw['discount_rate_as_percent_per_year']
+    financing_year = kw['financing_year']
+    discount_rate = kw['discount_rate_as_percent_of_cash_flow_per_year']
     discounted_production_in_kwh = compute_discounted_cash_flow(
-        d['electricity_production_in_kwh_by_year'], discount_rate_as_percent)
+        d['electricity_production_in_kwh_by_year'],
+        financing_year, discount_rate)
     discounted_cost = compute_discounted_cash_flow(
-        d['system_cost_by_year'], discount_rate_as_percent)
+        d['system_cost_by_year'],
+        financing_year, discount_rate)
     levelized_cost = discounted_cost / float(discounted_production_in_kwh)
     # Summarize
     d['discounted_electricity_production_in_kwh'] = \
@@ -173,13 +191,29 @@ def estimate_network_budget(
     return []
 
 
-def grow_exponentially(value, growth_rate_as_percent, growth_count):
-    return value * (1 + growth_rate_as_percent / 100.) ** growth_count
+def grow_exponentially(value, growth_as_percent, growth_count):
+    return value * (1 + growth_as_percent / 100.) ** growth_count
 
 
-def compute_discounted_cash_flow(cash_flow_by_year, discount_rate_as_percent):
-    # TODO
-    pass
+def adjust_for_losses(x, *fractional_losses):
+
+    def adjust_for_loss(x, fractional_loss):
+        divisor = 1 - fractional_loss
+        if not divisor:
+            return x
+        return x / float(divisor)
+
+    y = x
+    for fractional_loss in fractional_losses:
+        y = adjust_for_loss(y, fractional_loss)
+    return y
+
+
+def compute_discounted_cash_flow(
+        cash_flow_by_year, financing_year, discount_rate_as_percent):
+    year_increments = np.array(cash_flow_by_year.index - financing_year)
+    discount_rate_as_factor = 1 + discount_rate_as_percent / 100.
+    return sum(cash_flow_by_year / discount_rate_as_factor ** year_increments)
 
 
 def load_abbreviations(locale):
@@ -192,9 +226,10 @@ def load_abbreviations(locale):
 
 def load_messages(locale):
     return {
-        'financing_year_less_than_population_year': (
+        'bad_financing_year': (
             'financing year (%s) must be greater than or equal to '
             'population year (%s)'),
+        'bad_power_factor': 'power factor (%s) must be between -1 and 1',
     }
 
 
@@ -262,7 +297,10 @@ def compute(f, l, g=None):
     # Otherwise, provide only requested arguments
     kw = {}
     for argument_name in argument_specification.args:
-        kw[argument_name] = l.get(argument_name, g.get(argument_name))
+        argument_value = l.get(argument_name, g.get(argument_name))
+        if argument_value is None:
+            raise KeyError(argument_name)
+        kw[argument_name] = argument_value
     return f(**kw)
 
 
@@ -285,7 +323,7 @@ def save_yearly_values(target_folder, l_by_name):
     columns = OrderedDefaultDict(list)
     for name, l in l_by_name.items():
         for k, v in l.items():
-            if not k.endswith('_by_year'):
+            if not k.endswith('_by_year') or v.empty:
                 continue
             column = Series(v)
             column.index = MultiIndex.from_tuples([(
@@ -314,7 +352,7 @@ if __name__ == '__main__':
         '--time_horizon_in_years',
         metavar='INTEGER', required=True, type=int)
     argument_parser.add_argument(
-        '--discount_rate_as_percent_per_year',
+        '--discount_rate_as_percent_of_cash_flow_per_year',
         metavar='PERCENT', required=True, type=float)
 
     argument_parser.add_argument(
@@ -324,7 +362,7 @@ if __name__ == '__main__':
         '--population_year',
         metavar='YEAR', required=True, type=int)
     argument_parser.add_argument(
-        '--population_growth_rate_as_percent_per_year',
+        '--population_growth_as_percent_of_population_per_year',
         metavar='INTEGER', required=True, type=int)
 
     argument_parser.add_argument(
@@ -339,6 +377,16 @@ if __name__ == '__main__':
         metavar='PERCENT', required=True, type=float)
     argument_parser.add_argument(
         '--peak_hours_of_consumption_per_year',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--grid_system_loss_as_percent_of_total_production',
+        metavar='PERCENT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_medium_voltage_transformer_load_power_factor',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_electricity_production_cost_per_kwh',
         metavar='FLOAT', required=True, type=float)
 
     args = argument_parser.parse_args()
