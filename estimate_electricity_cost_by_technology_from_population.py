@@ -7,6 +7,7 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
+from math import ceil
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
 
@@ -77,7 +78,7 @@ def estimate_system_cost_by_technology(**kw):
     ]
     d = OrderedDefaultDict(OrderedDict)
     for technology, estimate_system_cost in [
-        ('grid', estimate_grid_system_cost),
+        ('grid', estimate_grid_system_cost_before_mv_network),
         # ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
         # ('solar_home', estimate_solar_home_system_cost),
     ]:
@@ -88,27 +89,27 @@ def estimate_system_cost_by_technology(**kw):
     return d
 
 
-def estimate_grid_system_cost(**kw):
+def estimate_grid_system_cost_before_mv_network(**kw):
     return prepare_system_cost([
         estimate_grid_electricity_production_cost,
-        estimate_grid_electricity_distribution_cost,
+        estimate_grid_electricity_distribution_cost_before_mv_network,  # noqa
     ], kw)
 
 
 def estimate_grid_electricity_production_cost(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production,
-        grid_medium_voltage_transformer_load_power_factor,
+        grid_mv_transformer_load_power_factor,
         grid_electricity_production_cost_per_kwh):
-    if not -1 <= grid_medium_voltage_transformer_load_power_factor <= 1:
+    if not -1 <= grid_mv_transformer_load_power_factor <= 1:
         raise InfrastructurePlanningError(
-            'grid_medium_voltage_transformer_load_power_factor', M[
+            'grid_mv_transformer_load_power_factor', M[
                 'bad_power_factor'
-            ] % grid_medium_voltage_transformer_load_power_factor)
+            ] % grid_mv_transformer_load_power_factor)
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production / 100.,
-        1 - grid_medium_voltage_transformer_load_power_factor)
+        1 - grid_mv_transformer_load_power_factor)
     d = OrderedDict()
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
     d['electricity_production_cost_by_year'] = \
@@ -116,10 +117,73 @@ def estimate_grid_electricity_production_cost(
     return d
 
 
-def estimate_grid_electricity_distribution_cost():
+def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
     d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = Series()
+    for component, estimate_component_cost in [
+        ('mv_transformer', estimate_grid_mv_transformer_cost),
+        # ('lv_line', estimate_grid_lv_line_cost),
+        # ('lv_connection', estimate_grid_lv_connection_cost),
+    ]:
+        v_by_k = OrderedDict(compute(estimate_component_cost, kw))
+        d.update(('%s_%s' % (component, k), v) for k, v in v_by_k.items())
     return d
+
+
+def estimate_grid_mv_transformer_cost(
+        peak_demand_in_kw,
+        grid_system_loss_as_percent_of_total_production,
+        grid_mv_transformer_table,
+        grid_mv_transformer_load_power_factor,
+        locale):
+    # Prepare table of transformer types
+    t = grid_mv_transformer_table
+    t.columns = normalize_column_names(t.columns, locale)
+    # Estimate desired capacity
+    desired_system_capacity_in_kva = adjust_for_losses(
+        peak_demand_in_kw,
+        grid_system_loss_as_percent_of_total_production / 100.,
+        1 - grid_mv_transformer_load_power_factor)
+    # Choose transformer type
+    capacity_column = C['capacity_in_kva']
+    eligible_t = t[t[capacity_column] < desired_system_capacity_in_kva]
+    if len(eligible_t):
+        t = eligible_t
+        # Choose the largest capacity from eligible transformer types
+        selected_t = t[t[capacity_column] == t[capacity_column].max()]
+    else:
+        # Choose the smallest capacity from all transformer types
+        selected_t = t[t[capacity_column] == t[capacity_column].min()]
+    selected_transformer = selected_t.ix[selected_t.index[0]]
+    selected_transformer_capacity_in_kva = selected_transformer[
+        capacity_column]
+    selected_transformer_count = int(ceil(
+        desired_system_capacity_in_kva / float(
+            selected_transformer_capacity_in_kva)))
+    # Compute costs
+    installation_lm_cost_per_transformer = selected_transformer[
+        C['installation_lm_cost']]
+    installation_lm_cost = installation_lm_cost_per_transformer * \
+        selected_transformer_count
+    maintenance_lm_cost_per_year_per_transformer = selected_transformer[
+        C['maintenance_lm_cost_per_year']]
+    maintenance_lm_cost_per_year = \
+        maintenance_lm_cost_per_year_per_transformer * \
+        selected_transformer_count
+    replacement_lm_cost_per_year = installation_lm_cost / float(
+        selected_transformer[C['lifetime_in_years']])
+    return [
+        ('installation_lm_cost', installation_lm_cost),
+        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
+        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
+    ]
+
+
+def estimate_grid_lv_line_cost():
+    pass
+
+
+def estimate_grid_lv_connection_cost():
+    pass
 
 
 def estimate_diesel_mini_grid_system_cost(**kw):
@@ -186,7 +250,7 @@ def prepare_system_cost(fs, kw):
     return d
 
 
-def estimate_network_budget(
+def estimate_mv_network_budget(
         system_cost_by_technology):
     return []
 
@@ -211,16 +275,19 @@ def adjust_for_losses(x, *fractional_losses):
 
 def compute_discounted_cash_flow(
         cash_flow_by_year, financing_year, discount_rate_as_percent):
+    'Discount cash flow starting from the year of financing'
     year_increments = np.array(cash_flow_by_year.index - financing_year)
+    year_increments[year_increments < 0] = 0  # Do not discount prior years
     discount_rate_as_factor = 1 + discount_rate_as_percent / 100.
     return sum(cash_flow_by_year / discount_rate_as_factor ** year_increments)
 
 
-def load_abbreviations(locale):
+def load_column_names(locale):
     return {
         'name': 'name',
         'population': 'population',
         'year': 'year',
+        'capacity_in_kva': 'capacity (kva)',
     }
 
 
@@ -233,14 +300,14 @@ def load_messages(locale):
     }
 
 
-A = load_abbreviations('en-US')
+C = load_column_names('en-US')
 M = load_messages('en-US')
 FUNCTIONS = [
     estimate_population_by_year,
     estimate_consumption_in_kwh_by_year,
     estimate_peak_demand_in_kw,
     estimate_system_cost_by_technology,
-    # estimate_network_budget,
+    # estimate_mv_network_budget,
 ]
 
 
@@ -327,7 +394,7 @@ def save_yearly_values(target_folder, l_by_name):
                 continue
             column = Series(v)
             column.index = MultiIndex.from_tuples([(
-                name, x) for x in column.index], names=[A['name'], A['year']])
+                name, x) for x in column.index], names=[C['name'], C['year']])
             columns[k.replace('_by_year', '')].append(column)
     table = DataFrame()
     for name, columns in columns.items():
@@ -383,14 +450,14 @@ if __name__ == '__main__':
         '--grid_system_loss_as_percent_of_total_production',
         metavar='PERCENT', required=True, type=float)
     argument_parser.add_argument(
-        '--grid_medium_voltage_transformer_load_power_factor',
+        '--grid_mv_transformer_load_power_factor',
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
         '--grid_electricity_production_cost_per_kwh',
         metavar='FLOAT', required=True, type=float)
 
     args = argument_parser.parse_args()
-    A = load_abbreviations(args.locale)
+    C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()
     g['demographic_table'] = TableType.load(args.demographic_table_path)
