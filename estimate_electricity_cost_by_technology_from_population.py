@@ -88,25 +88,84 @@ def estimate_system_cost_by_technology(**kw):
     return d
 
 
-def estimate_grid_system_cost():
-    return [
-        ('discounted_system_cost', 0),
-        ('levelized_system_cost', 0),
-    ]
+def estimate_grid_system_cost(**kw):
+    return prepare_system_cost([
+        estimate_grid_electricity_production_cost,
+        estimate_grid_electricity_distribution_cost,
+    ], kw)
 
 
-def estimate_diesel_mini_grid_system_cost():
-    return [
-        ('discounted_system_cost', 0),
-        ('levelized_system_cost', 0),
-    ]
+def estimate_grid_electricity_production_cost():
+    d = OrderedDict()
+    d['electricity_production_cost_by_year'] = {}
+    return d
 
 
-def estimate_solar_home_system_cost():
-    return [
-        ('discounted_system_cost', 0),
-        ('levelized_system_cost', 0),
-    ]
+def estimate_grid_electricity_distribution_cost():
+    d = OrderedDict()
+    d['electricity_distribution_cost_by_year'] = {}
+    return d
+
+
+def estimate_diesel_mini_grid_system_cost(**kw):
+    return prepare_system_cost([
+        estimate_diesel_mini_grid_electricity_production_cost,
+        estimate_diesel_mini_grid_electricity_distribution_cost,
+    ], kw)
+
+
+def estimate_diesel_mini_grid_electricity_production_cost():
+    d = OrderedDict()
+    d['electricity_production_cost_by_year'] = {}
+    return d
+
+
+def estimate_diesel_mini_grid_electricity_distribution_cost():
+    d = OrderedDict()
+    d['electricity_distribution_cost_by_year'] = {}
+    return d
+
+
+def estimate_solar_home_system_cost(**kw):
+    return prepare_system_cost([
+        estimate_solar_home_electricity_production_cost,
+        estimate_solar_home_electricity_distribution_cost,
+    ], kw)
+
+
+def estimate_solar_home_electricity_production_cost():
+    d = OrderedDict()
+    d['electricity_production_cost_by_year'] = {}
+    return d
+
+
+def estimate_solar_home_electricity_distribution_cost():
+    d = OrderedDict()
+    d['electricity_distribution_cost_by_year'] = {}
+    return d
+
+
+def prepare_system_cost(fs, kw):
+    d = OrderedDict()
+    # Compute
+    for f in fs:
+        d.update(compute(f, kw))
+    d['system_cost_by_year'] = sum([
+        d['electricity_production_cost_by_year'],
+        d['electricity_distribution_cost_by_year'],
+    ])
+    discount_rate_as_percent = kw['discount_rate_as_percent_per_year']
+    discounted_production_in_kwh = compute_discounted_cash_flow(
+        d['electricity_production_in_kwh_by_year'], discount_rate_as_percent)
+    discounted_cost = compute_discounted_cash_flow(
+        d['system_cost_by_year'], discount_rate_as_percent)
+    levelized_cost = discounted_cost / float(discounted_production_in_kwh)
+    # Summarize
+    d['discounted_electricity_production_in_kwh'] = \
+        discounted_production_in_kwh
+    d['discounted_system_cost'] = discounted_cost
+    d['levelized_system_cost'] = levelized_cost
+    return d
 
 
 def estimate_network_budget(
@@ -116,6 +175,11 @@ def estimate_network_budget(
 
 def grow_exponentially(value, growth_rate_as_percent, growth_count):
     return value * (1 + growth_rate_as_percent / 100.) ** growth_count
+
+
+def compute_discounted_cash_flow(cash_flow_by_year, discount_rate_as_percent):
+    # TODO
+    pass
 
 
 def load_abbreviations(locale):
