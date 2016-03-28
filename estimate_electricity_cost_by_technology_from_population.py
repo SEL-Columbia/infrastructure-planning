@@ -118,72 +118,55 @@ def estimate_grid_electricity_production_cost(
 
 
 def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
-    d = OrderedDict()
-    for component, estimate_component_cost in [
+    cost_by_year, d = prepare_cost_by_year([
         ('mv_transformer', estimate_grid_mv_transformer_cost),
-        # ('lv_line', estimate_grid_lv_line_cost),
-        # ('lv_connection', estimate_grid_lv_connection_cost),
-    ]:
-        v_by_k = OrderedDict(compute(estimate_component_cost, kw))
-        d.update(('%s_%s' % (component, k), v) for k, v in v_by_k.items())
+        ('lv_line', estimate_grid_lv_line_cost),
+        ('lv_connection', estimate_grid_lv_connection_cost),
+    ], kw)
+    d['electricity_distribution_cost_by_year'] = cost_by_year
     return d
 
 
 def estimate_grid_mv_transformer_cost(
         peak_demand_in_kw,
         grid_system_loss_as_percent_of_total_production,
-        grid_mv_transformer_table,
         grid_mv_transformer_load_power_factor,
-        locale):
-    # Prepare table of transformer types
-    t = grid_mv_transformer_table
-    t.columns = normalize_column_names(t.columns, locale)
+        grid_mv_transformer_table):
     # Estimate desired capacity
     desired_system_capacity_in_kva = adjust_for_losses(
         peak_demand_in_kw,
         grid_system_loss_as_percent_of_total_production / 100.,
         1 - grid_mv_transformer_load_power_factor)
     # Choose transformer type
-    capacity_column = C['capacity_in_kva']
-    eligible_t = t[t[capacity_column] < desired_system_capacity_in_kva]
-    if len(eligible_t):
-        t = eligible_t
-        # Choose the largest capacity from eligible transformer types
-        selected_t = t[t[capacity_column] == t[capacity_column].max()]
-    else:
-        # Choose the smallest capacity from all transformer types
-        selected_t = t[t[capacity_column] == t[capacity_column].min()]
-    selected_transformer = selected_t.ix[selected_t.index[0]]
-    selected_transformer_capacity_in_kva = selected_transformer[
-        capacity_column]
-    selected_transformer_count = int(ceil(
-        desired_system_capacity_in_kva / float(
-            selected_transformer_capacity_in_kva)))
-    # Compute costs
-    installation_lm_cost_per_transformer = selected_transformer[
-        C['installation_lm_cost']]
-    installation_lm_cost = installation_lm_cost_per_transformer * \
-        selected_transformer_count
-    maintenance_lm_cost_per_year_per_transformer = selected_transformer[
-        C['maintenance_lm_cost_per_year']]
-    maintenance_lm_cost_per_year = \
-        maintenance_lm_cost_per_year_per_transformer * \
-        selected_transformer_count
-    replacement_lm_cost_per_year = installation_lm_cost / float(
-        selected_transformer[C['lifetime_in_years']])
-    return [
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
+    return prepare_actual_system_capacity(
+        desired_system_capacity_in_kva,
+        grid_mv_transformer_table, 'capacity_in_kva')
 
 
-def estimate_grid_lv_line_cost():
-    pass
+def estimate_grid_lv_line_cost(
+        connection_count_by_year,
+        average_distance_between_buildings_in_meters,
+        grid_lv_line_installation_lm_cost_per_meter,
+        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_lv_line_lifetime_in_years):
+    return prepare_lv_line_cost(
+        connection_count_by_year,
+        average_distance_between_buildings_in_meters,
+        grid_lv_line_installation_lm_cost_per_meter,
+        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_lv_line_lifetime_in_years)
 
 
-def estimate_grid_lv_connection_cost():
-    pass
+def estimate_grid_lv_connection_cost(
+        connection_count_by_year,
+        grid_lv_connection_installation_lm_cost_per_connection,
+        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
+        grid_lv_connection_lifetime_in_years):
+    return prepare_lv_connection_cost(
+        connection_count_by_year,
+        grid_lv_connection_installation_lm_cost_per_connection,
+        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
+        grid_lv_connection_lifetime_in_years)
 
 
 def estimate_diesel_mini_grid_system_cost(**kw):
@@ -193,9 +176,23 @@ def estimate_diesel_mini_grid_system_cost(**kw):
     ], kw)
 
 
-def estimate_diesel_mini_grid_electricity_production_cost():
-    d = OrderedDict()
-    d['electricity_production_cost_by_year'] = Series()
+def estimate_diesel_mini_grid_electricity_production_cost(**kw):
+
+
+    """
+    The cost of fuel consumed is the product of the fuel cost per liter,
+    the fuel liters consumed per kilowatt-hour,
+    the generator's capacity in kilowatts and its effective hours of production per year.
+
+    The effective hours of production per year is the larger of either the 
+    loss-adjusted consumption per year divided by the system capacity or the 
+    minimum hours of production per year.
+    """
+
+    cost_by_year, d = prepare_cost_by_year([
+        ('generator', estimate_diesel_mini_grid_generator_cost),
+    ], kw)
+    d['electricity_production_cost_by_year'] = cost_by_year
     return d
 
 
@@ -203,6 +200,20 @@ def estimate_diesel_mini_grid_electricity_distribution_cost():
     d = OrderedDict()
     d['electricity_distribution_cost_by_year'] = Series()
     return d
+
+
+def estimate_diesel_mini_grid_generator_cost(
+        peak_demand_in_kw,
+        diesel_mini_grid_system_loss_as_percent_of_total_production,
+        diesel_mini_grid_generator_table):
+    # Estimate desired capacity
+    desired_system_capacity_in_kwh = adjust_for_losses(
+        peak_demand_in_kw,
+        diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
+    # Choose generator type
+    return prepare_actual_system_capacity(
+        desired_system_capacity_in_kwh,
+        diesel_mini_grid_generator_table, 'capacity_in_kwh')
 
 
 def estimate_solar_home_system_cost(**kw):
@@ -222,6 +233,15 @@ def estimate_solar_home_electricity_distribution_cost():
     d = OrderedDict()
     d['electricity_distribution_cost_by_year'] = Series()
     return d
+
+
+def estimate_mv_network_budget(
+        system_cost_by_technology):
+    return []
+
+
+def grow_exponentially(value, growth_as_percent, growth_count):
+    return value * (1 + growth_as_percent / 100.) ** growth_count
 
 
 def prepare_system_cost(fs, kw):
@@ -250,13 +270,101 @@ def prepare_system_cost(fs, kw):
     return d
 
 
-def estimate_mv_network_budget(
-        system_cost_by_technology):
-    return []
+def prepare_actual_system_capacity(
+        desired_system_capacity, option_table, capacity_column_key):
+    t = option_table
+    capacity_column = C[capacity_column_key]
+    # Select option
+    eligible_t = t[t[capacity_column] < desired_system_capacity]
+    if len(eligible_t):
+        t = eligible_t
+        # Choose the largest capacity from eligible transformer types
+        selected_t = t[t[capacity_column] == t[capacity_column].max()]
+    else:
+        # Choose the smallest capacity from all transformer types
+        selected_t = t[t[capacity_column] == t[capacity_column].min()]
+    selected = selected_t.ix[selected_t.index[0]]
+    # Get capacity and count
+    selected_capacity = selected[capacity_column]
+    selected_count = int(ceil(desired_system_capacity / float(
+        selected_capacity)))
+    # Get costs
+    installation_lm_cost = selected_count * selected[C[
+        'installation_lm_cost']]
+    maintenance_lm_cost_per_year = selected_count * selected[C[
+        'maintenance_lm_cost_per_year']]
+    replacement_lm_cost_per_year = installation_lm_cost / float(selected[C[
+        'lifetime_in_years']])
+    return [
+        ('desired_' + capacity_column_key, desired_system_capacity),
+        ('selected_' + capacity_column_key, selected_capacity),
+        ('selected_count', selected_count),
+        ('actual_' + capacity_column_key, selected_capacity * selected_count),
+        ('installation_lm_cost', installation_lm_cost),
+        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
+        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
+    ]
 
 
-def grow_exponentially(value, growth_as_percent, growth_count):
-    return value * (1 + growth_as_percent / 100.) ** growth_count
+def prepare_cost_by_year(component_packs, kw):
+    d = OrderedDict()
+    cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
+    for component, estimate_component_cost in component_packs:
+        v_by_k = OrderedDict(compute(estimate_component_cost, kw))
+        # Add initial costs
+        cost_by_year_index[0] += v_by_k['installation_lm_cost']
+        # Add recurring costs
+        cost_by_year_index[1:] += \
+            v_by_k['maintenance_lm_cost_per_year'] + \
+            v_by_k['replacement_lm_cost_per_year']
+        # Save
+        d.update(('%s_%s' % (component, k), v) for k, v in v_by_k.items())
+    cost_by_year = Series(cost_by_year_index, index=kw[
+        'population_by_year'].index)
+    return cost_by_year, d
+
+
+def prepare_lv_line_cost(
+        connection_count_by_year,
+        average_distance_between_buildings_in_meters,
+        lv_line_installation_lm_cost_per_meter,
+        lv_line_maintenance_lm_cost_per_meter_per_year,
+        lv_line_lifetime_in_years):
+    # TODO: Compute lv line cost by year as connections come online
+    maximum_connection_count = connection_count_by_year.max()
+    line_length_in_meters = average_distance_between_buildings_in_meters * (
+        maximum_connection_count - 1)
+    installation_lm_cost = line_length_in_meters * \
+        lv_line_installation_lm_cost_per_meter
+    maintenance_lm_cost_per_year = line_length_in_meters * \
+        lv_line_maintenance_lm_cost_per_meter_per_year
+    replacement_lm_cost_per_year = \
+        installation_lm_cost / float(lv_line_lifetime_in_years)
+    return [
+        ('installation_lm_cost', installation_lm_cost),
+        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
+        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
+    ]
+
+
+def prepare_lv_connection_cost(
+        connection_count_by_year,
+        lv_connection_installation_lm_cost_per_connection,
+        lv_connection_maintenance_lm_cost_per_connection_per_year,
+        lv_connection_lifetime_in_years):
+    # TODO: Compute lv connection cost by year as connections come online
+    maximum_connection_count = connection_count_by_year.max()
+    installation_lm_cost = maximum_connection_count * \
+        lv_connection_installation_lm_cost_per_connection
+    maintenance_lm_cost_per_year = maximum_connection_count * \
+        lv_connection_maintenance_lm_cost_per_connection_per_year
+    replacement_lm_cost_per_year = \
+        installation_lm_cost / float(lv_connection_lifetime_in_years)
+    return [
+        ('installation_lm_cost', installation_lm_cost),
+        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
+        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
+    ]
 
 
 def adjust_for_losses(x, *fractional_losses):
@@ -287,7 +395,11 @@ def load_column_names(locale):
         'name': 'name',
         'population': 'population',
         'year': 'year',
-        'capacity_in_kva': 'capacity (kva)',
+        'capacity_in_kva': 'capacity in kva',
+        'installation_lm_cost': 'installation labor and material cost',
+        'maintenance_lm_cost_per_year': (
+            'maintenance labor and material cost per year'),
+        'lifetime_in_years': 'lifetime in years',
     }
 
 
@@ -302,6 +414,10 @@ def load_messages(locale):
 
 C = load_column_names('en-US')
 M = load_messages('en-US')
+TABLE_NAMES = [
+    'demographic_table',
+    'grid_mv_transformer_table',
+]
 FUNCTIONS = [
     estimate_population_by_year,
     estimate_consumption_in_kwh_by_year,
@@ -313,11 +429,12 @@ FUNCTIONS = [
 
 def run(target_folder, g):
     # Prepare
-    t = g['demographic_table']
-    t.columns = normalize_column_names(t.columns, g['locale'])
+    for table_name in TABLE_NAMES:
+        table = g[table_name]
+        table.columns = normalize_column_names(table.columns, g['locale'])
     # Compute with node-level override
     l_by_name = OrderedDict()
-    for name, table in t.groupby('name'):
+    for name, table in g['demographic_table'].groupby('name'):
         l = get_local_arguments(table)
         for f in FUNCTIONS:
             try:
@@ -327,9 +444,9 @@ def run(target_folder, g):
                     e[0], name.encode('utf-8'), f.func_name, e[1]))
         l_by_name[name] = l
     l_by_name, g = sift_common_values(l_by_name, g)
+
     # Add location information if it doesn't exist
     # Build the network
-
     # Save
     # save_common_values(target_folder, g)
     # save_unique_values(target_folder, l_by_name)
@@ -433,6 +550,9 @@ if __name__ == '__main__':
         metavar='INTEGER', required=True, type=int)
 
     argument_parser.add_argument(
+        '--average_distance_between_buildings_in_meters',
+        metavar='METERS', required=True, type=float)
+    argument_parser.add_argument(
         '--connection_count_per_thousand_people',
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
@@ -447,19 +567,44 @@ if __name__ == '__main__':
         metavar='FLOAT', required=True, type=float)
 
     argument_parser.add_argument(
+        '--grid_electricity_production_cost_per_kwh',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
         '--grid_system_loss_as_percent_of_total_production',
         metavar='PERCENT', required=True, type=float)
     argument_parser.add_argument(
         '--grid_mv_transformer_load_power_factor',
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
-        '--grid_electricity_production_cost_per_kwh',
+        '--grid_mv_transformer_table_path',
+        metavar='PATH', required=True)
+
+    argument_parser.add_argument(
+        '--grid_lv_line_installation_lm_cost_per_meter',
         metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_lv_line_lifetime_in_years',
+        metavar='YEARS', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--grid_lv_connection_installation_lm_cost_per_connection',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_lv_connection_maintenance_lm_cost_per_connection_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_lv_connection_lifetime_in_years',
+        metavar='YEARS', required=True, type=float)
 
     args = argument_parser.parse_args()
     C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()
     g['demographic_table'] = TableType.load(args.demographic_table_path)
+    g['grid_mv_transformer_table'] = TableType.load(
+        args.grid_mv_transformer_table_path)
     d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
     print(format_summary(d))
