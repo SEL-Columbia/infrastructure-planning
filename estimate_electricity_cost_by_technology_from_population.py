@@ -2,12 +2,14 @@ import inspect
 import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
+from copy import copy, deepcopy
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from math import ceil
+from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
 
@@ -79,8 +81,8 @@ def estimate_system_cost_by_technology(**kw):
     d = OrderedDefaultDict(OrderedDict)
     for technology, estimate_system_cost in [
         ('grid', estimate_grid_system_cost_before_mv_network),
-        # ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
-        # ('solar_home', estimate_solar_home_system_cost),
+        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
+        ('solar_home', estimate_solar_home_system_cost),
     ]:
         v_by_k = OrderedDict(compute(estimate_system_cost, kw))
         d.update(('%s_%s' % (technology, k), v) for k, v in v_by_k.items())
@@ -181,14 +183,20 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw)
-    d.update(compute(estimate_diesel_mini_grid_fuel_cost, kw))
-    d['electricity_production_cost_by_year'] = d.pop('component_cost_by_year')
+    d.update(compute(
+        estimate_diesel_mini_grid_fuel_cost, merge_dictionaries(kw, d)))
+    d['electricity_production_cost_by_year'] = d.pop(
+        'component_cost_by_year') + d['fuel_cost_by_year']
     return d
 
 
-def estimate_diesel_mini_grid_electricity_distribution_cost():
-    d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = Series()
+def estimate_diesel_mini_grid_electricity_distribution_cost(**kw):
+    d = prepare_component_cost_by_year([
+        ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
+        ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
+    ], kw)
+    d['electricity_distribution_cost_by_year'] = d.pop(
+        'component_cost_by_year')
     return d
 
 
@@ -206,36 +214,63 @@ def estimate_diesel_mini_grid_generator_cost(
         diesel_mini_grid_generator_table, 'capacity_in_kw')
 
 
-def estimate_diesel_mini_grid_fuel_cost():
+def estimate_diesel_mini_grid_fuel_cost(
+        consumption_in_kwh_by_year,
+        diesel_mini_grid_generator_actual_system_capacity_in_kw,
+        diesel_mini_grid_generator_minimum_hours_of_production_per_year,
+        diesel_mini_grid_system_loss_as_percent_of_total_production,
+        diesel_mini_grid_fuel_cost_per_liter,
+        diesel_mini_grid_fuel_liters_consumed_per_kwh):
+    d = OrderedDict()
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
     desired_hours_of_production_by_year = production_in_kwh_by_year / float(
-        generator_actual_system_capacity_in_kw)
-
-
-    [minimum_hours_of_production_per_year] * len(production_in_kwh_by_year)
-
-    Series(np.ones(len(production_in_kwh_by_year)) * minimum_hours_of_production_per_year
-        
-        , index=production_in_kwh_by_year.index)
-
+        diesel_mini_grid_generator_actual_system_capacity_in_kw)
+    years = production_in_kwh_by_year.index
+    minimum_hours_of_production_by_year = Series([
+        diesel_mini_grid_generator_minimum_hours_of_production_per_year,
+    ] * len(years), index=years)
     effective_hours_of_production_by_year = DataFrame({
         'desired': desired_hours_of_production_by_year,
         'minimum': minimum_hours_of_production_by_year,
     }).max(axis=1)
+    d['effective_hours_of_production_by_year'] = \
+        effective_hours_of_production_by_year
+    d['fuel_cost_by_year'] = reduce(mul, [
+        diesel_mini_grid_fuel_cost_per_liter,
+        diesel_mini_grid_fuel_liters_consumed_per_kwh,
+        diesel_mini_grid_generator_actual_system_capacity_in_kw,
+        effective_hours_of_production_by_year,
+    ], 1)
+    d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
+    return d
 
 
-    pass
-    """
-    The cost of fuel consumed is the product of the fuel cost per liter,
-    the fuel liters consumed per kilowatt-hour,
-    the generator's capacity in kilowatts and its effective hours of production per year.
+def estimate_diesel_mini_grid_lv_line_cost(
+        connection_count_by_year,
+        average_distance_between_buildings_in_meters,
+        diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
+        diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        diesel_mini_grid_lv_line_lifetime_in_years):
+    return prepare_lv_line_cost(
+        connection_count_by_year,
+        average_distance_between_buildings_in_meters,
+        diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
+        diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        diesel_mini_grid_lv_line_lifetime_in_years)
 
-    The effective hours of production per year is the larger of either the 
-    loss-adjusted consumption per year divided by the system capacity or the 
-    minimum hours of production per year.
-    """
+
+def estimate_diesel_mini_grid_lv_connection_cost(
+        connection_count_by_year,
+        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
+        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
+        diesel_mini_grid_lv_connection_lifetime_in_years):
+    return prepare_lv_connection_cost(
+        connection_count_by_year,
+        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
+        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
+        diesel_mini_grid_lv_connection_lifetime_in_years)
 
 
 def estimate_solar_home_system_cost(**kw):
@@ -245,15 +280,75 @@ def estimate_solar_home_system_cost(**kw):
     ], kw)
 
 
-def estimate_solar_home_electricity_production_cost():
-    d = OrderedDict()
-    d['electricity_production_cost_by_year'] = Series()
+def estimate_solar_home_electricity_production_cost(**kw):
+    d = prepare_component_cost_by_year([
+        ('panel', estimate_solar_home_panel_cost),
+        ('battery', estimate_solar_home_battery_cost),
+        ('balance', estimate_solar_home_balance_cost),
+    ], kw)
+    d['electricity_production_cost_by_year'] = d.pop('component_cost_by_year')
     return d
 
 
-def estimate_solar_home_electricity_distribution_cost():
+def estimate_solar_home_electricity_distribution_cost(**kw):
     d = OrderedDict()
-    d['electricity_distribution_cost_by_year'] = Series()
+    years = kw['population_by_year'].index
+    d['electricity_distribution_cost_by_year'] = Series(
+        np.zeros(len(years)), index=years)
+    return d
+
+
+def estimate_solar_home_panel_cost(
+        consumption_in_kwh_by_year,
+        peak_hours_of_sun_per_year,
+        solar_home_system_loss_as_percent_of_total_production,
+        solar_home_panel_table):
+    # Estimate desired capacity
+    maximum_consumption_per_year_in_kwh = consumption_in_kwh_by_year.max()
+    maximum_production_per_year_in_kwh = adjust_for_losses(
+        maximum_consumption_per_year_in_kwh,
+        solar_home_system_loss_as_percent_of_total_production / 100.)
+    desired_system_capacity_in_kw = maximum_production_per_year_in_kwh / float(
+        peak_hours_of_sun_per_year)
+    # Choose panel type
+    return prepare_actual_system_capacity(
+        desired_system_capacity_in_kw,
+        solar_home_panel_table, 'capacity_in_kw')
+
+
+def estimate_solar_home_battery_cost(
+        solar_home_panel_actual_system_capacity_in_kw,
+        solar_home_battery_kwh_per_panel_kw,
+        solar_home_battery_installation_lm_cost_per_battery_kwh,
+        solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
+        solar_home_battery_lifetime_in_years):
+    battery_storage_in_kwh = solar_home_panel_actual_system_capacity_in_kw * \
+        solar_home_battery_kwh_per_panel_kw
+    installation_lm_cost = battery_storage_in_kwh * \
+        solar_home_battery_installation_lm_cost_per_battery_kwh
+    d = OrderedDict()
+    d['installation_lm_cost'] = installation_lm_cost
+    d['maintenance_lm_cost_per_year'] = battery_storage_in_kwh * \
+        solar_home_battery_maintenance_lm_cost_per_kwh_per_year
+    d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
+        solar_home_battery_lifetime_in_years)
+    return d
+
+
+def estimate_solar_home_balance_cost(
+        solar_home_panel_actual_system_capacity_in_kw,
+        solar_home_balance_installation_lm_cost_per_panel_kw,
+        solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year,
+        solar_home_balance_lifetime_in_years):
+    installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
+        solar_home_balance_installation_lm_cost_per_panel_kw
+    d = OrderedDict()
+    d['installation_lm_cost'] = installation_lm_cost
+    d['maintenance_lm_cost_per_year'] = \
+        solar_home_panel_actual_system_capacity_in_kw * \
+        solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year
+    d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
+        solar_home_balance_lifetime_in_years)
     return d
 
 
@@ -300,16 +395,17 @@ def prepare_actual_system_capacity(
     eligible_t = t[t[capacity_column] < desired_system_capacity]
     if len(eligible_t):
         t = eligible_t
-        # Choose the largest capacity from eligible transformer types
+        # Choose the largest capacity from eligible types
         selected_t = t[t[capacity_column] == t[capacity_column].max()]
     else:
-        # Choose the smallest capacity from all transformer types
+        # Choose the smallest capacity from all types
         selected_t = t[t[capacity_column] == t[capacity_column].min()]
     selected = selected_t.ix[selected_t.index[0]]
     # Get capacity and count
     selected_capacity = selected[capacity_column]
     selected_count = int(ceil(desired_system_capacity / float(
         selected_capacity)))
+    actual_system_capacity = selected_capacity * selected_count
     # Get costs
     installation_lm_cost = selected_count * selected[C[
         'installation_lm_cost']]
@@ -318,10 +414,10 @@ def prepare_actual_system_capacity(
     replacement_lm_cost_per_year = installation_lm_cost / float(selected[C[
         'lifetime_in_years']])
     return [
-        ('desired_' + capacity_column_key, desired_system_capacity),
+        ('desired_system_' + capacity_column_key, desired_system_capacity),
         ('selected_' + capacity_column_key, selected_capacity),
         ('selected_count', selected_count),
-        ('actual_' + capacity_column_key, selected_capacity * selected_count),
+        ('actual_system_' + capacity_column_key, actual_system_capacity),
         ('installation_lm_cost', installation_lm_cost),
         ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
         ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
@@ -418,6 +514,7 @@ def load_column_names(locale):
         'population': 'population',
         'year': 'year',
         'capacity_in_kva': 'capacity in kva',
+        'capacity_in_kw': 'capacity in kw',
         'installation_lm_cost': 'installation labor and material cost',
         'maintenance_lm_cost_per_year': (
             'maintenance labor and material cost per year'),
@@ -439,6 +536,8 @@ M = load_messages('en-US')
 TABLE_NAMES = [
     'demographic_table',
     'grid_mv_transformer_table',
+    'diesel_mini_grid_generator_table',
+    'solar_home_panel_table',
 ]
 FUNCTIONS = [
     estimate_population,
@@ -455,24 +554,24 @@ def run(target_folder, g):
         table = g[table_name]
         table.columns = normalize_column_names(table.columns, g['locale'])
     # Compute with node-level override
-    l_by_name = OrderedDict()
+    ls = []
     for name, table in g['demographic_table'].groupby('name'):
-        l = get_local_arguments(table)
+        l = OrderedDict({'name': name}, **get_local_arguments(table))
         for f in FUNCTIONS:
             try:
                 l.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
                 exit('%s.error = %s : %s : %s' % (
                     e[0], name.encode('utf-8'), f.func_name, e[1]))
-        l_by_name[name] = l
-    l_by_name, g = sift_common_values(l_by_name, g)
+        ls.append(l)
+    ls, g = sift_common_values(ls, g)
 
     # Add location information if it doesn't exist
     # Build the network
     # Save
-    # save_common_values(target_folder, g)
-    # save_unique_values(target_folder, l_by_name)
-    save_yearly_values(target_folder, l_by_name)
+    save_common_values(target_folder, g)
+    save_unique_values(target_folder, ls)
+    save_yearly_values(target_folder, ls)
 
     # Summarize
     d = OrderedDict()
@@ -510,24 +609,51 @@ def compute(f, l, g=None):
     return f(**kw)
 
 
-def sift_common_values(l_by_name, g):
+def sift_common_values(ls, g):
     'Move local arguments with common values into global arguments'
-    # TODO
-    return l_by_name, g
+    ls, g = deepcopy(ls), copy(g)
+    try:
+        common_value_by_key = ls[0].copy()
+    except IndexError:
+        return ls, g
+    for l in ls:
+        for k, v in l.items():
+            try:
+                value = common_value_by_key[k]
+            except KeyError:
+                continue
+            if v != value:
+                common_value_by_key.pop(k)
+    for key, value in common_value_by_key.items():
+        g[key] = value
+        for l in ls:
+            l.pop(key)
+    return ls, g
 
 
 def save_common_values(target_folder, g):
-    pass
+    target_path = join(target_folder, 'common_values.csv')
+    rows = [(C[k], v) for k, v in g.items()]
+    table = DataFrame(rows, columns=['Argument', 'Value'])
+    table.to_csv(target_path, index=False)
+    return target_path
 
 
-def save_unique_values(target_folder, l_by_name):
-    pass
+def save_unique_values(target_folder, ls):
+    target_path = join(target_folder, 'unique_values.csv')
+    rows = [Series(x) for x in ls]
+    table = concat(rows, axis=1)
+    table.to_csv(target_path)
+    table.transpose().to_csv(join(
+        target_folder, 'unique_values_transposed.csv'), index=False)
+    return target_path
 
 
-def save_yearly_values(target_folder, l_by_name):
+def save_yearly_values(target_folder, ls):
     target_path = join(target_folder, 'yearly_values.csv')
     columns = OrderedDefaultDict(list)
-    for name, l in l_by_name.items():
+    for l in ls:
+        name = l['name']
         for k, v in l.items():
             if not k.endswith('_by_year') or v.empty:
                 continue
@@ -573,7 +699,7 @@ if __name__ == '__main__':
 
     argument_parser.add_argument(
         '--average_distance_between_buildings_in_meters',
-        metavar='METERS', required=True, type=float)
+        metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
         '--connection_count_per_thousand_people',
         metavar='FLOAT', required=True, type=float)
@@ -609,7 +735,7 @@ if __name__ == '__main__':
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
         '--grid_lv_line_lifetime_in_years',
-        metavar='YEARS', required=True, type=float)
+        metavar='FLOAT', required=True, type=float)
 
     argument_parser.add_argument(
         '--grid_lv_connection_installation_lm_cost_per_connection',
@@ -619,14 +745,88 @@ if __name__ == '__main__':
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
         '--grid_lv_connection_lifetime_in_years',
-        metavar='YEARS', required=True, type=float)
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--diesel_mini_grid_system_loss_as_percent_of_total_production',
+        metavar='PERCENT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_generator_table_path',
+        metavar='PATH', required=True)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_generator_minimum_hours_of_production_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_fuel_cost_per_liter',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_fuel_liters_consumed_per_kwh',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_line_installation_lm_cost_per_meter',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_line_lifetime_in_years',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_connection_installation_lm_cost_per_connection',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year',  # noqa
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_connection_lifetime_in_years',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--peak_hours_of_sun_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_system_loss_as_percent_of_total_production',
+        metavar='PERCENT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_panel_table_path',
+        metavar='PATH', required=True)
+
+    argument_parser.add_argument(
+        '--solar_home_battery_kwh_per_panel_kw',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_battery_installation_lm_cost_per_battery_kwh',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_battery_maintenance_lm_cost_per_kwh_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_battery_lifetime_in_years',
+        metavar='FLOAT', required=True, type=float)
+
+    argument_parser.add_argument(
+        '--solar_home_balance_installation_lm_cost_per_panel_kw',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--solar_home_balance_lifetime_in_years',
+        metavar='FLOAT', required=True, type=float)
 
     args = argument_parser.parse_args()
     C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()
-    g['demographic_table'] = TableType.load(args.demographic_table_path)
+    g['demographic_table'] = TableType.load(
+        args.demographic_table_path)
     g['grid_mv_transformer_table'] = TableType.load(
         args.grid_mv_transformer_table_path)
+    g['diesel_mini_grid_generator_table'] = TableType.load(
+        args.diesel_mini_grid_generator_table_path)
+    g['solar_home_panel_table'] = TableType.load(
+        args.solar_home_panel_table_path)
     d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
     print(format_summary(d))
