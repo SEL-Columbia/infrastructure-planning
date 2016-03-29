@@ -183,6 +183,10 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw)
+    for k in [
+        'generator_actual_system_capacity_in_kw',
+    ]:
+        d['diesel_mini_grid_' + k] = d[k]
     d.update(compute(
         estimate_diesel_mini_grid_fuel_cost, merge_dictionaries(kw, d)))
     d['electricity_production_cost_by_year'] = d.pop(
@@ -283,9 +287,18 @@ def estimate_solar_home_system_cost(**kw):
 def estimate_solar_home_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('panel', estimate_solar_home_panel_cost),
+    ], kw)
+    for k in [
+        'panel_actual_system_capacity_in_kw',
+    ]:
+        d['solar_home_' + k] = d[k]
+    d.update(prepare_component_cost_by_year([
         ('battery', estimate_solar_home_battery_cost),
         ('balance', estimate_solar_home_balance_cost),
-    ], kw)
+    ], merge_dictionaries(kw, d)))
+    d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
+        kw['consumption_in_kwh_by_year'],
+        kw['solar_home_system_loss_as_percent_of_total_production'] / 100.)
     d['electricity_production_cost_by_year'] = d.pop('component_cost_by_year')
     return d
 
@@ -508,6 +521,12 @@ def compute_discounted_cash_flow(
     return sum(cash_flow_by_year / discount_rate_as_factor ** year_increments)
 
 
+def load_abbreviations(locale):
+    return {
+        'diesel_mini_grid_generator_minimum_hours_of_production_per_year': 'dmg_gen_mhoppy',  # noqa
+    }
+
+
 def load_column_names(locale):
     return {
         'name': 'name',
@@ -531,6 +550,7 @@ def load_messages(locale):
     }
 
 
+A = load_abbreviations('en-US')
 C = load_column_names('en-US')
 M = load_messages('en-US')
 TABLE_NAMES = [
@@ -564,7 +584,7 @@ def run(target_folder, g):
                 exit('%s.error = %s : %s : %s' % (
                     e[0], name.encode('utf-8'), f.func_name, e[1]))
         ls.append(l)
-    ls, g = sift_common_values(ls, g)
+    # ls, g = sift_common_values(ls, g)
 
     # Add location information if it doesn't exist
     # Build the network
@@ -622,8 +642,12 @@ def sift_common_values(ls, g):
                 value = common_value_by_key[k]
             except KeyError:
                 continue
-            if v != value:
-                common_value_by_key.pop(k)
+            try:
+                if v != value:
+                    common_value_by_key.pop(k)
+            except ValueError:
+                if not v.equals(value):
+                    common_value_by_key.pop(k)
     for key, value in common_value_by_key.items():
         g[key] = value
         for l in ls:
@@ -633,7 +657,8 @@ def sift_common_values(ls, g):
 
 def save_common_values(target_folder, g):
     target_path = join(target_folder, 'common_values.csv')
-    rows = [(C[k], v) for k, v in g.items()]
+    # rows = [(A[k], v) for k, v in g.items()]
+    rows = [(k, v) for k, v in g.items() if not k.endswith('_by_year') and not k.endswith('_table') and not k.endswith('_path')]
     table = DataFrame(rows, columns=['Argument', 'Value'])
     table.to_csv(target_path, index=False)
     return target_path
@@ -641,8 +666,11 @@ def save_common_values(target_folder, g):
 
 def save_unique_values(target_folder, ls):
     target_path = join(target_folder, 'unique_values.csv')
-    rows = [Series(x) for x in ls]
+    rows = [Series({
+        k: v for k, v in l.items() if not k.endswith('_by_year')
+    }) for l in ls]
     table = concat(rows, axis=1)
+    # table.columns = [A[k] for k in table.columns]
     table.to_csv(target_path)
     table.transpose().to_csv(join(
         target_folder, 'unique_values_transposed.csv'), index=False)
@@ -658,8 +686,9 @@ def save_yearly_values(target_folder, ls):
             if not k.endswith('_by_year') or v.empty:
                 continue
             column = Series(v)
-            column.index = MultiIndex.from_tuples([(
-                name, x) for x in column.index], names=[C['name'], C['year']])
+            # column.index = MultiIndex.from_tuples([(name, x) for x in column.index], names=[A['name'], A['year']])
+            column.index = MultiIndex.from_tuples([(name, x) for x in column.index], names=['name', 'year'])
+            # columns[A[k.replace('_by_year', '')]].append(column)
             columns[k.replace('_by_year', '')].append(column)
     table = DataFrame()
     for name, columns in columns.items():
@@ -817,6 +846,7 @@ if __name__ == '__main__':
         metavar='FLOAT', required=True, type=float)
 
     args = argument_parser.parse_args()
+    A = load_abbreviations(args.locale)
     C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()

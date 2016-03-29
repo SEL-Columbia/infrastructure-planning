@@ -1,3 +1,8 @@
+Consider ordering the columns in the output report manually
+    Remove OrderedDict
+Set name of town to column name
+
+
 Change finance units to years explicitly
 Define loan_year in compute discounted cost
 Check whether different loan year affects breakeven time (whether we need to add loan year)
