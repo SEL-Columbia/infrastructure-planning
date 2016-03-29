@@ -183,10 +183,8 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw)
-    for k in [
-        'generator_actual_system_capacity_in_kw',
-    ]:
-        d['diesel_mini_grid_' + k] = d[k]
+    d['diesel_mini_grid_generator_actual_system_capacity_in_kw'] = d[
+        'generator_actual_system_capacity_in_kw']
     d.update(compute(
         estimate_diesel_mini_grid_fuel_cost, merge_dictionaries(kw, d)))
     d['electricity_production_cost_by_year'] = d.pop(
@@ -288,10 +286,8 @@ def estimate_solar_home_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('panel', estimate_solar_home_panel_cost),
     ], kw)
-    for k in [
-        'panel_actual_system_capacity_in_kw',
-    ]:
-        d['solar_home_' + k] = d[k]
+    d['solar_home_panel_actual_system_capacity_in_kw'] = d[
+        'panel_actual_system_capacity_in_kw']
     d.update(prepare_component_cost_by_year([
         ('battery', estimate_solar_home_battery_cost),
         ('balance', estimate_solar_home_balance_cost),
@@ -658,7 +654,11 @@ def sift_common_values(ls, g):
 def save_common_values(target_folder, g):
     target_path = join(target_folder, 'common_values.csv')
     # rows = [(A[k], v) for k, v in g.items()]
-    rows = [(k, v) for k, v in g.items() if not k.endswith('_by_year') and not k.endswith('_table') and not k.endswith('_path')]
+    rows = [
+        (k, v) for k, v in g.items() if
+        not k.endswith('_by_year') and
+        not k.endswith('_table') and
+        not k.endswith('_path')]
     table = DataFrame(rows, columns=['Argument', 'Value'])
     table.to_csv(target_path, index=False)
     return target_path
@@ -686,8 +686,10 @@ def save_yearly_values(target_folder, ls):
             if not k.endswith('_by_year') or v.empty:
                 continue
             column = Series(v)
-            # column.index = MultiIndex.from_tuples([(name, x) for x in column.index], names=[A['name'], A['year']])
-            column.index = MultiIndex.from_tuples([(name, x) for x in column.index], names=['name', 'year'])
+            # column.index = MultiIndex.from_tuples([(
+            # name, x) for x in column.index], names=[A['name'], A['year']])
+            column.index = MultiIndex.from_tuples([(
+                name, x) for x in column.index], names=['name', 'year'])
             # columns[A[k.replace('_by_year', '')]].append(column)
             columns[k.replace('_by_year', '')].append(column)
     table = DataFrame()
