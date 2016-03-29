@@ -14,7 +14,7 @@ from pandas import DataFrame, MultiIndex, Series, concat
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 
 
-def estimate_population_by_year(
+def estimate_population(
         population,
         population_year,
         population_growth_as_percent_of_population_per_year,
@@ -40,7 +40,7 @@ def estimate_population_by_year(
     ]
 
 
-def estimate_consumption_in_kwh_by_year(
+def estimate_consumption_in_kwh(
         population_by_year,
         connection_count_per_thousand_people,
         consumption_per_connection_in_kwh):
@@ -118,12 +118,13 @@ def estimate_grid_electricity_production_cost(
 
 
 def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
-    cost_by_year, d = prepare_cost_by_year([
+    d = prepare_component_cost_by_year([
         ('mv_transformer', estimate_grid_mv_transformer_cost),
         ('lv_line', estimate_grid_lv_line_cost),
         ('lv_connection', estimate_grid_lv_connection_cost),
     ], kw)
-    d['electricity_distribution_cost_by_year'] = cost_by_year
+    d['electricity_distribution_cost_by_year'] = d.pop(
+        'component_cost_by_year')
     return d
 
 
@@ -177,22 +178,11 @@ def estimate_diesel_mini_grid_system_cost(**kw):
 
 
 def estimate_diesel_mini_grid_electricity_production_cost(**kw):
-
-
-    """
-    The cost of fuel consumed is the product of the fuel cost per liter,
-    the fuel liters consumed per kilowatt-hour,
-    the generator's capacity in kilowatts and its effective hours of production per year.
-
-    The effective hours of production per year is the larger of either the 
-    loss-adjusted consumption per year divided by the system capacity or the 
-    minimum hours of production per year.
-    """
-
-    cost_by_year, d = prepare_cost_by_year([
+    d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw)
-    d['electricity_production_cost_by_year'] = cost_by_year
+    d.update(compute(estimate_diesel_mini_grid_fuel_cost, kw))
+    d['electricity_production_cost_by_year'] = d.pop('component_cost_by_year')
     return d
 
 
@@ -207,13 +197,45 @@ def estimate_diesel_mini_grid_generator_cost(
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_generator_table):
     # Estimate desired capacity
-    desired_system_capacity_in_kwh = adjust_for_losses(
+    desired_system_capacity_in_kw = adjust_for_losses(
         peak_demand_in_kw,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
     # Choose generator type
     return prepare_actual_system_capacity(
-        desired_system_capacity_in_kwh,
-        diesel_mini_grid_generator_table, 'capacity_in_kwh')
+        desired_system_capacity_in_kw,
+        diesel_mini_grid_generator_table, 'capacity_in_kw')
+
+
+def estimate_diesel_mini_grid_fuel_cost():
+    production_in_kwh_by_year = adjust_for_losses(
+        consumption_in_kwh_by_year,
+        diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
+    desired_hours_of_production_by_year = production_in_kwh_by_year / float(
+        generator_actual_system_capacity_in_kw)
+
+
+    [minimum_hours_of_production_per_year] * len(production_in_kwh_by_year)
+
+    Series(np.ones(len(production_in_kwh_by_year)) * minimum_hours_of_production_per_year
+        
+        , index=production_in_kwh_by_year.index)
+
+    effective_hours_of_production_by_year = DataFrame({
+        'desired': desired_hours_of_production_by_year,
+        'minimum': minimum_hours_of_production_by_year,
+    }).max(axis=1)
+
+
+    pass
+    """
+    The cost of fuel consumed is the product of the fuel cost per liter,
+    the fuel liters consumed per kilowatt-hour,
+    the generator's capacity in kilowatts and its effective hours of production per year.
+
+    The effective hours of production per year is the larger of either the 
+    loss-adjusted consumption per year divided by the system capacity or the 
+    minimum hours of production per year.
+    """
 
 
 def estimate_solar_home_system_cost(**kw):
@@ -306,22 +328,22 @@ def prepare_actual_system_capacity(
     ]
 
 
-def prepare_cost_by_year(component_packs, kw):
+def prepare_component_cost_by_year(component_packs, kw):
     d = OrderedDict()
-    cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
+    component_cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
         v_by_k = OrderedDict(compute(estimate_component_cost, kw))
         # Add initial costs
-        cost_by_year_index[0] += v_by_k['installation_lm_cost']
+        component_cost_by_year_index[0] += v_by_k['installation_lm_cost']
         # Add recurring costs
-        cost_by_year_index[1:] += \
+        component_cost_by_year_index[1:] += \
             v_by_k['maintenance_lm_cost_per_year'] + \
             v_by_k['replacement_lm_cost_per_year']
         # Save
         d.update(('%s_%s' % (component, k), v) for k, v in v_by_k.items())
-    cost_by_year = Series(cost_by_year_index, index=kw[
-        'population_by_year'].index)
-    return cost_by_year, d
+    d['component_cost_by_year'] = Series(
+        component_cost_by_year_index, index=kw['population_by_year'].index)
+    return d
 
 
 def prepare_lv_line_cost(
@@ -419,8 +441,8 @@ TABLE_NAMES = [
     'grid_mv_transformer_table',
 ]
 FUNCTIONS = [
-    estimate_population_by_year,
-    estimate_consumption_in_kwh_by_year,
+    estimate_population,
+    estimate_consumption_in_kwh,
     estimate_peak_demand_in_kw,
     estimate_system_cost_by_technology,
     # estimate_mv_network_budget,
