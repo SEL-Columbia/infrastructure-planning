@@ -600,6 +600,19 @@ def run(target_folder, g):
         system_cost_table_path = join(target_folder, key + '.csv')
         system_cost_table.transpose().to_csv(system_cost_table_path)
         d[key + '_table_path'] = system_cost_table_path
+
+    target_path = join(target_folder, 'population.csv')
+    rows = []
+    import geopy
+    g = geopy.GoogleV3().geocode
+    for l in ls:
+        name = l['name']
+        location = g(name)
+        rows.append([name, location.latitude, location.longitude, l['population'], l['population']])
+    t = DataFrame(rows, columns=['Name', 'Latitude', 'Longitude', 'Population', 'RadiusInPixelsRange10-30'])
+    t.to_csv(target_path, index=False)
+    d['population_streets_satellite_geotable_path'] = target_path
+
     return d
 
 

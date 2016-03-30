@@ -1,6 +1,6 @@
 *.egg-info
 *.pyc
-*.swp
+*.sw[op]
 .cache
 .eggs
 .ipynb_checkpoints
