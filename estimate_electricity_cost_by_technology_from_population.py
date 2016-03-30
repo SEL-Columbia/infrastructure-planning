@@ -183,8 +183,7 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw)
-    d['diesel_mini_grid_generator_actual_system_capacity_in_kw'] = d[
-        'generator_actual_system_capacity_in_kw']
+    # d['diesel_mini_grid_generator_actual_system_capacity_in_kw'] = d['generator_actual_system_capacity_in_kw']  # noqa
     d.update(compute(
         estimate_diesel_mini_grid_fuel_cost, merge_dictionaries(kw, d)))
     d['electricity_production_cost_by_year'] = d.pop(
@@ -218,7 +217,8 @@ def estimate_diesel_mini_grid_generator_cost(
 
 def estimate_diesel_mini_grid_fuel_cost(
         consumption_in_kwh_by_year,
-        diesel_mini_grid_generator_actual_system_capacity_in_kw,
+        # diesel_mini_grid_generator_actual_system_capacity_in_kw,
+        generator_actual_system_capacity_in_kw,
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_fuel_cost_per_liter,
@@ -228,7 +228,7 @@ def estimate_diesel_mini_grid_fuel_cost(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
     desired_hours_of_production_by_year = production_in_kwh_by_year / float(
-        diesel_mini_grid_generator_actual_system_capacity_in_kw)
+        generator_actual_system_capacity_in_kw)
     years = production_in_kwh_by_year.index
     minimum_hours_of_production_by_year = Series([
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,
@@ -242,7 +242,7 @@ def estimate_diesel_mini_grid_fuel_cost(
     d['fuel_cost_by_year'] = reduce(mul, [
         diesel_mini_grid_fuel_cost_per_liter,
         diesel_mini_grid_fuel_liters_consumed_per_kwh,
-        diesel_mini_grid_generator_actual_system_capacity_in_kw,
+        generator_actual_system_capacity_in_kw,
         effective_hours_of_production_by_year,
     ], 1)
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
@@ -283,15 +283,12 @@ def estimate_solar_home_system_cost(**kw):
 
 
 def estimate_solar_home_electricity_production_cost(**kw):
+    # d['solar_home_panel_actual_system_capacity_in_kw'] = d['panel_actual_system_capacity_in_kw']  # noqa
     d = prepare_component_cost_by_year([
         ('panel', estimate_solar_home_panel_cost),
-    ], kw)
-    d['solar_home_panel_actual_system_capacity_in_kw'] = d[
-        'panel_actual_system_capacity_in_kw']
-    d.update(prepare_component_cost_by_year([
         ('battery', estimate_solar_home_battery_cost),
         ('balance', estimate_solar_home_balance_cost),
-    ], merge_dictionaries(kw, d)))
+    ], kw)
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         kw['consumption_in_kwh_by_year'],
         kw['solar_home_system_loss_as_percent_of_total_production'] / 100.)
@@ -326,12 +323,13 @@ def estimate_solar_home_panel_cost(
 
 
 def estimate_solar_home_battery_cost(
-        solar_home_panel_actual_system_capacity_in_kw,
+        # solar_home_panel_actual_system_capacity_in_kw,
+        panel_actual_system_capacity_in_kw,
         solar_home_battery_kwh_per_panel_kw,
         solar_home_battery_installation_lm_cost_per_battery_kwh,
         solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
         solar_home_battery_lifetime_in_years):
-    battery_storage_in_kwh = solar_home_panel_actual_system_capacity_in_kw * \
+    battery_storage_in_kwh = panel_actual_system_capacity_in_kw * \
         solar_home_battery_kwh_per_panel_kw
     installation_lm_cost = battery_storage_in_kwh * \
         solar_home_battery_installation_lm_cost_per_battery_kwh
@@ -345,16 +343,17 @@ def estimate_solar_home_battery_cost(
 
 
 def estimate_solar_home_balance_cost(
-        solar_home_panel_actual_system_capacity_in_kw,
+        # solar_home_panel_actual_system_capacity_in_kw,
+        panel_actual_system_capacity_in_kw,
         solar_home_balance_installation_lm_cost_per_panel_kw,
         solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year,
         solar_home_balance_lifetime_in_years):
-    installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
+    installation_lm_cost = panel_actual_system_capacity_in_kw * \
         solar_home_balance_installation_lm_cost_per_panel_kw
     d = OrderedDict()
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = \
-        solar_home_panel_actual_system_capacity_in_kw * \
+        panel_actual_system_capacity_in_kw * \
         solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year
     d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
         solar_home_balance_lifetime_in_years)
@@ -437,7 +436,8 @@ def prepare_component_cost_by_year(component_packs, kw):
     d = OrderedDict()
     component_cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(compute(estimate_component_cost, kw))
+        v_by_k = OrderedDict(
+            compute(estimate_component_cost, merge_dictionaries(kw, d)))
         # Add initial costs
         component_cost_by_year_index[0] += v_by_k['installation_lm_cost']
         # Add recurring costs
@@ -591,6 +591,15 @@ def run(target_folder, g):
 
     # Summarize
     d = OrderedDict()
+    for key in [
+        'discounted_system_cost_by_technology',
+        'levelized_system_cost_by_technology',
+    ]:
+        system_cost_table = concat([Series(x[key]) for x in ls], axis=1)
+        system_cost_table.columns = [x['name'] for x in ls]
+        system_cost_table_path = join(target_folder, key + '.csv')
+        system_cost_table.transpose().to_csv(system_cost_table_path)
+        d[key + '_table_path'] = system_cost_table_path
     return d
 
 
@@ -658,19 +667,25 @@ def save_common_values(target_folder, g):
         (k, v) for k, v in g.items() if
         not k.endswith('_by_year') and
         not k.endswith('_table') and
-        not k.endswith('_path')]
+        not k.endswith('_path') and
+        not k.endswith('_folder') and
+        not k.endswith('locale')]
     table = DataFrame(rows, columns=['Argument', 'Value'])
-    table.to_csv(target_path, index=False)
+    table.to_csv(target_path, header=False, index=False)
     return target_path
 
 
 def save_unique_values(target_folder, ls):
     target_path = join(target_folder, 'unique_values.csv')
     rows = [Series({
-        k: v for k, v in l.items() if not k.endswith('_by_year')
+        k: v for k, v in l.items() if
+        not k.endswith('_by_year') and
+        not k.endswith('_by_technology') and
+        k != 'name'
     }) for l in ls]
     table = concat(rows, axis=1)
     # table.columns = [A[k] for k in table.columns]
+    table.columns = [l['name'] for l in ls]
     table.to_csv(target_path)
     table.transpose().to_csv(join(
         target_folder, 'unique_values_transposed.csv'), index=False)
