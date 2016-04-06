@@ -6,8 +6,9 @@ from copy import copy, deepcopy
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
-    OrderedDefaultDict, merge_dictionaries)
+    OrderedDefaultDict, merge_dictionaries as merge_ds)
 from invisibleroads_macros.log import format_summary
+from itertools import product
 from math import ceil
 from operator import mul
 from os.path import join
@@ -74,20 +75,23 @@ def estimate_peak_demand_in_kw(
 
 def estimate_system_cost_by_technology(**kw):
     'Estimate system cost for each technology independently'
+    # Compute
+    technology_packs = [
+        ('grid', estimate_grid_system_cost_before_mv_network),
+        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
+        ('solar_home', estimate_solar_home_system_cost),
+    ]
+    d = OrderedDefaultDict(OrderedDict)
+    for technology, estimate_system_cost in technology_packs:
+        value_by_key = OrderedDict(compute(estimate_system_cost, kw))
+        d.update(rename_keys(value_by_key, prefix=technology + '_'))
+    # Summarize
     keys = [
         'discounted_system_cost',
         'levelized_system_cost',
     ]
-    d = OrderedDefaultDict(OrderedDict)
-    for technology, estimate_system_cost in [
-        ('grid', estimate_grid_system_cost_before_mv_network),
-        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
-        ('solar_home', estimate_solar_home_system_cost),
-    ]:
-        v_by_k = OrderedDict(compute(estimate_system_cost, kw))
-        d.update(('%s_%s' % (technology, k), v) for k, v in v_by_k.items())
-        for key in keys:
-            d['%s_by_technology' % key][technology] = v_by_k[key]
+    for technology, k in product([x[0] for x in technology_packs], keys):
+        d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
     return d
 
 
@@ -124,7 +128,7 @@ def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
         ('mv_transformer', estimate_grid_mv_transformer_cost),
         ('lv_line', estimate_grid_lv_line_cost),
         ('lv_connection', estimate_grid_lv_connection_cost),
-    ], kw)
+    ], kw, prefix='grid_')
     d['electricity_distribution_cost_by_year'] = d.pop(
         'component_cost_by_year')
     return d
@@ -182,12 +186,10 @@ def estimate_diesel_mini_grid_system_cost(**kw):
 def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
-    ], kw)
-    # d['diesel_mini_grid_generator_actual_system_capacity_in_kw'] = d['generator_actual_system_capacity_in_kw']  # noqa
-    d.update(compute(
-        estimate_diesel_mini_grid_fuel_cost, merge_dictionaries(kw, d)))
+    ], kw, prefix='diesel_mini_grid_')
+    d.update(compute(estimate_diesel_mini_grid_fuel_cost, merge_ds(kw, d)))
     d['electricity_production_cost_by_year'] = d.pop(
-        'component_cost_by_year') + d['fuel_cost_by_year']
+        'component_cost_by_year') + d['diesel_mini_grid_fuel_cost_by_year']
     return d
 
 
@@ -195,7 +197,7 @@ def estimate_diesel_mini_grid_electricity_distribution_cost(**kw):
     d = prepare_component_cost_by_year([
         ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
         ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
-    ], kw)
+    ], kw, prefix='diesel_mini_grid_')
     d['electricity_distribution_cost_by_year'] = d.pop(
         'component_cost_by_year')
     return d
@@ -217,8 +219,7 @@ def estimate_diesel_mini_grid_generator_cost(
 
 def estimate_diesel_mini_grid_fuel_cost(
         consumption_in_kwh_by_year,
-        # diesel_mini_grid_generator_actual_system_capacity_in_kw,
-        generator_actual_system_capacity_in_kw,
+        diesel_mini_grid_generator_actual_system_capacity_in_kw,
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_fuel_cost_per_liter,
@@ -228,7 +229,7 @@ def estimate_diesel_mini_grid_fuel_cost(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
     desired_hours_of_production_by_year = production_in_kwh_by_year / float(
-        generator_actual_system_capacity_in_kw)
+        diesel_mini_grid_generator_actual_system_capacity_in_kw)
     years = production_in_kwh_by_year.index
     minimum_hours_of_production_by_year = Series([
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,
@@ -237,12 +238,12 @@ def estimate_diesel_mini_grid_fuel_cost(
         'desired': desired_hours_of_production_by_year,
         'minimum': minimum_hours_of_production_by_year,
     }).max(axis=1)
-    d['effective_hours_of_production_by_year'] = \
+    d['diesel_mini_grid_effective_hours_of_production_by_year'] = \
         effective_hours_of_production_by_year
-    d['fuel_cost_by_year'] = reduce(mul, [
+    d['diesel_mini_grid_fuel_cost_by_year'] = reduce(mul, [
         diesel_mini_grid_fuel_cost_per_liter,
         diesel_mini_grid_fuel_liters_consumed_per_kwh,
-        generator_actual_system_capacity_in_kw,
+        diesel_mini_grid_generator_actual_system_capacity_in_kw,
         effective_hours_of_production_by_year,
     ], 1)
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
@@ -283,12 +284,11 @@ def estimate_solar_home_system_cost(**kw):
 
 
 def estimate_solar_home_electricity_production_cost(**kw):
-    # d['solar_home_panel_actual_system_capacity_in_kw'] = d['panel_actual_system_capacity_in_kw']  # noqa
     d = prepare_component_cost_by_year([
         ('panel', estimate_solar_home_panel_cost),
         ('battery', estimate_solar_home_battery_cost),
         ('balance', estimate_solar_home_balance_cost),
-    ], kw)
+    ], kw, prefix='solar_home_')
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         kw['consumption_in_kwh_by_year'],
         kw['solar_home_system_loss_as_percent_of_total_production'] / 100.)
@@ -323,13 +323,12 @@ def estimate_solar_home_panel_cost(
 
 
 def estimate_solar_home_battery_cost(
-        # solar_home_panel_actual_system_capacity_in_kw,
-        panel_actual_system_capacity_in_kw,
+        solar_home_panel_actual_system_capacity_in_kw,
         solar_home_battery_kwh_per_panel_kw,
         solar_home_battery_installation_lm_cost_per_battery_kwh,
         solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
         solar_home_battery_lifetime_in_years):
-    battery_storage_in_kwh = panel_actual_system_capacity_in_kw * \
+    battery_storage_in_kwh = solar_home_panel_actual_system_capacity_in_kw * \
         solar_home_battery_kwh_per_panel_kw
     installation_lm_cost = battery_storage_in_kwh * \
         solar_home_battery_installation_lm_cost_per_battery_kwh
@@ -343,17 +342,16 @@ def estimate_solar_home_battery_cost(
 
 
 def estimate_solar_home_balance_cost(
-        # solar_home_panel_actual_system_capacity_in_kw,
-        panel_actual_system_capacity_in_kw,
+        solar_home_panel_actual_system_capacity_in_kw,
         solar_home_balance_installation_lm_cost_per_panel_kw,
         solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year,
         solar_home_balance_lifetime_in_years):
-    installation_lm_cost = panel_actual_system_capacity_in_kw * \
+    installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
         solar_home_balance_installation_lm_cost_per_panel_kw
     d = OrderedDict()
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = \
-        panel_actual_system_capacity_in_kw * \
+        solar_home_panel_actual_system_capacity_in_kw * \
         solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year
     d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
         solar_home_balance_lifetime_in_years)
@@ -432,12 +430,11 @@ def prepare_actual_system_capacity(
     ]
 
 
-def prepare_component_cost_by_year(component_packs, kw):
+def prepare_component_cost_by_year(component_packs, kw, prefix):
     d = OrderedDict()
     component_cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(
-            compute(estimate_component_cost, merge_dictionaries(kw, d)))
+        v_by_k = OrderedDict(compute(estimate_component_cost, merge_ds(kw, d)))
         # Add initial costs
         component_cost_by_year_index[0] += v_by_k['installation_lm_cost']
         # Add recurring costs
@@ -445,7 +442,7 @@ def prepare_component_cost_by_year(component_packs, kw):
             v_by_k['maintenance_lm_cost_per_year'] + \
             v_by_k['replacement_lm_cost_per_year']
         # Save
-        d.update(('%s_%s' % (component, k), v) for k, v in v_by_k.items())
+        d.update(rename_keys(v_by_k, prefix=prefix + component + '_'))
     d['component_cost_by_year'] = Series(
         component_cost_by_year_index, index=kw['population_by_year'].index)
     return d
@@ -601,6 +598,7 @@ def run(target_folder, g):
         system_cost_table.transpose().to_csv(system_cost_table_path)
         d[key + '_table_path'] = system_cost_table_path
 
+    """
     target_path = join(target_folder, 'population.csv')
     rows = []
     import geopy
@@ -608,11 +606,22 @@ def run(target_folder, g):
     for l in ls:
         name = l['name']
         location = g(name)
-        rows.append([name, location.latitude, location.longitude, l['population'], l['population']])
-    t = DataFrame(rows, columns=['Name', 'Latitude', 'Longitude', 'Population', 'RadiusInPixelsRange10-30'])
+        rows.append([
+            name,
+            location.latitude,
+            location.longitude,
+            l['population'],
+            l['population']])
+    t = DataFrame(rows, columns=[
+        'Name',
+        'Latitude',
+        'Longitude',
+        'Population',
+        'RadiusInPixelsRange10-30',
+    ])
     t.to_csv(target_path, index=False)
     d['population_streets_satellite_geotable_path'] = target_path
-
+    """
     return d
 
 
@@ -636,7 +645,7 @@ def compute(f, l, g=None):
     # If the function wants every argument, provide every argument
     argument_specification = inspect.getargspec(f)
     if argument_specification.keywords:
-        return f(**merge_dictionaries(g, l))
+        return f(**merge_ds(g, l))
     # Otherwise, provide only requested arguments
     kw = {}
     for argument_name in argument_specification.args:
@@ -671,6 +680,17 @@ def sift_common_values(ls, g):
         for l in ls:
             l.pop(key)
     return ls, g
+
+
+def rename_keys(value_by_key, prefix='', suffix=''):
+    d = {}
+    for key, value in value_by_key.items():
+        if prefix and not key.startswith(prefix):
+            key = prefix + key
+        if suffix and not key.endswith(suffix):
+            key = key + suffix
+        d[key] = value
+    return d
 
 
 def save_common_values(target_folder, g):
