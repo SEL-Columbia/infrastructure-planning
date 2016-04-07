@@ -73,7 +73,7 @@ def estimate_peak_demand_in_kw(
     ]
 
 
-def estimate_system_cost_by_technology(**kw):
+def estimate_system_cost_by_technology_before_grid_mv_network(**kw):
     'Estimate system cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
@@ -82,8 +82,8 @@ def estimate_system_cost_by_technology(**kw):
         d.update(rename_keys(value_by_key, prefix=technology + '_'))
     # Summarize
     keys = [
-        'discounted_system_cost',
-        'levelized_system_cost',
+        'system_discounted_cost',
+        'system_levelized_cost',
     ]
     for technology, k in product(COST_FUNCTION_BY_TECHNOLOGY, keys):
         d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
@@ -124,8 +124,7 @@ def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
         ('lv_line', estimate_grid_lv_line_cost),
         ('lv_connection', estimate_grid_lv_connection_cost),
     ], kw, prefix='grid_')
-    d['electricity_distribution_cost_by_year'] = d.pop(
-        'component_cost_by_year')
+    d['electricity_distribution_cost_by_year'] = d.pop('cost_by_year')
     return d
 
 
@@ -171,6 +170,23 @@ def estimate_grid_lv_connection_cost(
         grid_lv_connection_lifetime_in_years)
 
 
+def estimate_grid_mv_line_cost_per_meter(
+        grid_mv_line_installation_lm_cost_per_meter,
+        grid_mv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_mv_line_lifetime_in_years):
+    grid_mv_line_replacement_lm_cost_per_year_per_meter = \
+        grid_mv_line_installation_lm_cost_per_meter / float(
+            grid_mv_line_lifetime_in_years)
+    return [
+        ('installation_lm_cost_per_meter',
+            grid_mv_line_installation_lm_cost_per_meter),
+        ('maintenance_lm_cost_per_meter_per_year',
+            grid_mv_line_maintenance_lm_cost_per_meter_per_year),
+        ('replacement_lm_cost_per_meter_per_year',
+            grid_mv_line_replacement_lm_cost_per_year_per_meter),
+    ]
+
+
 def estimate_diesel_mini_grid_system_cost(**kw):
     return prepare_system_cost([
         estimate_diesel_mini_grid_electricity_production_cost,
@@ -183,8 +199,8 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw, prefix='diesel_mini_grid_')
     d.update(compute(estimate_diesel_mini_grid_fuel_cost, merge_ds(kw, d)))
-    d['electricity_production_cost_by_year'] = d.pop(
-        'component_cost_by_year') + d['diesel_mini_grid_fuel_cost_by_year']
+    d['electricity_production_cost_by_year'] = d.pop('cost_by_year') + d[
+        'diesel_mini_grid_fuel_cost_by_year']
     return d
 
 
@@ -193,8 +209,7 @@ def estimate_diesel_mini_grid_electricity_distribution_cost(**kw):
         ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
         ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
     ], kw, prefix='diesel_mini_grid_')
-    d['electricity_distribution_cost_by_year'] = d.pop(
-        'component_cost_by_year')
+    d['electricity_distribution_cost_by_year'] = d.pop('cost_by_year')
     return d
 
 
@@ -287,7 +302,7 @@ def estimate_solar_home_electricity_production_cost(**kw):
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         kw['consumption_in_kwh_by_year'],
         kw['solar_home_system_loss_as_percent_of_total_production'] / 100.)
-    d['electricity_production_cost_by_year'] = d.pop('component_cost_by_year')
+    d['electricity_production_cost_by_year'] = d.pop('cost_by_year')
     return d
 
 
@@ -353,9 +368,23 @@ def estimate_solar_home_balance_cost(
     return d
 
 
-def estimate_grid_mv_network_budget(
-        discounted_system_cost_by_technology):
-    return []
+def estimate_grid_mv_line_budget_in_meters(
+        system_discounted_cost_by_technology, **kw):
+    standalone_cost = min(
+        v for k, v in system_discounted_cost_by_technology.items()
+        if k != 'grid')
+    mv_line_budget = \
+        standalone_cost - system_discounted_cost_by_technology['grid']
+    d = prepare_component_cost_by_year([
+        ('mv_line', estimate_grid_mv_line_cost_per_meter),
+    ], kw, prefix='grid_')
+    grid_mv_line_discounted_cost_per_meter = compute_discounted_cash_flow(
+        d.pop('cost_by_year'),
+        kw['financing_year'],
+        kw['discount_rate_as_percent_of_cash_flow_per_year'])
+    d['grid_mv_line_budget_in_meters'] = mv_line_budget / float(
+        grid_mv_line_discounted_cost_per_meter)
+    return d
 
 
 def grow_exponentially(value, growth_as_percent, growth_count):
@@ -381,10 +410,8 @@ def prepare_system_cost(fs, kw):
         financing_year, discount_rate)
     levelized_cost = discounted_cost / float(discounted_production_in_kwh)
     # Summarize
-    d['discounted_electricity_production_in_kwh'] = \
-        discounted_production_in_kwh
-    d['discounted_system_cost'] = discounted_cost
-    d['levelized_system_cost'] = levelized_cost
+    d['system_discounted_cost'] = discounted_cost
+    d['system_levelized_cost'] = levelized_cost
     return d
 
 
@@ -427,19 +454,19 @@ def prepare_actual_system_capacity(
 
 def prepare_component_cost_by_year(component_packs, kw, prefix):
     d = OrderedDict()
-    component_cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
+    cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
         v_by_k = OrderedDict(compute(estimate_component_cost, merge_ds(kw, d)))
         # Add initial costs
-        component_cost_by_year_index[0] += v_by_k['installation_lm_cost']
+        cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
         # Add recurring costs
-        component_cost_by_year_index[1:] += \
-            v_by_k['maintenance_lm_cost_per_year'] + \
-            v_by_k['replacement_lm_cost_per_year']
+        cost_by_year_index[1:] += \
+            get_by_prefix(v_by_k, 'maintenance') + \
+            get_by_prefix(v_by_k, 'replacement')
         # Save
         d.update(rename_keys(v_by_k, prefix=prefix + component + '_'))
-    d['component_cost_by_year'] = Series(
-        component_cost_by_year_index, index=kw['population_by_year'].index)
+    years = kw['population_by_year'].index
+    d['cost_by_year'] = Series(cost_by_year_index, index=years)
     return d
 
 
@@ -553,8 +580,9 @@ MAIN_FUNCTIONS = [
     estimate_population,
     estimate_consumption_in_kwh,
     estimate_peak_demand_in_kw,
-    estimate_system_cost_by_technology,
-    # estimate_grid_mv_network_budget,
+    estimate_system_cost_by_technology_before_grid_mv_network,
+    estimate_grid_mv_line_budget_in_meters,
+    # estimate_total_cost,
 ]
 COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
     ('grid', estimate_grid_system_cost_before_mv_network),
@@ -586,13 +614,13 @@ def run(target_folder, g):
     # Save
     save_common_values(target_folder, g)
     save_unique_values(target_folder, ls)
-    # save_yearly_values(target_folder, ls)
+    save_yearly_values(target_folder, ls)
 
     # Summarize
     d = OrderedDict()
     for key in [
-        'discounted_system_cost_by_technology',
-        'levelized_system_cost_by_technology',
+        'system_discounted_cost_by_technology',
+        'system_levelized_cost_by_technology',
     ]:
         system_cost_table = concat([Series(x[key]) for x in ls], axis=1)
         system_cost_table.columns = [x['name'] for x in ls]
@@ -693,6 +721,12 @@ def rename_keys(value_by_key, prefix='', suffix=''):
             key = key + suffix
         d[key] = value
     return d
+
+
+def get_by_prefix(value_by_key, prefix):
+    for key, value in value_by_key.items():
+        if key.startswith(prefix):
+            return value
 
 
 def save_common_values(target_folder, g):
@@ -809,6 +843,16 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--grid_mv_transformer_table_path',
         metavar='PATH', required=True)
+
+    argument_parser.add_argument(
+        '--grid_mv_line_installation_lm_cost_per_meter',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_mv_line_maintenance_lm_cost_per_meter_per_year',
+        metavar='FLOAT', required=True, type=float)
+    argument_parser.add_argument(
+        '--grid_mv_line_lifetime_in_years',
+        metavar='FLOAT', required=True, type=float)
 
     argument_parser.add_argument(
         '--grid_lv_line_installation_lm_cost_per_meter',
