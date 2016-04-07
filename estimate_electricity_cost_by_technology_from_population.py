@@ -76,21 +76,16 @@ def estimate_peak_demand_in_kw(
 def estimate_system_cost_by_technology(**kw):
     'Estimate system cost for each technology independently'
     # Compute
-    technology_packs = [
-        ('grid', estimate_grid_system_cost_before_mv_network),
-        ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
-        ('solar_home', estimate_solar_home_system_cost),
-    ]
     d = OrderedDefaultDict(OrderedDict)
-    for technology, estimate_system_cost in technology_packs:
-        value_by_key = OrderedDict(compute(estimate_system_cost, kw))
+    for technology, estimate_cost in COST_FUNCTION_BY_TECHNOLOGY.items():
+        value_by_key = OrderedDict(compute(estimate_cost, kw))
         d.update(rename_keys(value_by_key, prefix=technology + '_'))
     # Summarize
     keys = [
         'discounted_system_cost',
         'levelized_system_cost',
     ]
-    for technology, k in product([x[0] for x in technology_packs], keys):
+    for technology, k in product(COST_FUNCTION_BY_TECHNOLOGY, keys):
         d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
     return d
 
@@ -358,8 +353,8 @@ def estimate_solar_home_balance_cost(
     return d
 
 
-def estimate_mv_network_budget(
-        system_cost_by_technology):
+def estimate_grid_mv_network_budget(
+        discounted_system_cost_by_technology):
     return []
 
 
@@ -546,19 +541,26 @@ def load_messages(locale):
 A = load_abbreviations('en-US')
 C = load_column_names('en-US')
 M = load_messages('en-US')
+
+
 TABLE_NAMES = [
     'demographic_table',
     'grid_mv_transformer_table',
     'diesel_mini_grid_generator_table',
     'solar_home_panel_table',
 ]
-FUNCTIONS = [
+MAIN_FUNCTIONS = [
     estimate_population,
     estimate_consumption_in_kwh,
     estimate_peak_demand_in_kw,
     estimate_system_cost_by_technology,
-    # estimate_mv_network_budget,
+    # estimate_grid_mv_network_budget,
 ]
+COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
+    ('grid', estimate_grid_system_cost_before_mv_network),
+    ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
+    ('solar_home', estimate_solar_home_system_cost),
+])
 
 
 def run(target_folder, g):
@@ -570,7 +572,7 @@ def run(target_folder, g):
     ls = []
     for name, table in g['demographic_table'].groupby('name'):
         l = OrderedDict({'name': name}, **get_local_arguments(table))
-        for f in FUNCTIONS:
+        for f in MAIN_FUNCTIONS:
             try:
                 l.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
@@ -584,7 +586,7 @@ def run(target_folder, g):
     # Save
     save_common_values(target_folder, g)
     save_unique_values(target_folder, ls)
-    save_yearly_values(target_folder, ls)
+    # save_yearly_values(target_folder, ls)
 
     # Summarize
     d = OrderedDict()
@@ -695,6 +697,7 @@ def rename_keys(value_by_key, prefix='', suffix=''):
 
 def save_common_values(target_folder, g):
     target_path = join(target_folder, 'common_values.csv')
+    # TODO: Clean this messiness
     # rows = [(A[k], v) for k, v in g.items()]
     rows = [
         (k, v) for k, v in g.items() if
@@ -710,6 +713,7 @@ def save_common_values(target_folder, g):
 
 def save_unique_values(target_folder, ls):
     target_path = join(target_folder, 'unique_values.csv')
+    # TODO: Clean this messiness
     rows = [Series({
         k: v for k, v in l.items() if
         not k.endswith('_by_year') and
