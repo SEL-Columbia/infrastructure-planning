@@ -368,12 +368,12 @@ def estimate_solar_home_balance_cost(
     return d
 
 
-def estimate_grid_mv_line_budget_in_meters(
+def estimate_grid_mv_network_budget_in_meters(
         system_discounted_cost_by_technology, **kw):
     standalone_cost = min(
         v for k, v in system_discounted_cost_by_technology.items()
         if k != 'grid')
-    mv_line_budget = \
+    mv_network_budget = \
         standalone_cost - system_discounted_cost_by_technology['grid']
     d = prepare_component_cost_by_year([
         ('mv_line', estimate_grid_mv_line_cost_per_meter),
@@ -382,7 +382,7 @@ def estimate_grid_mv_line_budget_in_meters(
         d.pop('cost_by_year'),
         kw['financing_year'],
         kw['discount_rate_as_percent_of_cash_flow_per_year'])
-    d['grid_mv_line_budget_in_meters'] = mv_line_budget / float(
+    d['grid_mv_network_budget_in_meters'] = mv_network_budget / float(
         grid_mv_line_discounted_cost_per_meter)
     return d
 
@@ -581,7 +581,19 @@ MAIN_FUNCTIONS = [
     estimate_consumption_in_kwh,
     estimate_peak_demand_in_kw,
     estimate_system_cost_by_technology_before_grid_mv_network,
-    estimate_grid_mv_line_budget_in_meters,
+    estimate_grid_mv_network_budget_in_meters,
+
+    # place_grid_mv_network_with_modified_boruvka,
+    # propose_grid_mv_network_with_modified_boruvka,
+    # suggest_grid_mv_network_with_modified_boruvka,
+
+    # place_grid_mv_network_using_modified_boruvka,
+    # propose_grid_mv_network_using_modified_boruvka,
+    # suggest_grid_mv_network_using_modified_boruvka,
+
+    # sequence_grid_mv_network,
+    # order_grid_mv_network_construction,
+
     # estimate_total_cost,
 ]
 COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
