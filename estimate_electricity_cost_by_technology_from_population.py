@@ -387,6 +387,37 @@ def estimate_grid_mv_network_budget_in_meters(
     return d
 
 
+def assemble_grid_mv_network():
+    # Assemble table so that it
+
+    """
+    cfg = {
+        'demand_nodes': {
+            'filename': target_node_table_path,
+            # 'x_column': 'Longitude',
+            # 'y_column': 'Latitude',
+            'x_column': 'X',
+            'y_column': 'Y',
+            'budget_column': 'Network Budget',
+        },
+        'network_algorithm': 'mod_boruvka',
+        'network_parameters': {
+            'minimum_node_count': 2,
+        }
+    }
+    """
+
+    pass
+
+
+def sequence_grid_mv_network():
+    pass
+
+
+def estimate_total_cost():
+    pass
+
+
 def grow_exponentially(value, growth_as_percent, growth_count):
     return value * (1 + growth_as_percent / 100.) ** growth_count
 
@@ -582,18 +613,8 @@ MAIN_FUNCTIONS = [
     estimate_peak_demand_in_kw,
     estimate_system_cost_by_technology_before_grid_mv_network,
     estimate_grid_mv_network_budget_in_meters,
-
-    # place_grid_mv_network_with_modified_boruvka,
-    # propose_grid_mv_network_with_modified_boruvka,
-    # suggest_grid_mv_network_with_modified_boruvka,
-
-    # place_grid_mv_network_using_modified_boruvka,
-    # propose_grid_mv_network_using_modified_boruvka,
-    # suggest_grid_mv_network_using_modified_boruvka,
-
+    # assemble_grid_mv_network,
     # sequence_grid_mv_network,
-    # order_grid_mv_network_construction,
-
     # estimate_total_cost,
 ]
 COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
