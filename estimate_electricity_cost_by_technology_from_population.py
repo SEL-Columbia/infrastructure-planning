@@ -6,10 +6,11 @@ from copy import copy, deepcopy
 from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
-    OrderedDefaultDict, merge_dictionaries as merge_ds)
+    OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from itertools import product
 from math import ceil
+from networkx import Graph
 from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
@@ -17,7 +18,7 @@ from pandas import DataFrame, MultiIndex, Series, concat
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 
 
-def estimate_population(
+def estimate_nodal_population(
         population,
         population_year,
         population_growth_as_percent_of_population_per_year,
@@ -43,7 +44,7 @@ def estimate_population(
     ]
 
 
-def estimate_consumption_in_kwh(
+def estimate_nodal_consumption_in_kwh(
         population_by_year,
         connection_count_per_thousand_people,
         consumption_per_connection_in_kwh):
@@ -58,7 +59,7 @@ def estimate_consumption_in_kwh(
     ]
 
 
-def estimate_peak_demand_in_kw(
+def estimate_nodal_peak_demand_in_kw(
         consumption_in_kwh_by_year,
         consumption_during_peak_hours_as_percent_of_total_consumption,
         peak_hours_of_consumption_per_year):
@@ -73,8 +74,8 @@ def estimate_peak_demand_in_kw(
     ]
 
 
-def estimate_system_cost_by_technology_before_grid_mv_network(**kw):
-    'Estimate system cost for each technology independently'
+def estimate_internal_cost_by_technology(**kw):
+    'Estimate internal cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
     for technology, estimate_cost in COST_FUNCTION_BY_TECHNOLOGY.items():
@@ -82,18 +83,18 @@ def estimate_system_cost_by_technology_before_grid_mv_network(**kw):
         d.update(rename_keys(value_by_key, prefix=technology + '_'))
     # Summarize
     keys = [
-        'system_discounted_cost',
-        'system_levelized_cost',
+        'internal_discounted_cost',
+        'internal_levelized_cost',
     ]
     for technology, k in product(COST_FUNCTION_BY_TECHNOLOGY, keys):
         d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
     return d
 
 
-def estimate_grid_system_cost_before_mv_network(**kw):
-    return prepare_system_cost([
+def estimate_grid_internal_cost(**kw):
+    return prepare_internal_cost([
         estimate_grid_electricity_production_cost,
-        estimate_grid_electricity_distribution_cost_before_mv_network,  # noqa
+        estimate_grid_electricity_internal_distribution_cost,
     ], kw)
 
 
@@ -118,13 +119,13 @@ def estimate_grid_electricity_production_cost(
     return d
 
 
-def estimate_grid_electricity_distribution_cost_before_mv_network(**kw):
+def estimate_grid_electricity_internal_distribution_cost(**kw):
     d = prepare_component_cost_by_year([
         ('mv_transformer', estimate_grid_mv_transformer_cost),
         ('lv_line', estimate_grid_lv_line_cost),
         ('lv_connection', estimate_grid_lv_connection_cost),
     ], kw, prefix='grid_')
-    d['electricity_distribution_cost_by_year'] = d.pop('cost_by_year')
+    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
     return d
 
 
@@ -187,10 +188,10 @@ def estimate_grid_mv_line_cost_per_meter(
     ]
 
 
-def estimate_diesel_mini_grid_system_cost(**kw):
-    return prepare_system_cost([
+def estimate_diesel_mini_grid_internal_cost(**kw):
+    return prepare_internal_cost([
         estimate_diesel_mini_grid_electricity_production_cost,
-        estimate_diesel_mini_grid_electricity_distribution_cost,
+        estimate_diesel_mini_grid_electricity_internal_distribution_cost,
     ], kw)
 
 
@@ -198,18 +199,18 @@ def estimate_diesel_mini_grid_electricity_production_cost(**kw):
     d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], kw, prefix='diesel_mini_grid_')
-    d.update(compute(estimate_diesel_mini_grid_fuel_cost, merge_ds(kw, d)))
+    d.update(compute(estimate_diesel_mini_grid_fuel_cost, kw, d))
     d['electricity_production_cost_by_year'] = d.pop('cost_by_year') + d[
         'diesel_mini_grid_fuel_cost_by_year']
     return d
 
 
-def estimate_diesel_mini_grid_electricity_distribution_cost(**kw):
+def estimate_diesel_mini_grid_electricity_internal_distribution_cost(**kw):
     d = prepare_component_cost_by_year([
         ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
         ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
     ], kw, prefix='diesel_mini_grid_')
-    d['electricity_distribution_cost_by_year'] = d.pop('cost_by_year')
+    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
     return d
 
 
@@ -286,10 +287,10 @@ def estimate_diesel_mini_grid_lv_connection_cost(
         diesel_mini_grid_lv_connection_lifetime_in_years)
 
 
-def estimate_solar_home_system_cost(**kw):
-    return prepare_system_cost([
+def estimate_solar_home_internal_cost(**kw):
+    return prepare_internal_cost([
         estimate_solar_home_electricity_production_cost,
-        estimate_solar_home_electricity_distribution_cost,
+        estimate_solar_home_electricity_internal_distribution_cost,
     ], kw)
 
 
@@ -306,10 +307,10 @@ def estimate_solar_home_electricity_production_cost(**kw):
     return d
 
 
-def estimate_solar_home_electricity_distribution_cost(**kw):
+def estimate_solar_home_electricity_internal_distribution_cost(**kw):
     d = OrderedDict()
     years = kw['population_by_year'].index
-    d['electricity_distribution_cost_by_year'] = Series(
+    d['electricity_internal_distribution_cost_by_year'] = Series(
         np.zeros(len(years)), index=years)
     return d
 
@@ -368,13 +369,13 @@ def estimate_solar_home_balance_cost(
     return d
 
 
-def estimate_grid_mv_network_budget_in_meters(
-        system_discounted_cost_by_technology, **kw):
+def estimate_nodal_grid_mv_network_budget_in_meters(
+        internal_discounted_cost_by_technology, **kw):
     standalone_cost = min(
-        v for k, v in system_discounted_cost_by_technology.items()
+        v for k, v in internal_discounted_cost_by_technology.items()
         if k != 'grid')
     mv_network_budget = \
-        standalone_cost - system_discounted_cost_by_technology['grid']
+        standalone_cost - internal_discounted_cost_by_technology['grid']
     d = prepare_component_cost_by_year([
         ('mv_line', estimate_grid_mv_line_cost_per_meter),
     ], kw, prefix='grid_')
@@ -387,9 +388,7 @@ def estimate_grid_mv_network_budget_in_meters(
     return d
 
 
-def assemble_grid_mv_network():
-    # Assemble table so that it
-
+def assemble_total_grid_mv_network(infrastructure_table):
     """
     cfg = {
         'demand_nodes': {
@@ -410,11 +409,11 @@ def assemble_grid_mv_network():
     pass
 
 
-def sequence_grid_mv_network():
+def sequence_total_grid_mv_network(infrastructure_graph):
     pass
 
 
-def estimate_total_cost():
+def estimate_total_cost(infrastructure_graph):
     pass
 
 
@@ -422,14 +421,14 @@ def grow_exponentially(value, growth_as_percent, growth_count):
     return value * (1 + growth_as_percent / 100.) ** growth_count
 
 
-def prepare_system_cost(fs, kw):
+def prepare_internal_cost(fs, kw):
     d = OrderedDict()
     # Compute
     for f in fs:
         d.update(compute(f, kw))
-    d['system_cost_by_year'] = sum([
+    cost_by_year = sum([
         d['electricity_production_cost_by_year'],
-        d['electricity_distribution_cost_by_year'],
+        d['electricity_internal_distribution_cost_by_year'],
     ])
     financing_year = kw['financing_year']
     discount_rate = kw['discount_rate_as_percent_of_cash_flow_per_year']
@@ -437,12 +436,11 @@ def prepare_system_cost(fs, kw):
         d['electricity_production_in_kwh_by_year'],
         financing_year, discount_rate)
     discounted_cost = compute_discounted_cash_flow(
-        d['system_cost_by_year'],
-        financing_year, discount_rate)
+        cost_by_year, financing_year, discount_rate)
     levelized_cost = discounted_cost / float(discounted_production_in_kwh)
     # Summarize
-    d['system_discounted_cost'] = discounted_cost
-    d['system_levelized_cost'] = levelized_cost
+    d['internal_discounted_cost'] = discounted_cost
+    d['internal_levelized_cost'] = levelized_cost
     return d
 
 
@@ -487,7 +485,7 @@ def prepare_component_cost_by_year(component_packs, kw, prefix):
     d = OrderedDict()
     cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(compute(estimate_component_cost, merge_ds(kw, d)))
+        v_by_k = OrderedDict(compute(estimate_component_cost, kw, d))
         # Add initial costs
         cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
         # Add recurring costs
@@ -608,32 +606,55 @@ TABLE_NAMES = [
     'solar_home_panel_table',
 ]
 MAIN_FUNCTIONS = [
-    estimate_population,
-    estimate_consumption_in_kwh,
-    estimate_peak_demand_in_kw,
-    estimate_system_cost_by_technology_before_grid_mv_network,
-    estimate_grid_mv_network_budget_in_meters,
-    # assemble_grid_mv_network,
-    # sequence_grid_mv_network,
+    estimate_nodal_population,
+    estimate_nodal_consumption_in_kwh,
+    estimate_nodal_peak_demand_in_kw,
+    estimate_nodal_internal_cost_by_technology,
+    estimate_nodal_grid_mv_network_budget_in_meters,
+    # assemble_total_grid_mv_network,
+    # sequence_total_grid_mv_network,
     # estimate_total_cost,
 ]
 COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
-    ('grid', estimate_grid_system_cost_before_mv_network),
-    ('diesel_mini_grid', estimate_diesel_mini_grid_system_cost),
-    ('solar_home', estimate_solar_home_system_cost),
+    ('grid', estimate_grid_internal_cost),
+    ('diesel_mini_grid', estimate_diesel_mini_grid_internal_cost),
+    ('solar_home', estimate_solar_home_internal_cost),
 ])
 
 
 def run(target_folder, g):
-    # Prepare
+    # Normalize column names
     for table_name in TABLE_NAMES:
         table = g[table_name]
         table.columns = normalize_column_names(table.columns, g['locale'])
-    # Compute with node-level override
+    # Normalize tables
+    g['demographic_table'] = normalize_demographic_table(
+        g['demographic_table'])
+    # Prepare infrastructure graph and table
+    infrastructure_graph = Graph()
+    for index, row in g['demographic_table'].iterrows():
+        infrastructure_graph.add_node(index, merge_dictionaries(g, row))
+    g['infrastructure_graph'] = infrastructure_graph
+    # Compute
+    for f in MAIN_FUNCTIONS:
+        g['infrastructure_table'] = get_table_from_graph(
+            g['infrastructure_graph'])
+        if '_total_' in f.func_name:
+            d = compute(f, g)
+            # TODO: Update g
+            # continue
+
+        # For each node,
+            # Give attributes
+            # Compute
+            # Update attributes
+
+    # Compute
+    for f in MAIN_FUNCTIONS:
+        for name, table in g['demographic_table'].groupby('name'):
+            l = OrderedDict({'name': name}, **get_local_arguments(table))
+
     ls = []
-    for name, table in g['demographic_table'].groupby('name'):
-        l = OrderedDict({'name': name}, **get_local_arguments(table))
-        for f in MAIN_FUNCTIONS:
             try:
                 l.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
@@ -652,14 +673,14 @@ def run(target_folder, g):
     # Summarize
     d = OrderedDict()
     for key in [
-        'system_discounted_cost_by_technology',
-        'system_levelized_cost_by_technology',
+        'internal_discounted_cost_by_technology',
+        'internal_levelized_cost_by_technology',
     ]:
-        system_cost_table = concat([Series(x[key]) for x in ls], axis=1)
-        system_cost_table.columns = [x['name'] for x in ls]
-        system_cost_table_path = join(target_folder, key + '.csv')
-        system_cost_table.transpose().to_csv(system_cost_table_path)
-        d[key + '_table_path'] = system_cost_table_path
+        internal_cost_table = concat([Series(x[key]) for x in ls], axis=1)
+        internal_cost_table.columns = [x['name'] for x in ls]
+        internal_cost_table_path = join(target_folder, key + '.csv')
+        internal_cost_table.transpose().to_csv(internal_cost_table_path)
+        d[key + '_table_path'] = internal_cost_table_path
 
     """
     target_path = join(target_folder, 'population.csv')
@@ -693,12 +714,24 @@ def normalize_column_names(columns, locale):
     return [x.lower() for x in columns]
 
 
+def normalize_demographic_table(demographic_table):
+    # TODO: Rename year to population_year
+    # TODO: Collapse multiple rows to single row
+    return demographic_table
+
+
+def get_table_from_graph(graph):
+    return DataFrame(x[1] for x in graph.nodes(data=True))
+
+
 def get_local_arguments(table):
     'Convert the table into local arguments'
-    # TODO: Support specifying different overrides for different years
-    d = OrderedDict(table.ix[table.index[0]])
-    d['population_year'] = d['year']  # Let year be population_year
-    return d
+    if 'year' in table.columns:
+        table = table.rename(columns={'year': 'population_year'})
+    if 'population_year' in table.columns:
+        # Get row with most recent year
+        table = table.sort('population_year', ascending=False)
+    return OrderedDict(table.ix[table.index[0]])
 
 
 def compute(f, l, g=None):
@@ -708,7 +741,7 @@ def compute(f, l, g=None):
     # If the function wants every argument, provide every argument
     argument_specification = inspect.getargspec(f)
     if argument_specification.keywords:
-        return f(**merge_ds(g, l))
+        return f(**merge_dictionaries(g, l))
     # Otherwise, provide only requested arguments
     kw = {}
     for argument_name in argument_specification.args:
