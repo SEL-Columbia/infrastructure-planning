@@ -18,6 +18,8 @@ from pandas import DataFrame, MultiIndex, Series, concat
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 from networker.networker_runner import NetworkerRunner
+from sequencer import NetworkPlan
+from sequencer.Models import EnergyMaximizeReturn
 
 
 def estimate_nodal_population(
@@ -425,7 +427,20 @@ def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
 
 
 def sequence_total_grid_mv_network(infrastructure_graph):
-    print len(infrastructure_graph)
+    import IPython; IPython.embed()
+    """
+    node_table = get_table_from_graph(infrastructure_graph, [
+        'x', 'y', 'population', ''])
+
+    # source_folder = expanduser('~/Projects/sequencer/data/sumaila/input')
+    # csv = join(source_folder, 'metrics-local.csv')
+    # shp = join(source_folder, 'networks-proposed.shp')
+    csv = target_node_table_path
+    shp = join(target_network_folder, 'edges.shp')
+    nwp = NetworkPlan(shp, csv, prioritize='Population.')
+    model = EnergyMaximizeReturn(nwp)
+    results = model.sequence()
+    """
     return []
 
 
