@@ -74,7 +74,7 @@ def estimate_nodal_peak_demand_in_kw(
     ]
 
 
-def estimate_internal_cost_by_technology(**kw):
+def estimate_nodal_internal_cost_by_technology(**kw):
     'Estimate internal cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
@@ -112,7 +112,7 @@ def estimate_grid_electricity_production_cost(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production / 100.,
         1 - grid_mv_transformer_load_power_factor)
-    d = OrderedDict()
+    d = {}
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
     d['electricity_production_cost_by_year'] = \
         grid_electricity_production_cost_per_kwh * production_in_kwh_by_year
@@ -235,7 +235,7 @@ def estimate_diesel_mini_grid_fuel_cost(
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_fuel_cost_per_liter,
         diesel_mini_grid_fuel_liters_consumed_per_kwh):
-    d = OrderedDict()
+    d = {}
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
@@ -308,7 +308,7 @@ def estimate_solar_home_electricity_production_cost(**kw):
 
 
 def estimate_solar_home_electricity_internal_distribution_cost(**kw):
-    d = OrderedDict()
+    d = {}
     years = kw['population_by_year'].index
     d['electricity_internal_distribution_cost_by_year'] = Series(
         np.zeros(len(years)), index=years)
@@ -343,7 +343,7 @@ def estimate_solar_home_battery_cost(
         solar_home_battery_kwh_per_panel_kw
     installation_lm_cost = battery_storage_in_kwh * \
         solar_home_battery_installation_lm_cost_per_battery_kwh
-    d = OrderedDict()
+    d = {}
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = battery_storage_in_kwh * \
         solar_home_battery_maintenance_lm_cost_per_kwh_per_year
@@ -359,7 +359,7 @@ def estimate_solar_home_balance_cost(
         solar_home_balance_lifetime_in_years):
     installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
         solar_home_balance_installation_lm_cost_per_panel_kw
-    d = OrderedDict()
+    d = {}
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = \
         solar_home_panel_actual_system_capacity_in_kw * \
@@ -389,6 +389,7 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
 
 
 def assemble_total_grid_mv_network(infrastructure_table):
+    print len(infrastructure_table)
     """
     cfg = {
         'demand_nodes': {
@@ -405,16 +406,17 @@ def assemble_total_grid_mv_network(infrastructure_table):
         }
     }
     """
-
-    pass
+    return []
 
 
 def sequence_total_grid_mv_network(infrastructure_graph):
-    pass
+    print len(infrastructure_graph)
+    return []
 
 
 def estimate_total_cost(infrastructure_graph):
-    pass
+    print len(infrastructure_graph)
+    return []
 
 
 def grow_exponentially(value, growth_as_percent, growth_count):
@@ -422,7 +424,7 @@ def grow_exponentially(value, growth_as_percent, growth_count):
 
 
 def prepare_internal_cost(fs, kw):
-    d = OrderedDict()
+    d = {}
     # Compute
     for f in fs:
         d.update(compute(f, kw))
@@ -482,10 +484,10 @@ def prepare_actual_system_capacity(
 
 
 def prepare_component_cost_by_year(component_packs, kw, prefix):
-    d = OrderedDict()
+    d = {}
     cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(compute(estimate_component_cost, kw, d))
+        v_by_k = dict(compute(estimate_component_cost, kw, d))
         # Add initial costs
         cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
         # Add recurring costs
@@ -611,9 +613,9 @@ MAIN_FUNCTIONS = [
     estimate_nodal_peak_demand_in_kw,
     estimate_nodal_internal_cost_by_technology,
     estimate_nodal_grid_mv_network_budget_in_meters,
-    # assemble_total_grid_mv_network,
-    # sequence_total_grid_mv_network,
-    # estimate_total_cost,
+    assemble_total_grid_mv_network,
+    sequence_total_grid_mv_network,
+    estimate_total_cost,
 ]
 COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
     ('grid', estimate_grid_internal_cost),
@@ -623,46 +625,36 @@ COST_FUNCTION_BY_TECHNOLOGY = OrderedDict([
 
 
 def run(target_folder, g):
-    # Normalize column names
+    # Prepare
     for table_name in TABLE_NAMES:
         table = g[table_name]
         table.columns = normalize_column_names(table.columns, g['locale'])
-    # Normalize tables
-    g['demographic_table'] = normalize_demographic_table(
-        g['demographic_table'])
-    # Prepare infrastructure graph and table
-    infrastructure_graph = Graph()
-    for index, row in g['demographic_table'].iterrows():
-        infrastructure_graph.add_node(index, merge_dictionaries(g, row))
-    g['infrastructure_graph'] = infrastructure_graph
+    demographic_table = normalize_demographic_table(g['demographic_table'])
+    g['demographic_table'] = demographic_table
+    g['infrastructure_graph'] = get_graph_from_table(demographic_table)
     # Compute
     for f in MAIN_FUNCTIONS:
         g['infrastructure_table'] = get_table_from_graph(
             g['infrastructure_graph'])
         if '_total_' in f.func_name:
-            d = compute(f, g)
-            # TODO: Update g
-            # continue
-
-        # For each node,
-            # Give attributes
-            # Compute
-            # Update attributes
-
-    # Compute
-    for f in MAIN_FUNCTIONS:
-        for name, table in g['demographic_table'].groupby('name'):
-            l = OrderedDict({'name': name}, **get_local_arguments(table))
-
-    ls = []
             try:
-                l.update(compute(f, l, g))
+                g.update(compute(f, g))
+            except InfrastructurePlanningError as e:
+                exit('%s.error = %s : %s' % (e[0], f.func_name, e[1]))
+            continue
+        graph = g['infrastructure_graph']
+        for node_id, node_attributes in graph.nodes_iter(data=True):
+            # Perform node-level override
+            node_defaults = dict(demographic_table.ix[node_id])
+            l = merge_dictionaries(node_attributes, node_defaults)
+            try:
+                node_attributes.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
                 exit('%s.error = %s : %s : %s' % (
-                    e[0], name.encode('utf-8'), f.func_name, e[1]))
-        ls.append(l)
-    # ls, g = sift_common_values(ls, g)
+                    e[0], l['name'].encode('utf-8'), f.func_name, e[1]))
 
+    ls = [x[1] for x in g['infrastructure_graph'].nodes_iter(data=True)]
+    ls, g = sift_common_values(ls, g)
     # Add location information if it doesn't exist
     # Build the network
     # Save
@@ -714,24 +706,25 @@ def normalize_column_names(columns, locale):
     return [x.lower() for x in columns]
 
 
-def normalize_demographic_table(demographic_table):
-    # TODO: Rename year to population_year
-    # TODO: Collapse multiple rows to single row
-    return demographic_table
-
-
-def get_table_from_graph(graph):
-    return DataFrame(x[1] for x in graph.nodes(data=True))
-
-
-def get_local_arguments(table):
-    'Convert the table into local arguments'
+def normalize_demographic_table(table):
     if 'year' in table.columns:
         table = table.rename(columns={'year': 'population_year'})
     if 'population_year' in table.columns:
-        # Get row with most recent year
-        table = table.sort('population_year', ascending=False)
-    return OrderedDict(table.ix[table.index[0]])
+        # Use most recent year
+        table = table.sort('population_year').groupby('name').last()
+        table = table.reset_index()
+    return table
+
+
+def get_graph_from_table(table):
+    graph = Graph()
+    for index, row in table.iterrows():
+        graph.add_node(index, dict(row))
+    return graph
+
+
+def get_table_from_graph(graph):
+    return DataFrame(x[1] for x in graph.nodes_iter(data=True))
 
 
 def compute(f, l, g=None):
