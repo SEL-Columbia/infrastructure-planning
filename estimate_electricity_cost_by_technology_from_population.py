@@ -112,7 +112,7 @@ def estimate_grid_electricity_production_cost(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production / 100.,
         1 - grid_mv_transformer_load_power_factor)
-    d = {}
+    d = OrderedDict()
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
     d['electricity_production_cost_by_year'] = \
         grid_electricity_production_cost_per_kwh * production_in_kwh_by_year
@@ -235,7 +235,7 @@ def estimate_diesel_mini_grid_fuel_cost(
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_fuel_cost_per_liter,
         diesel_mini_grid_fuel_liters_consumed_per_kwh):
-    d = {}
+    d = OrderedDict()
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
@@ -308,7 +308,7 @@ def estimate_solar_home_electricity_production_cost(**kw):
 
 
 def estimate_solar_home_electricity_internal_distribution_cost(**kw):
-    d = {}
+    d = OrderedDict()
     years = kw['population_by_year'].index
     d['electricity_internal_distribution_cost_by_year'] = Series(
         np.zeros(len(years)), index=years)
@@ -343,7 +343,7 @@ def estimate_solar_home_battery_cost(
         solar_home_battery_kwh_per_panel_kw
     installation_lm_cost = battery_storage_in_kwh * \
         solar_home_battery_installation_lm_cost_per_battery_kwh
-    d = {}
+    d = OrderedDict()
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = battery_storage_in_kwh * \
         solar_home_battery_maintenance_lm_cost_per_kwh_per_year
@@ -359,7 +359,7 @@ def estimate_solar_home_balance_cost(
         solar_home_balance_lifetime_in_years):
     installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
         solar_home_balance_installation_lm_cost_per_panel_kw
-    d = {}
+    d = OrderedDict()
     d['installation_lm_cost'] = installation_lm_cost
     d['maintenance_lm_cost_per_year'] = \
         solar_home_panel_actual_system_capacity_in_kw * \
@@ -424,7 +424,7 @@ def grow_exponentially(value, growth_as_percent, growth_count):
 
 
 def prepare_internal_cost(fs, kw):
-    d = {}
+    d = OrderedDict()
     # Compute
     for f in fs:
         d.update(compute(f, kw))
@@ -484,10 +484,10 @@ def prepare_actual_system_capacity(
 
 
 def prepare_component_cost_by_year(component_packs, kw, prefix):
-    d = {}
+    d = OrderedDict()
     cost_by_year_index = np.zeros(kw['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = dict(compute(estimate_component_cost, kw, d))
+        v_by_k = OrderedDict(compute(estimate_component_cost, kw, d))
         # Add initial costs
         cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
         # Add recurring costs
@@ -772,7 +772,7 @@ def sift_common_values(ls, g):
 
 
 def rename_keys(value_by_key, prefix='', suffix=''):
-    d = {}
+    d = OrderedDict()
     for key, value in value_by_key.items():
         if prefix and not key.startswith(prefix):
             key = prefix + key
