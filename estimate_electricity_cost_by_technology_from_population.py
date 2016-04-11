@@ -395,21 +395,21 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
 def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
     geocode = geopy.GoogleV3().geocode
     for node_id, node_attributes in infrastructure_graph.nodes_iter(data=True):
-        x = node_attributes.get('longitude')
-        y = node_attributes.get('latitude')
-        if x is None or y is None:
+        lon = node_attributes.get('longitude')
+        lat = node_attributes.get('latitude')
+        if lon is None or lat is None:
             location = geocode(node_attributes['name'])
-            x, y = location.longitude, location.latitude
-        node_attributes.update(x=x, y=y)
+            lon, lat = location.longitude, location.latitude
+        node_attributes.update(longitude=lon, latitude=lat)
     node_table = get_table_from_graph(infrastructure_graph, [
-        'x', 'y', 'grid_mv_network_budget_in_meters'])
-    node_table_path = join(target_folder, 'nodes.csv')
+        'longitude', 'latitude', 'grid_mv_network_budget_in_meters'])
+    node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = {
         'demand_nodes': {
             'filename': node_table_path,
-            'x_column': 'x',
-            'y_column': 'y',
+            'x_column': 'longitude',
+            'y_column': 'latitude',
             'budget_column': 'grid_mv_network_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
@@ -421,27 +421,24 @@ def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
     nwk.validate()
     msf = nwk.run()
     infrastructure_graph.add_edges_from(msf.edges_iter())
-    return [
-        ('infrastructure_graph', infrastructure_graph),
-    ]
+    return {'infrastructure_graph': infrastructure_graph}
 
 
-def sequence_total_grid_mv_network(infrastructure_graph):
-    import IPython; IPython.embed()
-    """
+def sequence_total_grid_mv_network(target_folder, infrastructure_graph):
     node_table = get_table_from_graph(infrastructure_graph, [
-        'x', 'y', 'population', ''])
-
-    # source_folder = expanduser('~/Projects/sequencer/data/sumaila/input')
-    # csv = join(source_folder, 'metrics-local.csv')
-    # shp = join(source_folder, 'networks-proposed.shp')
-    csv = target_node_table_path
-    shp = join(target_network_folder, 'edges.shp')
-    nwp = NetworkPlan(shp, csv, prioritize='Population.')
+        'longitude', 'latitude', 'population', 'peak_demand_in_kw'])
+    node_table = node_table.rename(columns={'longitude': 'X', 'latitude': 'Y'})
+    node_table_path = join(target_folder, 'nodes-sequencer.csv')
+    node_table.to_csv(node_table_path)
+    edge_shapefile_path = join(target_folder, 'edges.shp')
+    nwp = NetworkPlan(
+        edge_shapefile_path, node_table_path, prioritize='population')
     model = EnergyMaximizeReturn(nwp)
-    results = model.sequence()
-    """
-    return []
+    model.sequence()
+    order_series = model.output_frame['Sequence..Far.sighted.sequence']
+    for index, order in order_series.iteritems():
+        infrastructure_graph.node[index]['order'] = order
+    return {'infrastructure_graph': infrastructure_graph}
 
 
 def estimate_total_cost(infrastructure_graph):
