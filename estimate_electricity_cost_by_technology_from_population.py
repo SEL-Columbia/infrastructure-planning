@@ -1,3 +1,4 @@
+import geopy
 import inspect
 import numpy as np
 from argparse import ArgumentParser
@@ -16,6 +17,7 @@ from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
+from networker.networker_runner import NetworkerRunner
 
 
 def estimate_nodal_population(
@@ -388,25 +390,38 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
     return d
 
 
-def assemble_total_grid_mv_network(infrastructure_table):
-    print len(infrastructure_table)
-    """
-    cfg = {
+def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
+    geocode = geopy.GoogleV3().geocode
+    for node_id, node_attributes in infrastructure_graph.nodes_iter(data=True):
+        x = node_attributes.get('longitude')
+        y = node_attributes.get('latitude')
+        if x is None or y is None:
+            location = geocode(node_attributes['name'])
+            x, y = location.longitude, location.latitude
+        node_attributes.update(x=x, y=y)
+    node_table = get_table_from_graph(infrastructure_graph, [
+        'x', 'y', 'grid_mv_network_budget_in_meters'])
+    node_table_path = join(target_folder, 'nodes.csv')
+    node_table.to_csv(node_table_path)
+    nwk_settings = {
         'demand_nodes': {
-            'filename': target_node_table_path,
-            # 'x_column': 'Longitude',
-            # 'y_column': 'Latitude',
-            'x_column': 'X',
-            'y_column': 'Y',
-            'budget_column': 'Network Budget',
+            'filename': node_table_path,
+            'x_column': 'x',
+            'y_column': 'y',
+            'budget_column': 'grid_mv_network_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {
             'minimum_node_count': 2,
         }
     }
-    """
-    return []
+    nwk = NetworkerRunner(nwk_settings, target_folder)
+    nwk.validate()
+    msf = nwk.run()
+    infrastructure_graph.add_edges_from(msf.edges_iter())
+    return [
+        ('infrastructure_graph', infrastructure_graph),
+    ]
 
 
 def sequence_total_grid_mv_network(infrastructure_graph):
@@ -630,12 +645,11 @@ def run(target_folder, g):
         table = g[table_name]
         table.columns = normalize_column_names(table.columns, g['locale'])
     demographic_table = normalize_demographic_table(g['demographic_table'])
+    g['target_folder'] = target_folder
     g['demographic_table'] = demographic_table
     g['infrastructure_graph'] = get_graph_from_table(demographic_table)
     # Compute
     for f in MAIN_FUNCTIONS:
-        g['infrastructure_table'] = get_table_from_graph(
-            g['infrastructure_graph'])
         if '_total_' in f.func_name:
             try:
                 g.update(compute(f, g))
@@ -663,41 +677,17 @@ def run(target_folder, g):
     save_yearly_values(target_folder, ls)
 
     # Summarize
-    d = OrderedDict()
-    for key in [
+    keys = [
         'internal_discounted_cost_by_technology',
         'internal_levelized_cost_by_technology',
-    ]:
+    ]
+    d = OrderedDict()
+    for key in keys:
         internal_cost_table = concat([Series(x[key]) for x in ls], axis=1)
         internal_cost_table.columns = [x['name'] for x in ls]
         internal_cost_table_path = join(target_folder, key + '.csv')
         internal_cost_table.transpose().to_csv(internal_cost_table_path)
         d[key + '_table_path'] = internal_cost_table_path
-
-    """
-    target_path = join(target_folder, 'population.csv')
-    rows = []
-    import geopy
-    g = geopy.GoogleV3().geocode
-    for l in ls:
-        name = l['name']
-        location = g(name)
-        rows.append([
-            name,
-            location.latitude,
-            location.longitude,
-            l['population'],
-            l['population']])
-    t = DataFrame(rows, columns=[
-        'Name',
-        'Latitude',
-        'Longitude',
-        'Population',
-        'RadiusInPixelsRange10-30',
-    ])
-    t.to_csv(target_path, index=False)
-    d['population_streets_satellite_geotable_path'] = target_path
-    """
     return d
 
 
@@ -723,8 +713,11 @@ def get_graph_from_table(table):
     return graph
 
 
-def get_table_from_graph(graph):
-    return DataFrame(x[1] for x in graph.nodes_iter(data=True))
+def get_table_from_graph(graph, keys=None):
+    index, rows = zip(*graph.nodes_iter(data=True))
+    if keys:
+        rows = ({k: d[k] for k in keys} for d in rows)
+    return DataFrame(rows, index=index)
 
 
 def compute(f, l, g=None):
