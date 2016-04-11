@@ -15,6 +15,7 @@ from networkx import Graph
 from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat
+from shapely.geometry import Point, LineString
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 from networker.networker_runner import NetworkerRunner
@@ -681,8 +682,6 @@ def run(target_folder, g):
 
     ls = [x[1] for x in g['infrastructure_graph'].nodes_iter(data=True)]
     ls, g = sift_common_values(ls, g)
-    # Add location information if it doesn't exist
-    # Build the network
     # Save
     save_common_values(target_folder, g)
     save_unique_values(target_folder, ls)
@@ -700,6 +699,34 @@ def run(target_folder, g):
         internal_cost_table_path = join(target_folder, key + '.csv')
         internal_cost_table.transpose().to_csv(internal_cost_table_path)
         d[key + '_table_path'] = internal_cost_table_path
+
+    # Map
+    columns = ['Name', 'WKT', 'RadiusInPixelsRange10-50', 'Order']
+    rows = []
+    graph = g['infrastructure_graph']
+    for node_id, node_attributes in graph.nodes_iter(data=True):
+        name = node_attributes['name']
+        longitude = node_attributes['longitude']
+        latitude = node_attributes['latitude']
+        population = node_attributes['population']
+        order = node_attributes['order']
+        wkt = Point(latitude, longitude).wkt
+        rows.append([name, wkt, population, order])
+    for node1_id, node2_id in graph.edges_iter():
+        node1 = graph.node[node1_id]
+        node2 = graph.node[node2_id]
+        name = 'From %s to %s' % (node1['name'], node2['name'])
+        wkt = LineString([
+            (node1['latitude'], node1['longitude']),
+            (node2['latitude'], node2['longitude']),
+        ])
+        rows.append([name, wkt, None, None])
+    infrastructure_geotable_path = join(
+        target_folder, 'infrastructure_streets_satellite.csv')
+    infrastructure_geotable = DataFrame(rows, columns=columns)
+    infrastructure_geotable.to_csv(infrastructure_geotable_path, index=False)
+    print('infrastructure_geotable_path = %s' % infrastructure_geotable_path)
+
     return d
 
 
