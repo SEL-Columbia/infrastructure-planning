@@ -1,21 +1,26 @@
-Make forecast_population use new spline fitting model
+Consider ordering the columns in the output report manually
+    Remove OrderedDict
+Set name of town to column name
 
-Prototype tool to get population-consumption curve points by world, region, income group
 
-Get electricity consumption by population curve (1/7/2016)
-Estimate electricity consumption from curve (1/7/2015)
-Estimate electricity demand (1/8/2015)
-Estimate grid electricity local cost (1/15/2016)
+Change finance units to years explicitly
+Define loan_year in compute discounted cost
+Check whether different loan year affects breakeven time (whether we need to add loan year)
 
-Estimate mini grid electricity local cost (1/28/2016)
-Estimate off grid electricity local cost (2/4/2016)
-Optimize medium voltage network for cost (2/11/2016)
-Compare electrification scenarios (2/18/2016)
+= Estimate grid electricity internal cost
+    Draft workflow in notebook
+        Check that we have accounted for all variables in old grid cost model
 
-Consider letting user choose country for population forecasting
-Consider letting user choose country for consumption forecasting
+Consider accepting net present value vs consumption curve for energy source X
+
+Optimize medium voltage network for cost
+Compare electrification scenarios
+Estimate mini grid electricity internal cost
+Estimate off grid electricity internal cost
+Estimate population using simple exponential growth
+
 Make script for each technology that only does modelling for that technology
-
+Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
 Return geotable if table has longitude and latitude
 Return geotable if table has city or address
 Cite sources for data in interface markdown
@@ -24,6 +29,8 @@ Cite sources for data in interface markdown
     Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
-Create wizard that recommends appropriate tool based on user's goals
+    Cite "Electric Sales, Revenue, and Average Price" 
+        http://www.eia.gov/electricity/sales_revenue_price/index.cfm
+        http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
 
-Consider estimating population using exponential growth
+Create wizard that recommends appropriate tool based on user's goals

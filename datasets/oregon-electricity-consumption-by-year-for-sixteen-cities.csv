@@ -1,0 +1,169 @@
+Entity,State,Ownership,Customers (Count),Sales (Megawatthours),Revenues (Thousands Dollars),Average Price (cents/kWh),Year
+City of Ashland,OR,Public,10422,10942,169437,6.4578574928,2004
+City of Ashland,OR,Public,11310,12247,169156,7.2400624276,2005
+City of Ashland,OR,Public,11503,13874,173811,7.9822335756,2006
+City of Ashland,OR,Public,10730,12518,175565,7.13,2007
+City of Ashland,OR,Public,11879,180514,12989,7.2,2008
+City of Ashland,OR,Public,11549,165688,11755,7.09,2009
+City of Ashland,OR,Public,11056,173022,11306,6.53,2010
+City of Ashland,OR,Public,11390,175389,12436,7.09,2011
+City of Ashland,OR,Municipal,11688,172148,12475,7.2466715,2012
+City of Ashland,OR,Municipal,11117,176839,13313,7.5283167,2013
+City of Ashland,OR,Municipal,11167,166504,13410,8.0538606,2014
+City of Bandon,OR,Public,3530,3830,55957,6.8445413442,2004
+City of Bandon,OR,Public,3601,4005,58511,6.8448667772,2005
+City of Bandon,OR,Public,3670,4161,59581,6.9837699938,2006
+City of Bandon,OR,Public,3684,4671,64860,7.2,2007
+City of Bandon,OR,Public,3705,64888,4717,7.27,2008
+City of Bandon,OR,Public,3516,64582,4766,7.38,2009
+City of Bandon,OR,Public,3735,61957,4607,7.44,2010
+City of Bandon,OR,Public,3761,63044,4707,7.47,2011
+City of Bandon,OR,Municipal,3759,63804,4963,7.7785092,2012
+City of Bandon,OR,Municipal,3637,62233,4880,7.8414989,2013
+City of Bandon,OR,Municipal,3956,60200,4845.6,8.0491694,2014
+City of Cascade Locks,OR,Public,581,1383,19132,7.2287267405,2004
+City of Cascade Locks,OR,Public,569,1432,20339,7.0406607994,2005
+City of Cascade Locks,OR,Public,578,1538,20856,7.3743766782,2006
+City of Cascade Locks,OR,Public,573,1616,21789,7.42,2007
+City of Cascade Locks,OR,Public,573,21117,1630,7.72,2008
+City of Cascade Locks,OR,Public,583,20559,1655,8.05,2009
+City of Cascade Locks,OR,Public,582,19010,1527,8.03,2010
+City of Cascade Locks,OR,Public,629,19430,1571,8.09,2011
+City of Drain,OR,Public,661,1290,19734,6.5369413196,2004
+City of Drain,OR,Public,667,1315,20469,6.4243490156,2005
+City of Drain,OR,Public,678,1355,20250,6.6913580247,2006
+City of Drain,OR,Public,695,1417,20534,6.9,2007
+City of Drain,OR,Public,696,19992,1362,6.81,2008
+City of Drain,OR,Public,700,16885,1211,7.17,2009
+City of Drain,OR,Public,704,14830,1178,7.94,2010
+City of Drain,OR,Public,689,16846,1277.5,7.58,2011
+City of Eugene,OR,Public,83118,161031,2634133,6.1132448513,2004
+City of Eugene,OR,Public,84137,169452,2663174,6.3627836559,2005
+City of Eugene,OR,Public,85409,173277,2689923,6.4417085545,2006
+City of Eugene,OR,Public,86531,173907,2728684,6.37,2007
+City of Eugene,OR,Public,86720,2625659,170068,6.48,2008
+City of Eugene,OR,Public,86829,2406878,159675,6.63,2009
+City of Eugene,OR,Public,87087,2399801,166847,6.95,2010
+City of Eugene,OR,Public,87455,2410101,172307,7.15,2011
+City of Eugene,OR,Municipal,89342,2364611,183510,7.7606845,2012
+City of Eugene,OR,Municipal,88691,2404522,195132.4,8.1152262,2013
+City of Eugene,OR,Municipal,89760,2336296,204493.2,8.7528806,2014
+City of Forest Grove,OR,Public,8771,11276,250250,4.5058941059,2004
+City of Forest Grove,OR,Public,8751,11443,249995,4.5772915458,2005
+City of Forest Grove,OR,Public,8629,12547,247274,5.0741282949,2006
+City of Forest Grove,OR,Public,8758,12737,248270,5.13,2007
+City of Forest Grove,OR,Public,8885,249549,13413,5.37,2008
+City of Forest Grove,OR,Public,8886,236719,13577,5.74,2009
+City of Forest Grove,OR,Public,8977,230143,13151.8,5.71,2010
+City of Forest Grove,OR,Public,9013,233750,13530.4,5.79,2011
+City of Forest Grove,OR,Municipal,9110,232553,13882.8,5.9697359,2012
+City of Forest Grove,OR,Municipal,9314,232408,14174,6.0987574,2013
+City of Forest Grove,OR,Municipal,9507,251235,14348,5.7109877,2014
+City of Hermiston,OR,Public,5123,6939,103576,6.699428439,2004
+City of Hermiston,OR,Public,5165,7004,105027,6.6687613661,2005
+City of Hermiston,OR,Public,5179,7024,105150,6.6799809796,2006
+City of Hermiston,OR,Public,5210,7139,107004,6.67,2007
+City of Hermiston,OR,Public,5277,107505,7178,6.68,2008
+City of Hermiston,OR,Public,5280,113097,7472,6.61,2009
+City of Hermiston,OR,Public,5245,105641,7066,6.69,2010
+City of Hermiston,OR,Public,5306,107188,7172,6.69,2011
+City of Hermiston,OR,Municipal,5288,104631,7057,6.744655,2012
+City of Hermiston,OR,Municipal,5229,110551,7359.4,6.657018,2013
+City of Hermiston,OR,Municipal,5176,108518,7299.2,6.7262574,2014
+City of McMinnville,OR,Public,15083,35005,830416,4.2153571222,2004
+City of McMinnville,OR,Public,15418,34089,824917,4.1324157461,2005
+City of McMinnville,OR,Public,15685,35076,852153,4.1161622385,2006
+City of McMinnville,OR,Public,16017,36205,883483,4.1,2007
+City of McMinnville,OR,Public,16271,925110,36747,3.97,2008
+City of McMinnville,OR,Public,16404,713095,29440,4.13,2009
+City of McMinnville,OR,Public,17075,725225,30396,4.19,2010
+City of McMinnville,OR,Public,17708,712845,31378,4.4,2011
+City of McMinnville,OR,Municipal,16270,717127,35748,4.9848911,2012
+City of McMinnville,OR,Municipal,15683,736274,37092,5.0377984,2013
+City of McMinnville,OR,Municipal,15805,745030,38867,5.2168369,2014
+City of Milton-Freewater,OR,Public,4799,5098,109995,4.6347561253,2004
+City of Milton-Freewater,OR,Public,4854,5309,109869,4.8321182499,2005
+City of Milton-Freewater,OR,Public,4894,5367,106040,5.0612976235,2006
+City of Milton-Freewater,OR,Public,4931,5694,110936,5.13,2007
+City of Milton-Freewater,OR,Public,4906,109583,5804,5.3,2008
+City of Milton-Freewater,OR,Public,4903,113862,5962,5.24,2009
+City of Milton-Freewater,OR,Public,4906,103702,5622,5.42,2010
+City of Milton-Freewater,OR,Public,4356,104401,5913,5.66,2011
+City of Milton-Freewater,OR,Municipal,4344,105209,6212,5.9044378,2012
+City of Milton-Freewater,OR,Municipal,4327,107615,6320,5.8727873,2013
+City of Milton-Freewater,OR,Municipal,4335,105599,6390,6.0511937,2014
+City of Monmouth,OR,Public,3483,3527,62708,5.6244817248,2004
+City of Monmouth,OR,Public,3645,3976,55718,7.1359345274,2005
+City of Monmouth,OR,Public,3807,4425,66103,6.6940986037,2006
+City of Monmouth,OR,Public,3895,4736,68032,6.96,2007
+City of Monmouth,OR,Public,3914,68800,5354,7.78,2008
+City of Monmouth,OR,Public,4143,70149,5716,8.15,2009
+City of Monmouth,OR,Public,4161,68241,5687.1,8.33,2010
+City of Monmouth,OR,Public,4216,70715,5869.9,8.3,2011
+City of Monmouth,OR,Municipal,4268,69319,5766.9,8.3193641,2012
+City of Monmouth,OR,Municipal,4306,73039,5849.7,8.0090089,2013
+City of Monmouth,OR,Municipal,4321,72257,5732.8,7.9339026,2014
+City of Salem,OR,Cooperative,17462,23340,380436,6.1350660821,2004
+City of Salem,OR,Cooperative,17951,20609,322085,6.3986214819,2005
+City of Salem,OR,Cooperative,18492,21623,327033,6.6118709733,2006
+City of Salem,OR,Cooperative,18338,24230,326776,7.41,2007
+City of Salem,OR,Cooperative,18487,335245,24861,7.42,2008
+City of Salem,OR,Cooperative,18544,322922,23083,7.15,2009
+City of Salem,OR,Cooperative,18516,310223,22170,7.15,2010
+City of Salem,OR,Cooperative,18545,315984,23043,7.29,2011
+City of Salem,OR,Cooperative,18578,312073,24613,7.8869367,2012
+City of Salem,OR,Cooperative,18759,320328,25448,7.944357,2013
+City of Salem,OR,Cooperative,19074,315922,25920,8.2045568,2014
+City of Springfield,OR,Public,30413,37687,736967,5.113797497,2004
+City of Springfield,OR,Public,30774,39764,783217,5.077009309,2005
+City of Springfield,OR,Public,31056,43742,807908,5.4142303332,2006
+City of Springfield,OR,Public,31181,47355,805268,5.88,2007
+City of Springfield,OR,Public,31297,829208,43556,5.25,2008
+City of Springfield,OR,Public,31412,816347,43019,5.27,2009
+City of Springfield,OR,Public,31502,808082,42165,5.22,2010
+City of Springfield,OR,Public,31591,815105,42761,5.25,2011
+City of Springfield,OR,Municipal,31695,811908,43946,5.4126822,2012
+City of Springfield,OR,Municipal,31764,835051,48434,5.8001248,2013
+City of Springfield,OR,Municipal,31791,786540,47000,5.9755384,2014
+Clatskanie Peoples Util Dist,OR,Public,4600,970782,42434,4.37,2011
+Clatskanie Peoples Util Dist,OR,Political Subdivision,4609,970591,42013,4.3285998,2012
+Clatskanie Peoples Util Dist,OR,Political Subdivision,4610,936118,43172.9,4.6119079,2013
+Clatskanie Peoples Util Dist,OR,Political Subdivision,4590,902060,44196.5,4.8995078,2014
+Clearwater Power Company,OR,Cooperative,157,1704,171.1,10.04,2011
+Clearwater Power Company,OR,Cooperative,156,1669,175.7,10.527262,2012
+Clearwater Power Company,OR,Cooperative,157,1744,180.6,10.355505,2013
+Clearwater Power Company,OR,Cooperative,158,1775,191.1,10.766197,2014
+Tillamook Peoples Utility Dist,OR,Public,19025,26889,386834,6.9510436001,2004
+Tillamook Peoples Utility Dist,OR,Public,19208,27841,402184,6.9224534044,2005
+Tillamook Peoples Utility Dist,OR,Public,19831,28485,416658,6.8365422001,2006
+Tillamook Peoples Utility Dist,OR,Public,20075,27989,428316,6.53,2007
+Tillamook Peoples Utility Dist,OR,Public,20352,440203,28511,6.48,2008
+Tillamook Peoples Utility Dist,OR,Public,20424,449978,29796,6.62,2009
+Tillamook Peoples Utility Dist,OR,Public,20504,457084,30744,6.73,2010
+Tillamook Peoples Utility Dist,OR,Public,20536,475451,32502,6.84,2011
+Tillamook Peoples Utility Dist,OR,Public,20536,475451,32502,6.84,2011
+Tillamook Peoples Utility Dist,OR,Political Subdivision,20585,460767,32978,7.1571966,2012
+Tillamook Peoples Utility Dist,OR,Political Subdivision,20604,468865,34815.2,7.425421,2013
+Tillamook Peoples Utility Dist,OR,Political Subdivision,20625,451861,34013,7.5273148,2014
+Umatilla Electric Coop Assn,OR,Cooperative,13218,42290,812599,5.2042889543,2004
+Umatilla Electric Coop Assn,OR,Cooperative,13353,43861,836073,5.2460730104,2005
+Umatilla Electric Coop Assn,OR,Cooperative,13530,40671,807173,5.038696785,2006
+Umatilla Electric Coop Assn,OR,Cooperative,13681,43124,874855,4.93,2007
+Umatilla Electric Coop Assn,OR,Cooperative,13795,911485,47888,5.25,2008
+Umatilla Electric Coop Assn,OR,Cooperative,14463,926838,48052.2,5.18,2009
+Umatilla Electric Coop Assn,OR,Cooperative,14042,883081,48604.8,5.5,2010
+Umatilla Electric Coop Assn,OR,Cooperative,14138,922432,50302.2,5.45,2011
+Umatilla Electric Coop Assn,OR,Cooperative,14254,973381,53772.7,5.5243219,2012
+Umatilla Electric Coop Assn,OR,Cooperative,14392,1085391,60734.2,5.5956056,2013
+Umatilla Electric Coop Assn,OR,Cooperative,14507,1347465,75556.8,5.6073293,2014
+"Wasco Electric Coop, Inc",OR,Cooperative,4530,5485,88783,6.1779845241,2004
+"Wasco Electric Coop, Inc",OR,Cooperative,4547,5596,88785,6.3028664752,2005
+"Wasco Electric Coop, Inc",OR,Cooperative,4547,6100,92541,6.5916728801,2006
+"Wasco Electric Coop, Inc",OR,Cooperative,4603,7255,95782,7.57,2007
+"Wasco Electric Coop, Inc",OR,Cooperative,4609,99721,7508,7.53,2008
+"Wasco Electric Coop, Inc",OR,Cooperative,4631,107525,7902,7.35,2009
+"Wasco Electric Coop, Inc",OR,Cooperative,4616,105993,8163,7.7,2010
+"Wasco Electric Coop, Inc",OR,Cooperative,4610,107460,8502,7.91,2011
+"Wasco Electric Coop, Inc",OR,Cooperative,4633,107307,9363,8.7254326,2012
+"Wasco Electric Coop, Inc",OR,Cooperative,4629,107256,9405,8.7687402,2013
+"Wasco Electric Coop, Inc",OR,Cooperative,4624,106404,9959,9.3596105,2014

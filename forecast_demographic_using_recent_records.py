@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 from crosscompute_table import TableType
 from infrastructure_planning.demography.linear import (
-    forecast_demographic_from_series)
+    forecast_demographic_using_recent_records)
+from infrastructure_planning.exceptions import EmptyDataset
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
@@ -16,13 +17,16 @@ def run(
         demographic_by_year_table_population_column,
         default_yearly_population_growth_percent):
     d = []
-    demographic_by_year_table = forecast_demographic_from_series(
-        target_year,
-        demographic_by_year_table,
-        demographic_by_year_table_name_column,
-        demographic_by_year_table_year_column,
-        demographic_by_year_table_population_column,
-        default_yearly_population_growth_percent)
+    try:
+        demographic_by_year_table = forecast_demographic_using_recent_records(
+            target_year,
+            demographic_by_year_table,
+            demographic_by_year_table_name_column,
+            demographic_by_year_table_year_column,
+            demographic_by_year_table_population_column,
+            default_yearly_population_growth_percent)
+    except EmptyDataset as e:
+        exit('demographic_by_year_table.error = %s' % e)
     demographic_by_year_table_path = join(
         target_folder, 'demographic-by-year.csv')
     demographic_by_year_table.to_csv(
@@ -32,13 +36,27 @@ def run(
         demographic_by_year_table_path))
 
     columns = demographic_by_year_table.columns
-    if 'Longitude' in columns and 'Latitude' in columns:
+    if 'Latitude' in columns and 'Longitude' in columns:
         demographic_by_year_geotable_path = join(
             target_folder, 'demographic-by-year.msg')
-        demographic_by_year_geotable = demographic_by_year_table
-        demographic_by_year_geotable['Weight'] = \
+        demographic_by_year_geotable = demographic_by_year_table.fillna(
+            method='ffill').groupby(
+            demographic_by_year_table_name_column).last()
+        # Set radius
+        demographic_by_year_geotable['RadiusInPixelsRange10-50FromSum'] = \
             demographic_by_year_geotable[
                 demographic_by_year_table_population_column]
+        # Set fill color
+        forecast_populations = demographic_by_year_table.groupby(
+            demographic_by_year_table_name_column).last()[
+                demographic_by_year_table_population_column]
+        original_populations = demographic_by_year_table.groupby(
+            demographic_by_year_table_name_column).first()[
+                demographic_by_year_table_population_column]
+        demographic_by_year_geotable['FillColor'] = (
+            forecast_populations - original_populations).apply(
+                lambda x: 'r' if x > 0 else 'b')
+        # Save table
         demographic_by_year_geotable.to_msgpack(
             demographic_by_year_geotable_path, compress='blosc')
         d.insert(0, (

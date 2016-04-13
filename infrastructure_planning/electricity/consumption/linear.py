@@ -1,10 +1,10 @@
 from pandas import DataFrame, concat, merge
 
 from ...growth import get_default_slope, get_future_years
-from ...growth.fitted import get_fitted_linear_function
+from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
 
 
-def estimate_electricity_consumption_from_series(
+def estimate_electricity_consumption_using_recent_records(
         demographic_by_year_table,
         demographic_by_year_table_name_column,
         demographic_by_year_table_year_column,
@@ -18,7 +18,7 @@ def estimate_electricity_consumption_from_series(
         demographic_by_year_table_year_column].max()
 
     electricity_consumption_per_capita_table = \
-        forecast_electricity_consumption_per_capita_from_series(
+        forecast_electricity_consumption_per_capita_using_recent_records(
             target_year,
             electricity_consumption_per_capita_by_year_table,
             electricity_consumption_per_capita_by_year_table_year_column,
@@ -41,7 +41,7 @@ def estimate_electricity_consumption_from_series(
         demographic_by_year_table_year_column])
 
 
-def forecast_electricity_consumption_per_capita_from_series(
+def forecast_electricity_consumption_per_capita_using_recent_records(
         target_year,
         electricity_consumption_per_capita_by_year_table,
         electricity_consumption_per_capita_by_year_table_year_column,
@@ -59,7 +59,7 @@ def forecast_electricity_consumption_per_capita_from_series(
         electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa
     ]].values.tolist()
 
-    estimate_electricity_consumption = get_fitted_linear_function(
+    estimate_electricity_consumption = get_estimate_electricity_consumption(
         year_packs, get_default_slope(
             default_yearly_electricity_consumption_growth_percent, year_packs))
 

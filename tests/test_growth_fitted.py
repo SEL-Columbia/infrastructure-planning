@@ -20,4 +20,4 @@ def test_get_fitted_linear_function():
     f = get_fitted_linear_function([(0, 1), (1, 0), (2, 2), (3, 1)])
     assert np.isclose(f(0), 0.7)
     assert np.isclose(f(1), 0.9)
-    assert np.allclose(f([0, 1]), [0.7, 0.9])  # Given xs, return ys
+    assert np.allclose(f([0, 1]), [0.7, 0.9])  # Get ys from xs
