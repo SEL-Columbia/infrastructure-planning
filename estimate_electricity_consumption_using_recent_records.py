@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
-from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
+from pandas import read_csv
 
 from infrastructure_planning.electricity.consumption.linear import (
     estimate_electricity_consumption_using_recent_records)
@@ -61,14 +61,12 @@ if __name__ == '__main__':
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
 
-        TableType.load(
-            args.demographic_by_year_table_path),
+        read_csv(args.demographic_by_year_table_path),
         args.demographic_by_year_table_name_column,
         args.demographic_by_year_table_year_column,
         args.demographic_by_year_table_population_column,
 
-        TableType.load(
-            args.electricity_consumption_per_capita_by_year_table_path),
+        read_csv(args.electricity_consumption_per_capita_by_year_table_path),
         args.electricity_consumption_per_capita_by_year_table_year_column,
         args.electricity_consumption_per_capita_by_year_table_consumption_per_capita_column,  # noqa
         args.default_yearly_electricity_consumption_growth_percent)

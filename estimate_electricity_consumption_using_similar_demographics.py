@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
-from crosscompute_table import TableType
 from infrastructure_planning.growth.fitted import get_fitted_linear_function
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from os.path import join
+from pandas import read_csv
 
 
 def run(target_folder, *args):
@@ -65,8 +65,7 @@ if __name__ == '__main__':
     d = run(
         args.target_folder or make_enumerated_folder_for(__file__),
 
-        TableType.load(
-            args.demographic_by_year_table_path),
+        read_csv(args.demographic_by_year_table_path),
         args.demographic_by_year_table_population_column,
 
         TableType.load(

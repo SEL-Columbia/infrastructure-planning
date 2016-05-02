@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
-from crosscompute_table import TableType
 from infrastructure_planning.demography.linear import (
     forecast_demographic_using_recent_records)
 from infrastructure_planning.exceptions import EmptyDataset
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
+from pandas import read_csv
 
 
 def run(
@@ -95,8 +95,7 @@ if __name__ == '__main__':
         args.target_folder or make_enumerated_folder_for(__file__),
         args.target_year,
 
-        TableType.load(
-            args.demographic_by_year_table_path),
+        read_csv(args.demographic_by_year_table_path),
         args.demographic_by_year_table_name_column,
         args.demographic_by_year_table_year_column,
         args.demographic_by_year_table_population_column,

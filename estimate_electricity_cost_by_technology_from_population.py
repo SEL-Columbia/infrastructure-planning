@@ -4,7 +4,6 @@ import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
 from copy import copy, deepcopy
-from crosscompute_table import TableType
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
@@ -14,7 +13,7 @@ from math import ceil
 from networkx import Graph
 from operator import mul
 from os.path import join
-from pandas import DataFrame, MultiIndex, Series, concat
+from pandas import DataFrame, MultiIndex, Series, concat, read_csv
 from shapely.geometry import Point, LineString
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
@@ -1039,13 +1038,13 @@ if __name__ == '__main__':
     C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()
-    g['demographic_table'] = TableType.load(
+    g['demographic_table'] = read_csv(
         args.demographic_table_path)
-    g['grid_mv_transformer_table'] = TableType.load(
+    g['grid_mv_transformer_table'] = read_csv(
         args.grid_mv_transformer_table_path)
-    g['diesel_mini_grid_generator_table'] = TableType.load(
+    g['diesel_mini_grid_generator_table'] = read_csv(
         args.diesel_mini_grid_generator_table_path)
-    g['solar_home_panel_table'] = TableType.load(
+    g['solar_home_panel_table'] = read_csv(
         args.solar_home_panel_table_path)
     d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
     print(format_summary(d))

@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from crosscompute_table import TableType
 from infrastructure_planning.finance.valuation import compute_levelized_cost
 from invisibleroads_macros.log import format_summary
+from pandas import read_csv
 
 
 def run(
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     args = argument_parser.parse_args()
     d = run(
-        TableType.load(args.time_production_cost_table_path),
+        read_csv(args.time_production_cost_table_path),
         args.time_production_cost_table_time_column,
         args.time_production_cost_table_production_column,
         args.time_production_cost_table_cost_column,
