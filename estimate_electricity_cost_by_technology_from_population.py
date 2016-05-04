@@ -392,6 +392,8 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
     return d
 
 
+# def assemble_total_grid_mv_network(
+# target_folder, infrastructure_graph, existing_network_geotable):
 def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
     geocode = geopy.GoogleV3().geocode
     for node_id, node_attributes in infrastructure_graph.nodes_iter(data=True):
@@ -405,6 +407,14 @@ def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
         'longitude', 'latitude', 'grid_mv_network_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
+
+    """
+        'existing_networks': {
+            'filename': 'data/leona/LeonaNetworksLL.shp',
+            'budget_value': 0
+        },
+    """
+
     nwk_settings = {
         'demand_nodes': {
             'filename': node_table_path,
