@@ -1,3 +1,4 @@
+import geometryIO
 import geopy
 import inspect
 import numpy as np
@@ -15,6 +16,7 @@ from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat, read_csv
 from shapely.geometry import Point, LineString
+from shapely import wkt
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
 from networker.networker_runner import NetworkerRunner
@@ -392,9 +394,8 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
     return d
 
 
-# def assemble_total_grid_mv_network(
-# target_folder, infrastructure_graph, existing_network_geotable):
-def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
+def assemble_total_grid_mv_network(
+        target_folder, infrastructure_graph, existing_networks_geotable):
     geocode = geopy.GoogleV3().geocode
     for node_id, node_attributes in infrastructure_graph.nodes_iter(data=True):
         lon = node_attributes.get('longitude')
@@ -407,14 +408,6 @@ def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
         'longitude', 'latitude', 'grid_mv_network_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
-
-    """
-        'existing_networks': {
-            'filename': 'data/leona/LeonaNetworksLL.shp',
-            'budget_value': 0
-        },
-    """
-
     nwk_settings = {
         'demand_nodes': {
             'filename': node_table_path,
@@ -423,10 +416,18 @@ def assemble_total_grid_mv_network(target_folder, infrastructure_graph):
             'budget_column': 'grid_mv_network_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
-        'network_parameters': {
-            'minimum_node_count': 2,
-        }
+        'network_parameters': {'minimum_node_count': 2},
     }
+    if len(existing_networks_geotable):
+        geometries = [wkt.loads(x) for x in existing_networks_geotable['WKT']]
+        existing_networks_geotable_path = join(
+            target_folder, 'existing_networks.shp')
+        geometryIO.save(
+            existing_networks_geotable_path, geometryIO.proj4LL, geometries)
+        nwk_settings['existing_networks'] = {
+            'filename': existing_networks_geotable_path,
+            'budget_value': 0
+        }
     nwk = NetworkerRunner(nwk_settings, target_folder)
     nwk.validate()
     msf = nwk.run()
@@ -932,6 +933,10 @@ if __name__ == '__main__':
         metavar='FLOAT', required=True, type=float)
 
     argument_parser.add_argument(
+        '--existing_networks_geotable_path',
+        metavar='PATH', required=True)
+
+    argument_parser.add_argument(
         '--grid_electricity_production_cost_per_kwh',
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
@@ -1050,6 +1055,8 @@ if __name__ == '__main__':
     g = args.__dict__.copy()
     g['demographic_table'] = read_csv(
         args.demographic_table_path)
+    g['existing_networks_geotable'] = read_csv(
+        args.existing_networks_geotable_path)
     g['grid_mv_transformer_table'] = read_csv(
         args.grid_mv_transformer_table_path)
     g['diesel_mini_grid_generator_table'] = read_csv(
