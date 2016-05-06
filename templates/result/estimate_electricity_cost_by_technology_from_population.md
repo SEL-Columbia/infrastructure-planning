@@ -1,4 +1,4 @@
-# Electricity Cost From Grid Before Network using Population
+# Electricity Cost by Technology from Population
 
 {demographic_table_path}
 
