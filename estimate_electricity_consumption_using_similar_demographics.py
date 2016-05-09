@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from infrastructure_planning.growth.fitted import get_fitted_linear_function
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from invisibleroads_macros.log import format_summary
 from os.path import join
 from pandas import read_csv
 
@@ -68,7 +69,7 @@ if __name__ == '__main__':
         read_csv(args.demographic_by_year_table_path),
         args.demographic_by_year_table_population_column,
 
-        TableType.load(
-            args.electricity_consumption_by_population_table_path),
+        read_csv(args.electricity_consumption_by_population_table_path),
         args.electricity_consumption_by_population_table_population_column,
         args.electricity_consumption_by_population_table_consumption_column)
+    print(format_summary(d))

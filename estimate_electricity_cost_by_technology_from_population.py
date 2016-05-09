@@ -85,8 +85,8 @@ def estimate_nodal_internal_cost_by_technology(**keywords):
     # Compute
     d = OrderedDefaultDict(OrderedDict)
     for (
-        technology, estimate_internal_cost, estimate_external_cost,
-    ) in COST_FUNCTIONS_BY_TECHNOLOGY.items():
+        technology, estimate_internal_cost
+    ) in INTERNAL_COST_FUNCTIONS_BY_TECHNOLOGY.items():
         value_by_key = OrderedDict(compute(estimate_internal_cost, keywords))
         d.update(rename_keys(value_by_key, prefix=technology + '_'))
     # Summarize
@@ -94,7 +94,7 @@ def estimate_nodal_internal_cost_by_technology(**keywords):
         'internal_discounted_cost',
         'internal_levelized_cost',
     ]
-    for technology, k in product(COST_FUNCTIONS_BY_TECHNOLOGY, keys):
+    for technology, k in product(INTERNAL_COST_FUNCTIONS_BY_TECHNOLOGY, keys):
         d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
     return d
 
@@ -155,12 +155,14 @@ def estimate_grid_mv_transformer_cost(
 
 def estimate_grid_lv_line_cost(
         connection_count_by_year,
+        line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         grid_lv_line_installation_lm_cost_per_meter,
         grid_lv_line_maintenance_lm_cost_per_meter_per_year,
         grid_lv_line_lifetime_in_years):
     return prepare_lv_line_cost(
         connection_count_by_year,
+        line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         grid_lv_line_installation_lm_cost_per_meter,
         grid_lv_line_maintenance_lm_cost_per_meter_per_year,
@@ -272,12 +274,14 @@ def estimate_diesel_mini_grid_fuel_cost(
 
 def estimate_diesel_mini_grid_lv_line_cost(
         connection_count_by_year,
+        line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
         diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
         diesel_mini_grid_lv_line_lifetime_in_years):
     return prepare_lv_line_cost(
         connection_count_by_year,
+        line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
         diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
@@ -680,18 +684,15 @@ MAIN_FUNCTIONS = [
     # estimate_nodal_external_cost_by_technology,
     estimate_total_cost,
 ]
-COST_FUNCTIONS_BY_TECHNOLOGY = OrderedDict([(
+INTERNAL_COST_FUNCTIONS_BY_TECHNOLOGY = OrderedDict([(
     'grid',
     estimate_grid_internal_cost,
-    None  # estimate_grid_external_cost,
 ), (
     'diesel_mini_grid',
     estimate_diesel_mini_grid_internal_cost,
-    None  # estimate_diesel_mini_grid_external_cost,
 ), (
     'solar_home',
     estimate_solar_home_internal_cost,
-    None  # estimate_solar_home_external_cost,
 )])
 
 
