@@ -16,7 +16,7 @@ from networkx import Graph, write_gpickle
 from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat, read_csv
-from shapely.geometry import Point, LineString
+from shapely.geometry import GeometryCollection, LineString, Point
 from shapely import wkt
 
 from infrastructure_planning.exceptions import InfrastructurePlanningError
@@ -431,7 +431,15 @@ def assemble_total_grid_mv_network(
         'network_parameters': {'minimum_node_count': 2},
     }
     if len(existing_networks_geotable):
+        # Adjust coordinate order
         geometries = [wkt.loads(x) for x in existing_networks_geotable['WKT']]
+        existing_xy = GeometryCollection(geometries).centroid.xy
+        existing_yx = existing_xy[1], existing_xy[0]
+        node_xy = node_table[['longitude', 'latitude']].mean()
+        if get_distance(node_xy, existing_xy) > get_distance(
+                node_xy, existing_yx):
+            for geometry in geometries:
+                geometry.coords = [x[::-1] for x in geometry.coords]
         # Save in longitude, latitude
         existing_networks_geotable_path = join(
             target_folder, 'existing_networks.shp')
