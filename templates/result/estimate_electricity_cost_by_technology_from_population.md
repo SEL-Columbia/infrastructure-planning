@@ -1,8 +1,16 @@
 # Electricity Cost by Technology from Population
 
-{demographic_table_path}
+## Executive Summary
+{executive_summary_table}
 
-Radius indicates **population**.
-Color indicates **year**.
+## Infrastructure Map
+Radius indicates relative **peak demand**.
+Color indicates **suggested technology**.
 
-{demographic_streets_satellite_geotable_path}
+{infrastructure_geotable}
+
+## Grid Medium Voltage Line Table
+{grid_mv_line_table}
+
+## Levelized Cost Comparison by Location
+{levelized_cost_by_technology_table}
