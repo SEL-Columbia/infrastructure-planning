@@ -433,9 +433,9 @@ def assemble_total_grid_mv_network(
     if len(existing_networks_geotable):
         # Adjust coordinate order
         geometries = [wkt.loads(x) for x in existing_networks_geotable['WKT']]
-        existing_xy = GeometryCollection(geometries).centroid.xy
+        existing_xy = tuple(GeometryCollection(geometries).centroid.coords[0])
         existing_yx = existing_xy[1], existing_xy[0]
-        node_xy = node_table[['longitude', 'latitude']].mean()
+        node_xy = tuple(node_table[['longitude', 'latitude']].mean())
         if get_distance(node_xy, existing_xy) > get_distance(
                 node_xy, existing_yx):
             for geometry in geometries:
@@ -875,20 +875,6 @@ def run(target_folder, g):
     d = OrderedDict()
     graph = g['infrastructure_graph']
 
-    # Show executive summary
-    keys = [
-        'discounted_cost_by_technology',
-        'levelized_cost_by_technology',
-        'count_by_technology',
-    ]
-    table = concat((Series(g[key]) for key in keys), axis=1)
-    table.index.name = 'Technology'
-    table.index = [format_technology(x) for x in table.index]
-    table.columns = ['Discounted Cost', 'Levelized Cost', 'Count']
-    table_path = join(target_folder, 'executive_summary.csv')
-    table.to_csv(table_path)
-    d['executive_summary_table_path'] = table_path
-
     # TODO: Use JSON after we convert pandas series into dictionaries
     write_gpickle(graph, join(target_folder, 'infrastructure_graph.pkl'))
     # Map
@@ -955,11 +941,24 @@ def run(target_folder, g):
             'WKT': geometry_wkt,
             'FillColor': COLOR_BY_TECHNOLOGY['grid'],
         })
-
     infrastructure_geotable_path = join(
         target_folder, 'infrastructure_streets_satellite.csv')
     DataFrame(rows)[columns].to_csv(infrastructure_geotable_path, index=False)
     d['infrastructure_geotable_path'] = infrastructure_geotable_path
+
+    # Show executive summary
+    keys = [
+        'discounted_cost_by_technology',
+        'levelized_cost_by_technology',
+        'count_by_technology',
+    ]
+    table = concat((Series(g[key]) for key in keys), axis=1)
+    table.index.name = 'Technology'
+    table.index = [format_technology(x) for x in table.index]
+    table.columns = ['Discounted Cost', 'Levelized Cost', 'Count']
+    table_path = join(target_folder, 'executive_summary.csv')
+    table.to_csv(table_path)
+    d['executive_summary_table_path'] = table_path
 
     # Show edge summary
     rows = []
