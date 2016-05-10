@@ -440,6 +440,9 @@ def assemble_total_grid_mv_network(
                 node_xy, existing_yx):
             for geometry in geometries:
                 geometry.coords = [x[::-1] for x in geometry.coords]
+            existing_networks_latlon = 1
+        else:
+            existing_networks_latlon = 0
         # Save in longitude, latitude
         existing_networks_geotable_path = join(
             target_folder, 'existing_networks.shp')
@@ -464,7 +467,10 @@ def assemble_total_grid_mv_network(
             'peak_demand_in_kw': 0,
         })
     infrastructure_graph.add_edges_from(msf.edges_iter())
-    return {'infrastructure_graph': infrastructure_graph}
+    return {
+        'infrastructure_graph': infrastructure_graph,
+        'existing_networks_latlon': existing_networks_latlon,
+    }
 
 
 def sequence_total_grid_mv_network(target_folder, infrastructure_graph):
@@ -928,19 +934,21 @@ def run(target_folder, g):
             'WKT': geometry_wkt,
             'FillColor': COLOR_BY_TECHNOLOGY['grid'],
         })
-    for geometry_wkt in g['existing_networks_geotable']['WKT']:
-        geometry = wkt.loads(geometry_wkt)
-        # Save in latitude, longitude
-        coords = []
-        for x, y in list(geometry.coords):
-            coords.append((y, x))
-        geometry_wkt = LineString(coords)
-        rows.append({
-            'Name': '(Existing Grid)',
-            'Suggested Technology': 'grid',
-            'WKT': geometry_wkt,
-            'FillColor': COLOR_BY_TECHNOLOGY['grid'],
-        })
+    if 'existing_networks_geotable' in g:
+        for geometry_wkt in g['existing_networks_geotable']['WKT']:
+            geometry = wkt.loads(geometry_wkt)
+            # Save in latitude, longitude
+            if not g['existing_networks_latlon']:
+                coords = []
+                for x, y in list(geometry.coords):
+                    coords.append((y, x))
+                geometry_wkt = LineString(coords)
+            rows.append({
+                'Name': '(Existing Grid)',
+                'Suggested Technology': 'grid',
+                'WKT': geometry_wkt,
+                'FillColor': COLOR_BY_TECHNOLOGY['grid'],
+            })
     infrastructure_geotable_path = join(
         target_folder, 'infrastructure_streets_satellite.csv')
     DataFrame(rows)[columns].to_csv(infrastructure_geotable_path, index=False)
