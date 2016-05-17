@@ -407,7 +407,7 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
 
 
 def assemble_total_grid_mv_network(
-        target_folder, infrastructure_graph, existing_networks_geotable):
+        target_folder, infrastructure_graph, grid_mv_line_geotable):
     geocode = geopy.GoogleV3().geocode
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         lon = node_d.get('longitude')
@@ -430,19 +430,18 @@ def assemble_total_grid_mv_network(
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {'minimum_node_count': 2},
     }
-    if len(existing_networks_geotable):
+    existing_networks_latlon = 0
+    if len(grid_mv_line_geotable):
         # Adjust coordinate order
-        geometries = [wkt.loads(x) for x in existing_networks_geotable['WKT']]
-        existing_xy = tuple(GeometryCollection(geometries).centroid.coords[0])
-        existing_yx = existing_xy[1], existing_xy[0]
+        geometries = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
+        edge_xy = tuple(GeometryCollection(geometries).centroid.coords[0])
+        edge_yx = edge_xy[1], edge_xy[0]
         node_xy = tuple(node_table[['longitude', 'latitude']].mean())
-        if get_distance(node_xy, existing_xy) > get_distance(
-                node_xy, existing_yx):
+        if get_distance(node_xy, edge_xy) > get_distance(
+                node_xy, edge_yx):
             for geometry in geometries:
                 geometry.coords = [x[::-1] for x in geometry.coords]
             existing_networks_latlon = 1
-        else:
-            existing_networks_latlon = 0
         # Save in longitude, latitude
         existing_networks_geotable_path = join(
             target_folder, 'existing_networks.shp')
@@ -1189,9 +1188,6 @@ if __name__ == '__main__':
         metavar='INTEGER', required=True, type=int)
 
     argument_parser.add_argument(
-        '--existing_networks_geotable_path',
-        metavar='PATH', required=True)
-    argument_parser.add_argument(
         '--line_length_adjustment_factor',
         metavar='FLOAT', required=True, type=float)
     argument_parser.add_argument(
@@ -1200,10 +1196,10 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--connection_count_per_thousand_people',
         metavar='FLOAT', required=True, type=float)
+
     argument_parser.add_argument(
         '--consumption_per_connection_in_kwh',
         metavar='FLOAT', required=True, type=float)
-
     argument_parser.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
         metavar='PERCENT', required=True, type=float)
@@ -1218,6 +1214,9 @@ if __name__ == '__main__':
         '--grid_system_loss_as_percent_of_total_production',
         metavar='PERCENT', required=True, type=float)
 
+    argument_parser.add_argument(
+        '--grid_mv_line_geotable_path',
+        metavar='PATH', required=True)
     argument_parser.add_argument(
         '--grid_mv_line_installation_lm_cost_per_meter',
         metavar='FLOAT', required=True, type=float)
@@ -1331,8 +1330,8 @@ if __name__ == '__main__':
     g = args.__dict__.copy()
     g['demographic_table'] = read_csv(
         args.demographic_table_path)
-    g['existing_networks_geotable'] = read_csv(
-        args.existing_networks_geotable_path)
+    g['grid_mv_line_geotable'] = read_csv(
+        args.grid_mv_line_geotable_path)
     g['grid_mv_transformer_table'] = read_csv(
         args.grid_mv_transformer_table_path)
     g['diesel_mini_grid_generator_table'] = read_csv(

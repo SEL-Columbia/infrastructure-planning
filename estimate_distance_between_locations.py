@@ -6,9 +6,9 @@ from networkx.algorithms import minimum_spanning_tree
 from pandas import read_csv
 
 
-def run(buildings_geotable):
+def run(location_geotable):
     graph = Graph()
-    for index, row in buildings_geotable.iterrows():
+    for index, row in location_geotable.iterrows():
         graph.add_node(index, {
             'lat': row['Latitude'], 'lon': row['Longitude']})
     for node1_id in xrange(min(graph), max(graph)):
@@ -22,12 +22,12 @@ def run(buildings_geotable):
     tree = minimum_spanning_tree(graph)
     total_distance = sum(edge_d[
         'weight'] for node1_id, node2_id, edge_d in tree.edges(data=True))
-    building_count = len(graph)
-    average_distance = total_distance / float(building_count)
+    location_count = len(graph)
+    average_distance = total_distance / float(location_count)
     return [
-        ('total_distance_between_buildings_in_meters', total_distance),
-        ('building_count', building_count),
-        ('average_distance_between_buildings_in_meters', average_distance),
+        ('total_distance_between_locations_in_meters', total_distance),
+        ('location_count', location_count),
+        ('average_distance_between_locations_in_meters', average_distance),
     ]
 
 
@@ -35,10 +35,10 @@ if __name__ == '__main__':
     argument_parser = ArgumentParser()
 
     argument_parser.add_argument(
-        '--buildings_geotable_path',
+        '--location_geotable_path',
         metavar='PATH', required=True)
 
     args = argument_parser.parse_args()
     d = run(
-        read_csv(args.buildings_geotable_path))
+        read_csv(args.location_geotable_path))
     print(format_summary(d))
