@@ -2,22 +2,11 @@ Consider ordering the columns in the output report manually
     Remove OrderedDict
 Set name of town to column name
 
-
 Change finance units to years explicitly
 Define loan_year in compute discounted cost
 Check whether different loan year affects breakeven time (whether we need to add loan year)
-
-= Estimate grid electricity internal cost
-    Draft workflow in notebook
-        Check that we have accounted for all variables in old grid cost model
-
 Consider accepting net present value vs consumption curve for energy source X
-
-Optimize medium voltage network for cost
 Compare electrification scenarios
-Estimate mini grid electricity internal cost
-Estimate off grid electricity internal cost
-Estimate population using simple exponential growth
 
 Make script for each technology that only does modelling for that technology
 Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
@@ -32,5 +21,3 @@ Cite sources for data in interface markdown
     Cite "Electric Sales, Revenue, and Average Price" 
         http://www.eia.gov/electricity/sales_revenue_price/index.cfm
         http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
-
-Create wizard that recommends appropriate tool based on user's goals
