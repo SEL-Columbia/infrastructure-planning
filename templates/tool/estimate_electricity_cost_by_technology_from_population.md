@@ -33,9 +33,6 @@ To override a computed value, upload a CSV with an additional column. The column
 ## Consumption
 Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
 
-#### Existing Electricity Networks
-{existing_networks_geotable}
-
 #### Line Length Adjustment Factor
 The length of line used to connect two locations is often greater than the distance between the two locations.
 {line_length_adjustment_factor}
@@ -77,6 +74,9 @@ Medium voltage lines carry electricity over large distances.
     * Multiply the maintenance cost of MV line per meter by the number of meters of MV line in the network.
 * Recurring Replacement Cost
     * Divide the installation cost by the lifetime of MV line.
+
+#### Existing Grid Medium Voltage Line
+{grid_mv_line_geotable}
 
 #### Grid Medium Voltage Line Installation Labor and Material Cost per Meter
 {grid_mv_line_installation_lm_cost_per_meter}
