@@ -137,13 +137,13 @@ The low voltage connection connects a building to low voltage line.
 * Recurring Replacement Cost
     * Divide the installation cost by the lifetime of the connection to estimate the replacement cost per year.
 
-#### Grid Low Voltage Connection
+#### Grid Low Voltage Connection Installation Labor and Material Cost per Connection
 {grid_lv_connection_installation_lm_cost_per_connection}
 
-#### Grid Low Voltage Connection
+#### Grid Low Voltage Connection Maintenance Labor and Material Cost per Connection per Year
 {grid_lv_connection_maintenance_lm_cost_per_connection_per_year}
 
-#### Grid Low Voltage Connection
+#### Grid Low Voltage Connection Lifetime in Years
 {grid_lv_connection_lifetime_in_years}
 
 ## Technology: Diesel Mini Grid

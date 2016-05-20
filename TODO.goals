@@ -1,17 +1,50 @@
-Consider ordering the columns in the output report manually
-    Remove OrderedDict
-Set name of town to column name
+Check that it works with Nigeria dataset
+    Expose minimum node count per subnetwork
+    Expose maximum_connection_count
+    Expose maximum_consumption_per_year_in_kwh
 
+    Make sure that existing networks show on map
+    Check whether node level overrides work
+    Use number of people per connection
+
+    Change instances of $/kW
+
+
+
+    Consider filling certain values based on urban vs rural or administrative boundary
+        Build separate tools to populate spreadsheet
+        Consider integrated tool that lets people pick how to fill values
+    Consider number of people per household connection
+    Build separate consumption model
+        Estimate number of households based on household size
+        Specify number of schools and school demand
+        Specify number of hospitals and hospital demand
+
+Split components into package
+    estimate_nodal_population,
+    estimate_nodal_consumption_in_kwh,
+    estimate_nodal_peak_demand_in_kw,
+    estimate_nodal_internal_cost_by_technology,
+    estimate_nodal_grid_mv_network_budget_in_meters,
+    assemble_total_grid_mv_network,
+    sequence_total_grid_mv_network,
+    estimate_nodal_external_cost_by_technology,
+    estimate_total_cost,
+
+    estimate_grid_internal_cost
+    estimate_grid_external_cost
+    estimate_diesel_mini_grid_internal_cost
+    estimate_diesel_mini_grid_external_cost
+    estimate_solar_home_internal_cost
+    estimate_solar_home_external_cost
+
+Set name of town to column name
 Change finance units to years explicitly
-Define loan_year in compute discounted cost
-Check whether different loan year affects breakeven time (whether we need to add loan year)
 Consider accepting net present value vs consumption curve for energy source X
-Compare electrification scenarios
 
 Make script for each technology that only does modelling for that technology
 Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
-Return geotable if table has longitude and latitude
-Return geotable if table has city or address
+
 Cite sources for data in interface markdown
     Cite "Total population, both sexes combined (thousands)" http://data.un.org/Data.aspx?d=PopDiv&f=variableID%3A12
     Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
@@ -21,3 +54,10 @@ Cite sources for data in interface markdown
     Cite "Electric Sales, Revenue, and Average Price" 
         http://www.eia.gov/electricity/sales_revenue_price/index.cfm
         http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
+
+Update compute-discounted-cost
+    Define loan_year in compute discounted cost
+    Check whether different loan year affects breakeven time (whether we need to add loan year)
+
+Return geotable if table has longitude and latitude
+Return geotable if table has city or address

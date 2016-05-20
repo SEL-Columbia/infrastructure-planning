@@ -31,7 +31,9 @@ def estimate_nodal_population(
         population_growth_as_percent_of_population_per_year,
         financing_year,
         time_horizon_in_years):
-    # TODO: Support the case when financing_year is less than population_year
+    """
+    forecast_demographic_with_exponential_growth
+    """
     if financing_year < population_year:
         raise InfrastructurePlanningError('financing_year', M[
             'bad_financing_year'] % (financing_year, population_year))
