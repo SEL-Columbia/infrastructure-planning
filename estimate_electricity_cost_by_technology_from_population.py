@@ -444,6 +444,10 @@ def assemble_total_grid_mv_network(
             for geometry in geometries:
                 geometry.coords = [x[::-1] for x in geometry.coords]
             existing_networks_latlon = 1
+        print('AAAAA')
+        print('existing_networks_latlon %s' % existing_networks_latlon)
+        for geometry in geometries:
+            print geometry.wkt
         # Save in longitude, latitude
         existing_networks_geotable_path = join(
             target_folder, 'existing_networks.shp')
@@ -935,15 +939,21 @@ def run(target_folder, g):
             'WKT': geometry_wkt,
             'FillColor': COLOR_BY_TECHNOLOGY['grid'],
         })
-    if 'existing_networks_geotable' in g:
-        for geometry_wkt in g['existing_networks_geotable']['WKT']:
-            geometry = wkt.loads(geometry_wkt)
+    if 'grid_mv_line_geotable' in g:
+
+        print('BBBBBB')
+        print('existing_networks_latlon %s' % g['existing_networks_latlon'])
+
+        for geometry_wkt in g['grid_mv_line_geotable']['WKT']:
             # Save in latitude, longitude
             if not g['existing_networks_latlon']:
                 coords = []
-                for x, y in list(geometry.coords):
-                    coords.append((y, x))
+                for x, y in list(wkt.loads(geometry_wkt).coords):
+                    coords.append((y, x))  # Mapbox wants lon lat
                 geometry_wkt = LineString(coords)
+
+            print geometry_wkt
+
             rows.append({
                 'Name': '(Existing Grid)',
                 'Suggested Technology': 'grid',

@@ -20,18 +20,53 @@ The user must be able to override variables on a case by case basis.
 
 # Log
 20160523-1130 - 20160523-1230
++ Make sure that existing networks show
++ Fix geotable flip flop if wkt is specified wrong (or consider smart alignment)
++ Identify current output files
+
+    common_values.csv
+    edges.dbf
+    edges.prj
+    edges.shp
+    edges.shx
+    executive_summary.csv
+    existing_networks.dbf
+    existing_networks.prj
+    existing_networks.shp
+    existing_networks.shx
+    grid_mv_line.csv
+    infrastructure_graph.pkl
+    infrastructure_streets_satellite.csv
+    levelized_cost_by_technology.csv
+    nodes-networker.csv
+    nodes-sequencer.csv
+    nodes.dbf
+    nodes.prj
+    nodes.shp
+    nodes.shx
+    result.cfg
+    run.sh
+    standard_error.log
+    standard_output.log
+    unique_values.csv
+    unique_values_transposed.csv
+    yearly_values.csv
+
+Identify desired output files
 
 # Tasks
 
+    Clean up files in output folder
+        Generate executive summary as specified by Naichen and Edwin
+
     Fix bugs
-        Make sure that existing networks show
-        Fix geotable flip flop if wkt is specified wrong (or consider smart alignment)
         Rename to existing grid mv line and proposed grid mv line
+        Change instances of $/kW to cost per kW
+        Change finance units to years explicitly
+
         Fix input to sequencer to use only points selected for grid
         Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
-        Change instances of $/kW to cost per kW
         Use number of people per connection
-        Change finance units to years explicitly
 
     Add credits to each tool
     Make JSON file for Nigeria dataset
@@ -40,8 +75,6 @@ The user must be able to override variables on a case by case basis.
         Expose minimum node count per subnetwork
         Expose maximum_connection_count
         Expose maximum_consumption_per_year_in_kwh
-
-    Generate executive summary as specified by Naichen and Edwin
 
     Split components into package and separate tools
         estimate_nodal_population
