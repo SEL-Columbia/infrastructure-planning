@@ -961,9 +961,10 @@ def run(target_folder, g):
                 'FillColor': COLOR_BY_TECHNOLOGY['grid'],
             })
     infrastructure_geotable_path = join(
-        target_folder, 'infrastructure_streets_satellite.csv')
+        target_folder, 'infrastructure_map.csv')
     DataFrame(rows)[columns].to_csv(infrastructure_geotable_path, index=False)
-    d['infrastructure_geotable_path'] = infrastructure_geotable_path
+    d['infrastructure_streets_satellite_geotable_path'] = \
+        infrastructure_geotable_path
 
     # Show executive summary
     keys = [

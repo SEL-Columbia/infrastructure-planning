@@ -4,7 +4,7 @@
 Radius indicates relative **peak demand**.
 Color indicates **suggested technology**.
 
-{infrastructure_geotable}
+{infrastructure_streets_satellite_geotable}
 
 ## Executive Summary
 {executive_summary_table}
