@@ -20,6 +20,7 @@ The user must be able to override variables on a case by case basis.
 
 # Log
 20160523-1130 - 20160523-1230
+
 The main goal will be to have trainers start testing the script.
 
     + Make sure that existing networks show
@@ -60,10 +61,10 @@ The main goal will be to have trainers start testing the script.
         /run.sh
         /stdout.log
         /stderr.log
-        /infrastructure_graph.pkl
         /infrastructure_map.csv
         /infrastructure_summary.csv
         /infrastructure_details.csv
+        /infrastructure_graph.pkl (eventually topojson)
         /estimate_total_cost/points.csv
         /estimate_total_cost/points.shp
         /estimate_total_cost/lines.csv
@@ -72,27 +73,64 @@ The main goal will be to have trainers start testing the script.
         /estimate_total_cost/costs.csv
         /estimate_total_cost/parameters.json
 
+20160523-1430 - 20160523-1530
+
+The main goal is to make sure the users can start testing tomorrow. I'm really tempted to start cleaning up the code, but I should hold off on that temptation and just fix the bugs.
+
+    + Change instances of $/kWh to cost per kWh
+
+The original purpose of existing_networks_latlon was to detect whether the existing networks needed to have its coordinates reversed.  It would be nice if the existing networks were just specified in latitude and longitude explicitly. There is also the complication that Mapbox wants longitude, latitude. It's possible we are having this problem because of WKT format, which leaves coordinate order ambiguous. Maybe there should be something to indicate which coordinate order the file is using. Let's stick to longitude, latitude.
+
+Make sure that we normalize points and lines to Longitude, Latitude. Ideally, this should happen at the beginning and not only when it is needed.
+
+    g = normalize(target_folder, g)
+    g = normalize_parameters(target_folder, g)
+    _ g = normalize_everything(target_folder, g)
+
+Normalize and save raw inputs?
+
 # Tasks
 
-    Clean up files in output folder
-        Generate executive summary as specified by Naichen and Edwin
-
-    Fix bugs
-        Rename to existing grid mv line and proposed grid mv line
-        Change instances of $/kW to cost per kW
+    = Fix bugs
+        = Clean up existing_networks_latlon scotch tape
+        Fix input to sequencer to use only points selected for grid
+        Use number of people per connection
         Change finance units to years explicitly
 
-        Fix input to sequencer to use only points selected for grid
-        Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
-        Use number of people per connection
-
-    Add credits to each tool
     Make JSON file for Nigeria dataset
 
     Check whether local overrides work
         Expose minimum node count per subnetwork
         Expose maximum_connection_count
         Expose maximum_consumption_per_year_in_kwh
+
+    Clean up output folder
+        /result.cfg
+        /run.sh
+        /stdout.log
+        /stderr.log
+        /infrastructure_map.csv
+        /infrastructure_summary.csv
+        /infrastructure_details.csv
+        /infrastructure_graph.pkl (eventually topojson)
+        /estimate_total_cost/parameters.json
+        /estimate_total_cost/points.csv
+        /estimate_total_cost/points.shp
+        /estimate_total_cost/lines.csv
+        /estimate_total_cost/lines-existing.shp
+        /estimate_total_cost/lines-proposed.shp
+        /estimate_total_cost/costs.csv
+            Generate executive summary as specified by Naichen and Edwin
+    Consider saving the input and output for each function for debugging purposes (we can do this in compute)
+
+    Add acknowledgments to integrated tool
+    Setup independent cloud server
+    Setup laptop
+
+    Fix miscellaneous issues
+        Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
+        Rename to existing mv line and proposed mv line
+        Consider renaming demographic_table to demand_point_table or point_table
 
     Split components into package and separate tools
         estimate_nodal_population
@@ -113,5 +151,4 @@ The main goal will be to have trainers start testing the script.
             estimate_solar_home_external_cost
         estimate_total_cost
 
-    Setup laptop
-    Setup independent cloud server
+    Add acknowledgments to separate tools

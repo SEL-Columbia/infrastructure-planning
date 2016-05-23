@@ -57,7 +57,7 @@ A remote source produces electricity that is distributed to consumers.
 
 * Recurring Production Cost
     * Assume that we must produce more than what we consume because of distribution losses.
-    * Production cost is the loss-adjusted local consumption in kWh multiplied by the electricity production cost in $/kWh.
+    * Production cost is the loss-adjusted local consumption in kWh multiplied by the electricity production cost per kWh.
 
 #### Grid Electricity Production Cost per Kilowatt-Hour
 {grid_electricity_production_cost_per_kwh}

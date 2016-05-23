@@ -872,22 +872,21 @@ def run(target_folder, g):
             except InfrastructurePlanningError as e:
                 exit('%s.error = %s : %s : %s' % (
                     e[0], l['name'].encode('utf-8'), f.func_name, e[1]))
-
     ls = [node_d for node_id, node_d in g[
         'infrastructure_graph'
     ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
     ls, g = sift_common_values(ls, g)
+
     # Save
     save_common_values(target_folder, g)
     save_unique_values(target_folder, ls)
     save_yearly_values(target_folder, ls)
-
     # Prepare summaries
     d = OrderedDict()
     graph = g['infrastructure_graph']
-
     # TODO: Use JSON after we convert pandas series into dictionaries
     write_gpickle(graph, join(target_folder, 'infrastructure_graph.pkl'))
+
     # Map
     columns = [
         'Name',
