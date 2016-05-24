@@ -432,30 +432,13 @@ def assemble_total_grid_mv_network(
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {'minimum_node_count': 2},
     }
-    existing_networks_latlon = 0
     if len(grid_mv_line_geotable):
-        # Adjust coordinate order
-        geometries = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
-        edge_xy = tuple(GeometryCollection(geometries).centroid.coords[0])
-        edge_yx = edge_xy[1], edge_xy[0]
-        node_xy = tuple(node_table[['longitude', 'latitude']].mean())
-        if get_distance(node_xy, edge_xy) > get_distance(
-                node_xy, edge_yx):
-            for geometry in geometries:
-                geometry.coords = [x[::-1] for x in geometry.coords]
-            existing_networks_latlon = 1
-        print('AAAAA')
-        print('existing_networks_latlon %s' % existing_networks_latlon)
-        for geometry in geometries:
-            print geometry.wkt
-        # Save in longitude, latitude
-        existing_networks_geotable_path = join(
-            target_folder, 'existing_networks.shp')
-        geometryIO.save(
-            existing_networks_geotable_path, geometryIO.proj4LL, geometries)
+        grid_mv_line_shapefile_path = join(
+            target_folder, 'existing_grid_mv_line.shp')
+        save_shapefile(grid_mv_line_shapefile_path, grid_mv_line_geotable)
         nwk_settings['existing_networks'] = {
-            'filename': existing_networks_geotable_path,
-            'budget_value': 0
+            'filename': grid_mv_line_shapefile_path,
+            'budget_value': 0,
         }
     nwk = NetworkerRunner(nwk_settings, target_folder)
     nwk.validate()
@@ -474,7 +457,6 @@ def assemble_total_grid_mv_network(
     infrastructure_graph.add_edges_from(msf.edges_iter())
     return {
         'infrastructure_graph': infrastructure_graph,
-        'existing_networks_latlon': existing_networks_latlon,
     }
 
 
@@ -835,7 +817,7 @@ COLUMN_NAMES = {
 
 
 def run(target_folder, g):
-    g = normalize_parameters(g, TABLE_NAMES, COLUMN_NAMES)
+    g = prepare_parameters(g, TABLE_NAMES, COLUMN_NAMES)
 
     # Compute
 
@@ -927,20 +909,7 @@ def run(target_folder, g):
             'FillColor': COLOR_BY_TECHNOLOGY['grid'],
         })
     if 'grid_mv_line_geotable' in g:
-
-        print('BBBBBB')
-        print('existing_networks_latlon %s' % g['existing_networks_latlon'])
-
         for geometry_wkt in g['grid_mv_line_geotable']['WKT']:
-            # Save in latitude, longitude
-            if not g['existing_networks_latlon']:
-                coords = []
-                for x, y in list(wkt.loads(geometry_wkt).coords):
-                    coords.append((y, x))  # Mapbox wants lon lat
-                geometry_wkt = LineString(coords)
-
-            print geometry_wkt
-
             rows.append({
                 'Name': '(Existing Grid)',
                 'Suggested Technology': 'grid',
@@ -982,7 +951,7 @@ def run(target_folder, g):
         rows.append([name, line_length, discounted_cost])
     table_path = join(target_folder, 'grid_mv_line.csv')
     DataFrame(rows, columns=[
-        'Name', 'Length (m)', 'Discounted Cost']).sort(
+        'Name', 'Length (m)', 'Discounted Cost']).sort_values(
         'Length (m)',
     ).to_csv(table_path, index=False)
     d['grid_mv_line_table_path'] = table_path
@@ -1002,7 +971,7 @@ def run(target_folder, g):
         'Name', 'Connection Order',
     ] + [
         format_technology(x) for x in TECHNOLOGIES
-    ] + ['Suggested Technology']).sort(
+    ] + ['Suggested Technology']).sort_values(
         'Connection Order',
     ).to_csv(table_path, index=False)
     d['levelized_cost_by_technology_table_path'] = table_path
@@ -1010,18 +979,16 @@ def run(target_folder, g):
     return d
 
 
-def normalize_parameters(g, table_names, column_names):
+def prepare_parameters(g, table_names, column_names):
     for table_name in table_names:
         table = g[table_name]
         table.columns = normalize_column_names(table.columns, column_names)
-    demand_point_table = normalize_demand_point_table(g['demand_point_table'])
-    grid_mv_line_geotable = normalize_grid_mv_line_geotable(
-        g['grid_mv_line_geotable'], demand_point_table)
-    return merge_dictionaries(g, {
-        'demand_point_table': demand_point_table,
-        'grid_mv_line_geotable': grid_mv_line_geotable,
-        'infrastructure_graph': get_graph_from_table(demand_point_table),
-    })
+    for prepare_parameter in [
+            prepare_demand_point_table,
+            prepare_grid_mv_line_geotable]:
+        g.update(compute(prepare_parameter, g))
+    g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
+    return g
 
 
 def normalize_column_names(column_names, normalized_name_by_column_name):
@@ -1037,20 +1004,39 @@ def normalize_column_names(column_names, normalized_name_by_column_name):
     return normalized_names
 
 
-def normalize_demand_point_table(demand_point_table):
+def prepare_demand_point_table(demand_point_table):
     if 'year' in demand_point_table.columns:
         # Rename year to population_year
         demand_point_table = demand_point_table.rename(columns={
             'year': 'population_year'})
+    demand_point_by_year = demand_point_table.set_index('population_year')
     if 'population_year' in demand_point_table.columns:
         # Use most recent population_year if there are many population_years
-        demand_point_table = demand_point_table.sort(
+        demand_point_table = demand_point_table.sort_values(
             'population_year').groupby('name').last().reset_index()
-    return demand_point_table
+    return [
+        ('demand_point_table', demand_point_table),
+        ('demand_point_by_year', demand_point_by_year),
+    ]
 
 
-def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
-    return grid_mv_line_geotable
+def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
+    'Make sure that grid mv lines use (latitude, longitude) coordinate order'
+    grid_mv_lines = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
+    if grid_mv_lines:
+        edge_xy = tuple(GeometryCollection(grid_mv_lines).centroid.coords[0])
+        edge_yx = edge_xy[1], edge_xy[0]
+        node_xy = tuple(demand_point_table[['longitude', 'latitude']].mean())
+        # If the flipped coordinates are closer,
+        if get_distance(node_xy, edge_yx) < get_distance(node_xy, edge_xy):
+            # Flip coordinates to get (latitude, longitude) coordinate order
+            for line in grid_mv_lines:
+                line.coords = [flip_xy(xyz) for xyz in line.coords]
+            # ISO 6709 specifies (latitude, longitude) coordinate order
+            grid_mv_line_geotable['WKT'] = [x.wkt for x in grid_mv_lines]
+    return [
+        ('grid_mv_line_geotable', grid_mv_line_geotable),
+    ]
 
 
 def get_graph_from_table(table):
@@ -1186,6 +1172,21 @@ def save_yearly_values(target_folder, ls):
 
 def format_technology(x):
     return x.replace('_', ' ').title()
+
+
+def flip_xy(xyz):
+    xyz = list(xyz)
+    xyz[0], xyz[1] = xyz[1], xyz[0]
+    return xyz
+
+
+def save_shapefile(target_path, geotable):
+    # TODO: Support WKT
+    # TODO: Support Latitude, Longitude
+    # TODO: Save extra attributes
+    geometries = [wkt.loads(x) for x in geotable['WKT']]
+    geometryIO.save(target_path, geometryIO.proj4LL, geometries)
+    return target_path
 
 
 if __name__ == '__main__':

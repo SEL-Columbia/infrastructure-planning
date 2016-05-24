@@ -108,16 +108,37 @@ I don't like it when functions depend on global variables because then they are 
 
 Maybe I'll change my notation from underscore for cancelling something to the hash symbol, the universal comment character.
 
+    + Implement normalize_parameters
+    + Update normalize_column_names
+
+20160524-1130 - 20160524-1230: 1 hour estimated
+20160524-1130 - 20160524-1600: 4 hours 30 minutes actual
+
+I should really finish the JSON support today for CJN.
+
+    + Implement normalize_grid_mv_line_geotable
+    + Clean up existing_networks_latlon scotch tape
+
+Will there ever be a case when medium voltage lines are for some other technology, not grid? But to be consistent, there is always grid in front of mv line.
+
+    existing_grid_mv_line_shapefile
+    # existing_mv_line_shapefile
+    # existing_grid_mv_lines_shapefile
+    # existing_mv_lines_shapefile
+    # existing_mv_shapefile
+
+I'm not sure whether I should pass around grid_mv_lines or grid_mv_line_geotable. The problem with shapely geometries is that they do not naturally support other attributes that might have been passed in for each line and that we might want to use or preserve. In that case, let's stick to grid_mv_line_geotable.
+
 # Tasks
 
     = Fix bugs
-        = Clean up existing_networks_latlon scotch tape
-            = Implement normalize_parameters
-        Fix input to sequencer to use only points selected for grid
         Use number of people per connection
-        Change finance units to years explicitly
 
     Make JSON file for Nigeria dataset
+
+    Fix more bugs
+        Fix input to sequencer to use only points selected for grid
+        Change finance units to years explicitly
 
     Check whether local overrides work
         Expose minimum node count per subnetwork
