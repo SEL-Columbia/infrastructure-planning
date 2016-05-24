@@ -1,10 +1,10 @@
 import geometryIO
-import geopy
 import inspect
 import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
 from copy import copy, deepcopy
+from geopy import GoogleV3
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
@@ -32,7 +32,7 @@ def estimate_nodal_population(
         financing_year,
         time_horizon_in_years):
     """
-    forecast_demographic_with_exponential_growth
+    forecast_demand_point_table_path
     """
     if financing_year < population_year:
         raise InfrastructurePlanningError('financing_year', M[
@@ -410,7 +410,7 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
 
 def assemble_total_grid_mv_network(
         target_folder, infrastructure_graph, grid_mv_line_geotable):
-    geocode = geopy.GoogleV3().geocode
+    geocode = GoogleV3().geocode
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         lon = node_d.get('longitude')
         lat = node_d.get('latitude')
@@ -653,9 +653,8 @@ def prepare_internal_cost(functions, keywords):
 
 
 def prepare_actual_system_capacity(
-        desired_system_capacity, option_table, capacity_column_key):
+        desired_system_capacity, option_table, capacity_column):
     t = option_table
-    capacity_column = C[capacity_column_key]
     # Select option
     eligible_t = t[t[capacity_column] < desired_system_capacity]
     if len(eligible_t):
@@ -672,17 +671,16 @@ def prepare_actual_system_capacity(
         selected_capacity)))
     actual_system_capacity = selected_capacity * selected_count
     # Get costs
-    installation_lm_cost = selected_count * selected[C[
-        'installation_lm_cost']]
-    maintenance_lm_cost_per_year = selected_count * selected[C[
-        'maintenance_lm_cost_per_year']]
-    replacement_lm_cost_per_year = installation_lm_cost / float(selected[C[
-        'lifetime_in_years']])
+    installation_lm_cost = selected_count * selected['installation_lm_cost']
+    maintenance_lm_cost_per_year = selected_count * selected[
+        'maintenance_lm_cost_per_year']
+    replacement_lm_cost_per_year = installation_lm_cost / float(selected[
+        'lifetime_in_years'])
     return [
-        ('desired_system_' + capacity_column_key, desired_system_capacity),
-        ('selected_' + capacity_column_key, selected_capacity),
+        ('desired_system_' + capacity_column, desired_system_capacity),
+        ('selected_' + capacity_column, selected_capacity),
         ('selected_count', selected_count),
-        ('actual_system_' + capacity_column_key, actual_system_capacity),
+        ('actual_system_' + capacity_column, actual_system_capacity),
         ('installation_lm_cost', installation_lm_cost),
         ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
         ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
@@ -780,20 +778,6 @@ def load_abbreviations(locale):
     }
 
 
-def load_column_names(locale):
-    return {
-        'name': 'name',
-        'population': 'population',
-        'year': 'year',
-        'capacity_in_kva': 'capacity in kva',
-        'capacity_in_kw': 'capacity in kw',
-        'installation_lm_cost': 'installation labor and material cost',
-        'maintenance_lm_cost_per_year': (
-            'maintenance labor and material cost per year'),
-        'lifetime_in_years': 'lifetime in years',
-    }
-
-
 def load_messages(locale):
     return {
         'bad_financing_year': (
@@ -804,16 +788,9 @@ def load_messages(locale):
 
 
 A = load_abbreviations('en-US')
-C = load_column_names('en-US')
 M = load_messages('en-US')
 
 
-TABLE_NAMES = [
-    'demographic_table',
-    'grid_mv_transformer_table',
-    'diesel_mini_grid_generator_table',
-    'solar_home_panel_table',
-]
 MAIN_FUNCTIONS = [
     estimate_nodal_population,
     estimate_nodal_consumption_in_kwh,
@@ -841,18 +818,27 @@ COLORS = 'bgrcmykw'
 COLOR_BY_TECHNOLOGY = {
     technology: COLORS[index] for index, technology in enumerate(TECHNOLOGIES)
 }
+TABLE_NAMES = [
+    'demand_point_table',
+    'grid_mv_transformer_table',
+    'diesel_mini_grid_generator_table',
+    'solar_home_panel_table',
+]
+COLUMN_NAMES = {
+    'capacity in kva': 'capacity_in_kva',
+    'capacity in kw': 'capacity_in_kw',
+    'installation labor and material cost': 'installation_lm_cost',
+    'maintenance labor and material cost per year':
+        'maintenance_lm_cost_per_year',
+    'lifetime in years': 'lifetime_in_years'
+}
 
 
 def run(target_folder, g):
-    # Prepare
-    for table_name in TABLE_NAMES:
-        table = g[table_name]
-        table.columns = normalize_column_names(table.columns, g['locale'])
-    demographic_table = normalize_demographic_table(g['demographic_table'])
-    g['target_folder'] = target_folder
-    g['demographic_table'] = demographic_table
-    g['infrastructure_graph'] = get_graph_from_table(demographic_table)
+    g = normalize_parameters(g, TABLE_NAMES, COLUMN_NAMES)
+
     # Compute
+
     for f in MAIN_FUNCTIONS:
         if '_total_' in f.func_name:
             try:
@@ -865,7 +851,7 @@ def run(target_folder, g):
             if 'name' not in node_d:
                 continue  # We have a fake node
             # Perform node-level override
-            node_defaults = dict(demographic_table.ix[node_id])
+            node_defaults = dict(g['demand_point_table'].ix[node_id])
             l = merge_dictionaries(node_d, node_defaults)
             try:
                 node_d.update(compute(f, l, g))
@@ -876,6 +862,7 @@ def run(target_folder, g):
         'infrastructure_graph'
     ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
     ls, g = sift_common_values(ls, g)
+    # compute should produce ls, g
 
     # Save
     save_common_values(target_folder, g)
@@ -888,6 +875,7 @@ def run(target_folder, g):
     write_gpickle(graph, join(target_folder, 'infrastructure_graph.pkl'))
 
     # Map
+    # The map is a type of report, but it is not included in the summary folder
     columns = [
         'Name',
         'Peak Demand (kW)',
@@ -965,6 +953,8 @@ def run(target_folder, g):
     d['infrastructure_streets_satellite_geotable_path'] = \
         infrastructure_geotable_path
 
+    # The executive summary is also not included in the summary folder
+
     # Show executive summary
     keys = [
         'discounted_cost_by_technology',
@@ -1020,19 +1010,47 @@ def run(target_folder, g):
     return d
 
 
-def normalize_column_names(columns, locale):
-    'Translate each column name into English'
-    return [x.lower() for x in columns]
+def normalize_parameters(g, table_names, column_names):
+    for table_name in table_names:
+        table = g[table_name]
+        table.columns = normalize_column_names(table.columns, column_names)
+    demand_point_table = normalize_demand_point_table(g['demand_point_table'])
+    grid_mv_line_geotable = normalize_grid_mv_line_geotable(
+        g['grid_mv_line_geotable'], demand_point_table)
+    return merge_dictionaries(g, {
+        'demand_point_table': demand_point_table,
+        'grid_mv_line_geotable': grid_mv_line_geotable,
+        'infrastructure_graph': get_graph_from_table(demand_point_table),
+    })
 
 
-def normalize_demographic_table(table):
-    if 'year' in table.columns:
-        table = table.rename(columns={'year': 'population_year'})
-    if 'population_year' in table.columns:
-        # Use most recent year
-        table = table.sort('population_year').groupby('name').last()
-        table = table.reset_index()
-    return table
+def normalize_column_names(column_names, normalized_name_by_column_name):
+    'Translate each column name into lowercase_english_with_underscores'
+    normalized_names = []
+    for column_name in column_names:
+        column_name = column_name.lower()
+        try:
+            column_name = normalized_name_by_column_name[column_name]
+        except KeyError:
+            pass
+        normalized_names.append(column_name)
+    return normalized_names
+
+
+def normalize_demand_point_table(demand_point_table):
+    if 'year' in demand_point_table.columns:
+        # Rename year to population_year
+        demand_point_table = demand_point_table.rename(columns={
+            'year': 'population_year'})
+    if 'population_year' in demand_point_table.columns:
+        # Use most recent population_year if there are many population_years
+        demand_point_table = demand_point_table.sort(
+            'population_year').groupby('name').last().reset_index()
+    return demand_point_table
+
+
+def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
+    return grid_mv_line_geotable
 
 
 def get_graph_from_table(table):
@@ -1190,7 +1208,7 @@ if __name__ == '__main__':
         metavar='PERCENT', required=True, type=float)
 
     argument_parser.add_argument(
-        '--demographic_table_path',
+        '--demand_point_table_path',
         metavar='PATH', required=True)
     argument_parser.add_argument(
         '--population_year',
@@ -1337,11 +1355,10 @@ if __name__ == '__main__':
 
     args = argument_parser.parse_args()
     A = load_abbreviations(args.locale)
-    C = load_column_names(args.locale)
     M = load_messages(args.locale)
     g = args.__dict__.copy()
-    g['demographic_table'] = read_csv(
-        args.demographic_table_path)
+    g['demand_point_table'] = read_csv(
+        args.demand_point_table_path)
     g['grid_mv_line_geotable'] = read_csv(
         args.grid_mv_line_geotable_path)
     g['grid_mv_transformer_table'] = read_csv(

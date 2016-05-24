@@ -20,9 +20,9 @@ The net present value or discounted cost of an infrastructure project assumes th
 ## Demography
 Assume that population grows at a fixed rate each year. If the population is 100 and the growth rate is 10%, then the population will be 110 after the first year and 121 after the second year.
 
-#### Demographic Table
+#### Demand Point Table
 To override a computed value, upload a CSV with an additional column. The column name should match the name of the variable that you are overriding. Variable names are available in the CSV that is generated after running this tool.
-{demographic_table}
+{demand_point_table}
 
 #### Population Year
 {population_year}

@@ -83,16 +83,33 @@ The original purpose of existing_networks_latlon was to detect whether the exist
 
 Make sure that we normalize points and lines to Longitude, Latitude. Ideally, this should happen at the beginning and not only when it is needed.
 
-    g = normalize(target_folder, g)
     g = normalize_parameters(target_folder, g)
     _ g = normalize_everything(target_folder, g)
+    _ g = normalize(target_folder, g)
 
 Normalize and save raw inputs?
+
+I don't think that estimate_total_cost should produce the final outputs. There should be some kind of reporting function.
+
+    generate_total_summary
+    _ aggregate
+    _ save
+    _ summarize
+
+20160523-1800 - 20160523-1900
+
+I don't like it when functions depend on global variables.
+
+    def normalize_parameters(table_names, target_folder, g):
+    def normalize_parameters(target_folder, table_names, g):
+    def normalize_parameters(target_folder, g, table_names):
+    def normalize_parameters(g, table_names, target_folder):
 
 # Tasks
 
     = Fix bugs
         = Clean up existing_networks_latlon scotch tape
+            = Implement normalize_parameters
         Fix input to sequencer to use only points selected for grid
         Use number of people per connection
         Change finance units to years explicitly
@@ -113,13 +130,13 @@ Normalize and save raw inputs?
         /infrastructure_summary.csv
         /infrastructure_details.csv
         /infrastructure_graph.pkl (eventually topojson)
-        /estimate_total_cost/parameters.json
-        /estimate_total_cost/points.csv
-        /estimate_total_cost/points.shp
-        /estimate_total_cost/lines.csv
-        /estimate_total_cost/lines-existing.shp
-        /estimate_total_cost/lines-proposed.shp
-        /estimate_total_cost/costs.csv
+        /summary/parameters.json
+        /summary/points.csv
+        /summary/points.shp
+        /summary/lines.csv
+        /summary/lines-existing.shp
+        /summary/lines-proposed.shp
+        /summary/costs.csv
             Generate executive summary as specified by Naichen and Edwin
     Consider saving the input and output for each function for debugging purposes (we can do this in compute)
 
