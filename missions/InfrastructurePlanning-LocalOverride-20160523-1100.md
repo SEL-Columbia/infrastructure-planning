@@ -87,7 +87,7 @@ Make sure that we normalize points and lines to Longitude, Latitude. Ideally, th
     _ g = normalize_everything(target_folder, g)
     _ g = normalize(target_folder, g)
 
-Normalize and save raw inputs?
+Normalize and save raw inputs? No, I don't think we need to save the raw inputs.
 
 I don't think that estimate_total_cost should produce the final outputs. There should be some kind of reporting function.
 
@@ -98,12 +98,15 @@ I don't think that estimate_total_cost should produce the final outputs. There s
 
 20160523-1800 - 20160523-1900
 
-I don't like it when functions depend on global variables.
+I don't like it when functions depend on global variables because then they are hard to test.
 
-    def normalize_parameters(table_names, target_folder, g):
-    def normalize_parameters(target_folder, table_names, g):
-    def normalize_parameters(target_folder, g, table_names):
-    def normalize_parameters(g, table_names, target_folder):
+    def normalize_parameters(g, table_names):
+    # def save_parameters
+    # def normalize_parameters(g, table_names, target_folder):
+    # def normalize_parameters(table_names, target_folder, g):
+    # def normalize_parameters(target_folder, table_names, g):
+
+Maybe I'll change my notation from underscore for cancelling something to the hash symbol, the universal comment character.
 
 # Tasks
 
