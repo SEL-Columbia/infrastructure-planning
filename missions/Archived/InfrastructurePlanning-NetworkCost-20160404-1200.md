@@ -13,6 +13,8 @@ Building and sequencing a network is an important part of planning infrastructur
 # Timeframe
 20160404-1300 - 20160404-1500: 2 hours estimated
 
+20160404-1300 - 20160506-1300: 32 days actual
+
 # Objectives
 1. Run networker
 2. Run sequencer
@@ -20,133 +22,145 @@ Building and sequencing a network is an important part of planning infrastructur
 
 # Log
 20160404-1200 - 20160404-1215
+
 Clone both repositories.
-https://github.com/SEL-Columbia/networker
-https://github.com/SEL-Columbia/Sequencer
+
+- https://github.com/SEL-Columbia/networker
+- https://github.com/SEL-Columbia/Sequencer
 
 20160404-1530
+
 Well, I managed to get them both working, with some fixes.
+
 However, the code looks pretty messy.
 
 20160404-1600 - 20160404-1700
-+ Fork repositories.
-+ Get them working.
-    + Fix networker
-        + Remove numba.jit
-    + Fix sequencer
-+ Commit.
-+ Write a script that runs the networker and sequencer.
+
+    + Fork repositories.
+    + Get them working.
+        + Fix networker
+            + Remove numba.jit
+        + Fix sequencer
+    + Commit.
+    + Write a script that runs the networker and sequencer.
 
 20160405-1100 - 20160405-1200
-<<<<<<< HEAD
+
 20160406-1400 - 20160406-1600
-+ Write a script that runs the networker and sequencer.
 
-Decide name for population column.
+    + Write a script that runs the networker and sequencer.
+    + Decide name for population column.
 
-_ population start
-_ population end
+        _ population start
+        _ population end
 
-_ starting population
-_ ending population
+        _ starting population
+        _ ending population
 
-_ 2008 population
-_ 2020 population
+        _ 2008 population
+        _ 2020 population
 
-_ population in 2008
-_ population in 2020
+        _ population in 2008
+        _ population in 2020
 
-_ population (2008)
-_ population (2020)
+        _ population (2008)
+        _ population (2020)
 
-_ consumption (kWh)
-_ Consumption in kWh
+        _ consumption (kWh)
+        _ Consumption in kWh
 
-year
-population year
-2010
-population
-population in 2010
-population (2010)
-2000000
-financing year
-2020
-projected population
-population in 2020
-population (2020)
-3939393
+        year
+        population year
+        2010
+        population
+        population in 2010
+        population (2010)
+        2000000
+        financing year
+        2020
+        projected population
+        population in 2020
+        population (2020)
+        3939393
 
-= year, population, financing year, future population, future consumption
-year, population, financing year, population++, consumption++
-year, population, financing year, effective population, effective consumption
-_ year, population, financing year, projected population, projected consumption
+        = year, population, financing year, future population, future consumption
+        year, population, financing year, population++, consumption++
+        year, population, financing year, effective population, effective consumption
+        _ year, population, financing year, projected population, projected consumption
 
-_ population (2010), population (2020), consumption (2010), consumption (2020)
+        _ population (2010), population (2020), consumption (2010), consumption (2020)
 
-population (2010)
-2000000
-population (2020)
-3939393
+        population (2010)
+        2000000
+        population (2020)
+        3939393
 
-_ financing year
-_ financing population
+        _ financing year
+        _ financing population
 
-_ effective year
-_ effective population
+        _ effective year
+        _ effective population
 
-_ initial population
-_ population
+        _ initial population
+        _ population
 
-_ consumption (2008 kWh)
-_ Consumption in kWh in 2008
-Consumption (kWh, 2008)
+        _ consumption (2008 kWh)
+        _ Consumption in kWh in 2008
+        Consumption (kWh, 2008)
 
-population
-projected population
+        population
+        projected population
 
 The year based columns is not going to work because the population column might be different for each node.
 
 I choose this nomenclature because we can feed it back into the system. And future is a positive word.
-+ year, population, financing year, future population, future consumption
+
+    + year, population, financing year, future population, future consumption
 
 Instead, let's just have duplicate columns marked by an asterisk?
 
 No, I don't like symbolism. Let's be explicit and call it Future.
 
 20160406-1700 - 20160406-1900
+
 20160407-1100 - 20160407-1200
-List tasks remaining.
+
+    + List tasks remaining.
 
 20160407-1400 - 20160407-1500
+
 20160407-1500 - 20160407-1630
-+ Compute network budget.
 
-    _ estimate_system_cost_by_technology
-    estimate_system_cost_by_technology_before_grid_mv_network
-    _ estimate_system_cost_by_technology_before_mv_network
-    _ estimate_system_cost_by_technology_before_network
+    + Compute network budget.
 
-    estimate_grid_mv_network_budget
-    _ estimate_network_budget
+        _ estimate_system_cost_by_technology
+        estimate_system_cost_by_technology_before_grid_mv_network
+        _ estimate_system_cost_by_technology_before_mv_network
+        _ estimate_system_cost_by_technology_before_network
 
-    # minimize_grid_mv_line
-    # optimize_grid_mv_network
-    # propose_grid_mv_network_using_modified_boruvka,
-    suggest_grid_mv_network_using_modified_boruvka,
+        estimate_grid_mv_network_budget
+        _ estimate_network_budget
 
-    estimate_grid_mv_line_budget_in_meters,
-    estimate_grid_mv_network_budget_in_meters,
+        # minimize_grid_mv_line
+        # optimize_grid_mv_network
+        # propose_grid_mv_network_using_modified_boruvka,
+        suggest_grid_mv_network_using_modified_boruvka,
 
-    place_grid_mv_line_using_modified_boruvka,
-    place_grid_mv_network_using_modified_boruvka,
-    suggest_grid_mv_network_using_modified_boruvka,
+        estimate_grid_mv_line_budget_in_meters,
+        estimate_grid_mv_network_budget_in_meters,
 
-    # sequence_grid_mv_network
-    # order_grid_mv_network_construction
+        place_grid_mv_line_using_modified_boruvka,
+        place_grid_mv_network_using_modified_boruvka,
+        suggest_grid_mv_network_using_modified_boruvka,
+
+        # sequence_grid_mv_network
+        # order_grid_mv_network_construction
 
 20160408-1200 - 20160408-1300
+
 20160408-1430 - 20160408-1530
-= Run networker.
+
+    + Run networker.
 
 I want a table to be available for each main function.
 I want node-level overrides to work.
@@ -204,29 +218,33 @@ Decide nodal vs total
 
 Should we support multiple years within a location? No.
 
-+ Rename system to internal
-+ Remove references to pre network
-+ Rename distribution cost to internal distribution cost
-+ Remove references to OrderedDict
+    + Rename system to internal
+    + Remove references to pre network
+    + Rename distribution cost to internal distribution cost
+    + Remove references to OrderedDict
 
 20160411-1300 - 20160411-1400
-+ Write pseudocode for `assemble_total_grid_mv_network`
+
+    + Write pseudocode for `assemble_total_grid_mv_network`
 
 20160411-1400 - 20160411-1500
-+ See what information is included in edges.shp and nodes.shp by networker
-+ Integrate metric, networker, sequencer into one script.
-    + Run networker.
-    + Run sequencer.
-    + Extract relevant columns from sequencer output.
+
+    + See what information is included in edges.shp and nodes.shp by networker
+    + Integrate metric, networker, sequencer into one script.
+        + Run networker.
+        + Run sequencer.
+        + Extract relevant columns from sequencer output.
 
 20160504-1630 - 20160504-1730
-+ Map network nodes and edges
-+ Integrate existing grid
-    + Use old np datasets
+
+    + Map network nodes and edges
+    + Integrate existing grid
+        + Use old np datasets
 
 20160506-1100 - 20160506-1200
-+ Draft tool template
-+ Add bird distance vs multiplier option
-+ Aggregate costs for each node to compute total discounted and levelized cost
-+ Check that it works
-+ Draft result template
+
+    + Draft tool template
+    + Add bird distance vs multiplier option
+    + Aggregate costs for each node to compute total discounted and levelized cost
+    + Check that it works
+    + Draft result template
