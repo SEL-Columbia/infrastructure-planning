@@ -129,14 +129,16 @@ Will there ever be a case when medium voltage lines are for some other technolog
 
 I'm not sure whether I should pass around grid_mv_lines or grid_mv_line_geotable. The problem with shapely geometries is that they do not naturally support other attributes that might have been passed in for each line and that we might want to use or preserve. In that case, let's stick to grid_mv_line_geotable.
 
-# Tasks
+20160524-1600 - 20160524-1700: 1 hour estimated
 
-    = Fix bugs
-        Use number of people per connection
+Since we only have an hour left, let's jump to making the JSON file for the Nigeria dataset. Actually, I need to lift weights now. I wanted to lift weights yesterday but didn't get a chance.
+
+# Tasks
 
     Make JSON file for Nigeria dataset
 
-    Fix more bugs
+    Fix bugs
+        Use number of people per connection
         Fix input to sequencer to use only points selected for grid
         Change finance units to years explicitly
 

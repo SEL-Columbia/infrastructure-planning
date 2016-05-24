@@ -1,0 +1,86 @@
+{
+    "schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Networker Configuration",
+    "type": "object",
+    "properties": {
+        "existing_networks": {
+            "type": "object", 
+            "description": "parameters related to existing network input",
+            "properties": {
+                "filename": {"type": "string"},
+                "budget_value": {
+                    "type": "number", 
+                    "description": "Initial Budget value for network nodes",
+                    "default": 0
+                }
+            },
+            "required": ["filename"]
+        },
+        "demand_nodes": {
+            "type": "object", 
+            "description": "parameters related to demand node input",
+            "properties": {
+                "filename": {"type": "string"},
+                "x_column": {
+                    "type": "string", 
+                    "description": "column for x or longitude values",
+                    "default": "X"
+                },
+                "y_column": {
+                    "type": "string", 
+                    "description": "column for y or latitude values",
+                    "default": "Y"
+                }
+
+            },
+            "required": ["filename"]
+        },
+        "network_algorithm": {
+            "type": "string",
+            "description": "algorithm for network creation",
+            "enum": [
+                "mod_boruvka",
+                "mod_kruskal"
+            ],
+            "default": "mod_boruvka"
+        },
+        "network_parameters": {
+            "type": "object", 
+            "properties": {
+                "minimum_node_count": {
+                    "type": "number", 
+                    "description": "Minimum number of nodes in a non-grid connected subnetwork",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "single_network": {
+                    "type": "boolean", 
+                    "description": "Treat subgraphs of network as a single network",
+                    "default": true
+                },
+                "spherical_accuracy": {
+                    "type": "boolean",
+                    "description": "Treat geographic coordinates as spherical when connecting to existing grid (ignored if coordinates are projected)",
+                    "default": false
+                }
+            }
+        },
+        "output": {
+            "type": "object", 
+            "description": "parameters related to output",
+            "properties": {
+                "header_type": {
+                    "type": "string", 
+                    "description": "header output specifier",
+                    "enum": [
+                        "alias",
+                        "section_option"
+                    ],
+                    "default": "section_option"
+                }
+            }
+        }
+
+    },
+    "required": ["demand_nodes", "network_algorithm"]
+}
