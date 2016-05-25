@@ -101,10 +101,10 @@ I don't think that estimate_total_cost should produce the final outputs. There s
 I don't like it when functions depend on global variables because then they are hard to test.
 
     def normalize_parameters(g, table_names):
-    # def save_parameters
-    # def normalize_parameters(g, table_names, target_folder):
-    # def normalize_parameters(table_names, target_folder, g):
-    # def normalize_parameters(target_folder, table_names, g):
+    _ def save_parameters
+    _ def normalize_parameters(g, table_names, target_folder):
+    _ def normalize_parameters(table_names, target_folder, g):
+    _ def normalize_parameters(target_folder, table_names, g):
 
 Maybe I'll change my notation from underscore for cancelling something to the hash symbol, the universal comment character.
 
@@ -118,24 +118,60 @@ I should really finish the JSON support today for CJN.
 
     + Implement normalize_grid_mv_line_geotable
     + Clean up existing_networks_latlon scotch tape
+    + Rename demographic_table to demand_point_table or point_table
 
 Will there ever be a case when medium voltage lines are for some other technology, not grid? But to be consistent, there is always grid in front of mv line.
 
     existing_grid_mv_line_shapefile
-    # existing_mv_line_shapefile
-    # existing_grid_mv_lines_shapefile
-    # existing_mv_lines_shapefile
-    # existing_mv_shapefile
+    _ existing_mv_line_shapefile
+    _ existing_grid_mv_lines_shapefile
+    _ existing_mv_lines_shapefile
+    _ existing_mv_shapefile
 
 I'm not sure whether I should pass around grid_mv_lines or grid_mv_line_geotable. The problem with shapely geometries is that they do not naturally support other attributes that might have been passed in for each line and that we might want to use or preserve. In that case, let's stick to grid_mv_line_geotable.
 
 20160524-1600 - 20160524-1700: 1 hour estimated
 
-Since we only have an hour left, let's jump to making the JSON file for the Nigeria dataset. Actually, I need to lift weights now. I wanted to lift weights yesterday but didn't get a chance.
+Since we only have an hour left, let's jump to making the JSON file for the Nigeria dataset.
+
+20160525-1400 - 20160525-1500
+
++ Rename files
+
+    senegal-selected-demand-points.csv
+    senegal-selected-grid-mv-lines.csv
+    _ senegal-selected-points.csv
+    _ senegal-selected-lines.csv
+    _ senegal-existing-grid-mv-lines.csv
+    _ senegal-demand-points
+    _ senegal-grid-mv-lines
+    _ senegal-some-demand-points
+    _ senegal-some-grid-mv-lines.csv
+
+The disadvantage to using hashes is that it might confuse people when we are also using hashes for section headers.
+
+20160525-1600 - 20160525-1700
+
+We can use the configuration file as a starting point. The script should load the JSON, then either call run or construct an argument_parser. I think calling run is better. I see, it loads a ``g`` which is short for global variables. The JSON should become g, but there will also be some work where relative paths are resolved to source_folder.
+
+It looks like there is an option for nested JSON.
+
+Option 1: Nest the JSON into sections, with keys truncated and later prepended with their section name (but that would require adding extra text to the beginning of some keys).
+
+Option 2: Do not truncate the keys.
+
+For now, let's just keep it flat, get it working and think about this later.
 
 # Tasks
 
-    Make JSON file for Nigeria dataset
+    Draft JSON file from Senegal defaults in configuration file
+        Check that Senegal defaults really line up with old defaults from network-planner
+    Adjust script so that it accepts JSON file
+    Adjust script so that it accepts alterative ways to specify source_folder and target_folder
+    Support relative paths using source_folder
+    Write JSON schema
+
+    Draft JSON file from Nigeria defaults
 
     Fix bugs
         Use number of people per connection
@@ -146,52 +182,3 @@ Since we only have an hour left, let's jump to making the JSON file for the Nige
         Expose minimum node count per subnetwork
         Expose maximum_connection_count
         Expose maximum_consumption_per_year_in_kwh
-
-    Clean up output folder
-        /result.cfg
-        /run.sh
-        /stdout.log
-        /stderr.log
-        /infrastructure_map.csv
-        /infrastructure_summary.csv
-        /infrastructure_details.csv
-        /infrastructure_graph.pkl (eventually topojson)
-        /summary/parameters.json
-        /summary/points.csv
-        /summary/points.shp
-        /summary/lines.csv
-        /summary/lines-existing.shp
-        /summary/lines-proposed.shp
-        /summary/costs.csv
-            Generate executive summary as specified by Naichen and Edwin
-    Consider saving the input and output for each function for debugging purposes (we can do this in compute)
-
-    Add acknowledgments to integrated tool
-    Setup independent cloud server
-    Setup laptop
-
-    Fix miscellaneous issues
-        Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
-        Rename to existing mv line and proposed mv line
-        Consider renaming demographic_table to demand_point_table or point_table
-
-    Split components into package and separate tools
-        estimate_nodal_population
-        estimate_nodal_consumption_in_kwh
-        estimate_nodal_peak_demand_in_kw
-        estimate_nodal_internal_cost_by_technology
-            estimate_grid_internal_cost
-            estimate_diesel_mini_grid_internal_cost
-            estimate_solar_home_internal_cost
-        estimate_nodal_grid_mv_network_budget_in_meters
-        assemble_total_grid_mv_network
-            Submit pull request to networker
-        sequence_total_grid_mv_network
-            Submit pull request to sequencer
-        estimate_nodal_external_cost_by_technology
-            estimate_grid_external_cost
-            estimate_diesel_mini_grid_external_cost
-            estimate_solar_home_external_cost
-        estimate_total_cost
-
-    Add acknowledgments to separate tools

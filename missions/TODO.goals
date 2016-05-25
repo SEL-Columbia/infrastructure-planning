@@ -1,3 +1,52 @@
+Clean up output folder
+    /result.cfg
+    /run.sh
+    /stdout.log
+    /stderr.log
+    /infrastructure_map.csv
+    /infrastructure_summary.csv
+    /infrastructure_details.csv
+    /infrastructure_graph.pkl (eventually topojson)
+    /summary/parameters.json
+    /summary/points.csv
+    /summary/points.shp
+    /summary/lines.csv
+    /summary/lines-existing.shp
+    /summary/lines-proposed.shp
+    /summary/costs.csv
+        Generate executive summary as specified by Naichen and Edwin
+
+Add acknowledgments to integrated tool
+Setup independent cloud server
+Setup laptop
+
+Fix miscellaneous issues
+    Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
+    Rename to existing mv line and proposed mv line
+
+Split components into package and separate tools
+    estimate_nodal_population
+    estimate_nodal_consumption_in_kwh
+    estimate_nodal_peak_demand_in_kw
+    estimate_nodal_internal_cost_by_technology
+        estimate_grid_internal_cost
+        estimate_diesel_mini_grid_internal_cost
+        estimate_solar_home_internal_cost
+    estimate_nodal_grid_mv_network_budget_in_meters
+    assemble_total_grid_mv_network
+        Submit pull request to networker
+    sequence_total_grid_mv_network
+        Submit pull request to sequencer
+    estimate_nodal_external_cost_by_technology
+        estimate_grid_external_cost
+        estimate_diesel_mini_grid_external_cost
+        estimate_solar_home_external_cost
+    estimate_total_cost
+
+Add acknowledgments to separate tools
+Consider saving the input and output for each function for debugging purposes (we can do this in compute)
+Consider converting rows across multiple years into x_by_year
+
 Build separate consumption model
     Estimate number of households based on household size
     Specify number of schools and school demand

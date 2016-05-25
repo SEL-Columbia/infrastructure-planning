@@ -31,9 +31,6 @@ def estimate_nodal_population(
         population_growth_as_percent_of_population_per_year,
         financing_year,
         time_horizon_in_years):
-    """
-    forecast_demand_point_table_path
-    """
     if financing_year < population_year:
         raise InfrastructurePlanningError('financing_year', M[
             'bad_financing_year'] % (financing_year, population_year))
@@ -1009,14 +1006,13 @@ def prepare_demand_point_table(demand_point_table):
         # Rename year to population_year
         demand_point_table = demand_point_table.rename(columns={
             'year': 'population_year'})
-    demand_point_by_year = demand_point_table.set_index('population_year')
     if 'population_year' in demand_point_table.columns:
+        # TODO: Convert rows across multiple years into x_by_year
         # Use most recent population_year if there are many population_years
         demand_point_table = demand_point_table.sort_values(
             'population_year').groupby('name').last().reset_index()
     return [
         ('demand_point_table', demand_point_table),
-        ('demand_point_by_year', demand_point_by_year),
     ]
 
 
