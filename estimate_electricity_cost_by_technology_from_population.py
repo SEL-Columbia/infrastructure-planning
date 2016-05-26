@@ -25,7 +25,7 @@ from sequencer import NetworkPlan
 from sequencer.Models import EnergyMaximizeReturn
 
 
-def estimate_nodal_population(
+def estimate_local_population(
         population,
         population_year,
         population_growth_as_percent_of_population_per_year,
@@ -50,7 +50,7 @@ def estimate_nodal_population(
     ]
 
 
-def estimate_nodal_consumption_in_kwh(
+def estimate_local_consumption_in_kwh(
         population_by_year,
         connection_count_per_thousand_people,
         consumption_per_connection_in_kwh):
@@ -65,7 +65,7 @@ def estimate_nodal_consumption_in_kwh(
     ]
 
 
-def estimate_nodal_peak_demand_in_kw(
+def estimate_local_peak_demand_in_kw(
         consumption_in_kwh_by_year,
         consumption_during_peak_hours_as_percent_of_total_consumption,
         peak_hours_of_consumption_per_year):
@@ -80,7 +80,7 @@ def estimate_nodal_peak_demand_in_kw(
     ]
 
 
-def estimate_nodal_internal_cost_by_technology(**keywords):
+def estimate_local_internal_cost_by_technology(**keywords):
     'Estimate internal cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
@@ -384,12 +384,12 @@ def estimate_solar_home_balance_cost(
     return d
 
 
-def estimate_nodal_grid_mv_network_budget_in_meters(
+def estimate_local_grid_mv_line_budget_in_meters(
         internal_discounted_cost_by_technology, **keywords):
     standalone_cost = min(
         v for k, v in internal_discounted_cost_by_technology.items()
         if k != 'grid')
-    mv_network_budget = \
+    mv_line_budget = \
         standalone_cost - internal_discounted_cost_by_technology['grid']
     d = prepare_component_cost_by_year([
         ('mv_line', estimate_grid_mv_line_cost_per_meter),
@@ -400,12 +400,12 @@ def estimate_nodal_grid_mv_network_budget_in_meters(
         keywords['discount_rate_as_percent_of_cash_flow_per_year'])
     d['grid_mv_line_discounted_cost_per_meter'] = \
         grid_mv_line_discounted_cost_per_meter
-    d['grid_mv_network_budget_in_meters'] = mv_network_budget / float(
+    d['grid_mv_line_budget_in_meters'] = mv_line_budget / float(
         grid_mv_line_discounted_cost_per_meter)
     return d
 
 
-def assemble_total_grid_mv_network(
+def assemble_total_grid_mv_line_network(
         target_folder, infrastructure_graph, grid_mv_line_geotable):
     geocode = GoogleV3().geocode
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
@@ -416,7 +416,7 @@ def assemble_total_grid_mv_network(
             lon, lat = location.longitude, location.latitude
         node_d.update(longitude=lon, latitude=lat)
     node_table = get_table_from_graph(infrastructure_graph, [
-        'longitude', 'latitude', 'grid_mv_network_budget_in_meters'])
+        'longitude', 'latitude', 'grid_mv_line_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = {
@@ -424,7 +424,7 @@ def assemble_total_grid_mv_network(
             'filename': node_table_path,
             'x_column': 'longitude',
             'y_column': 'latitude',
-            'budget_column': 'grid_mv_network_budget_in_meters',
+            'budget_column': 'grid_mv_line_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {'minimum_node_count': 2},
@@ -457,7 +457,7 @@ def assemble_total_grid_mv_network(
     }
 
 
-def sequence_total_grid_mv_network(target_folder, infrastructure_graph):
+def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
     node_table = get_table_from_graph(infrastructure_graph, [
         'longitude', 'latitude', 'population', 'peak_demand_in_kw'])
     node_table = node_table.rename(columns={'longitude': 'X', 'latitude': 'Y'})
@@ -476,7 +476,7 @@ def sequence_total_grid_mv_network(target_folder, infrastructure_graph):
     return {'infrastructure_graph': infrastructure_graph}
 
 
-def estimate_nodal_external_cost_by_technology(**keywords):
+def estimate_total_external_cost_by_technology(**keywords):
     'Estimate external cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
@@ -495,13 +495,16 @@ def estimate_nodal_external_cost_by_technology(**keywords):
 
 
 def estimate_grid_external_cost(**keywords):
-    d = OrderedDict()
-    d.update(compute(
-        estimate_grid_mv_line_adjusted_length_in_meters, keywords))
-    d.update(compute(
-        estimate_grid_mv_line_discounted_cost, keywords))
-    d['external_discounted_cost'] = d['grid_mv_line_discounted_cost']
-    return d
+    # TODO: Fix this hack
+    external_discounted_cost = 0
+    for node_id, node_d in keywords['infrastructure_graph'].nodes_iter(data=True):
+        node_d.update(compute(estimate_grid_mv_line_adjusted_length_in_meters, keywords))
+        node_d.update(compute(estimate_grid_mv_line_discounted_cost, keywords))
+        node_d['grid_external_discounted_cost'] = node_d['grid_mv_line_discounted_cost']
+        external_discounted_cost += node_d['grid_external_discounted_cost']
+    return [
+        ('external_discounted_cost', external_discounted_cost),
+    ]
 
 
 def estimate_grid_mv_line_adjusted_length_in_meters(
@@ -560,20 +563,20 @@ def estimate_total_cost(infrastructure_graph):
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
-        nodal_levelized_costs = []
+        local_levelized_costs = []
         for technology in TECHNOLOGIES:
             discounted_cost = node_d[
-                technology + '_internal_discounted_cost'] + node_d[
-                technology + '_external_discounted_cost']
+                technology + '_internal_discounted_cost'] + node_d.get(
+                technology + '_external_discounted_cost', 0)
             discounted_production = node_d[
                 technology + '_electricity_discounted_production_in_kwh']
             levelized_cost = discounted_cost / float(
                 discounted_production) if discounted_production else 0
-            nodal_levelized_costs.append(levelized_cost)
+            local_levelized_costs.append(levelized_cost)
             node_d[technology + '_total_discounted_cost'] = discounted_cost
             node_d[technology + '_total_levelized_cost'] = levelized_cost
-        node_d['suggested_technology'] = TECHNOLOGIES[
-            np.argmin(nodal_levelized_costs)]
+        node_d['proposed_technology'] = TECHNOLOGIES[
+            np.argmin(local_levelized_costs)]
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in TECHNOLOGIES}
     discounted_cost_by_technology = OrderedDefaultDict(int)
@@ -581,7 +584,7 @@ def estimate_total_cost(infrastructure_graph):
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
-        technology = node_d['suggested_technology']
+        technology = node_d['proposed_technology']
         count_by_technology[technology] += 1
         discounted_cost_by_technology[technology] += node_d[
             technology + '_total_discounted_cost']
@@ -771,14 +774,14 @@ M = load_messages('en-US')
 
 
 MAIN_FUNCTIONS = [
-    estimate_nodal_population,
-    estimate_nodal_consumption_in_kwh,
-    estimate_nodal_peak_demand_in_kw,
-    estimate_nodal_internal_cost_by_technology,
-    estimate_nodal_grid_mv_network_budget_in_meters,
-    assemble_total_grid_mv_network,
-    sequence_total_grid_mv_network,
-    estimate_nodal_external_cost_by_technology,
+    estimate_local_population,
+    estimate_local_consumption_in_kwh,
+    estimate_local_peak_demand_in_kw,
+    estimate_local_internal_cost_by_technology,
+    estimate_local_grid_mv_line_budget_in_meters,
+    assemble_total_grid_mv_line_network,
+    sequence_total_grid_mv_line_network,
+    estimate_total_external_cost_by_technology,
     estimate_total_cost,
 ]
 COST_FUNCTIONS_BY_TECHNOLOGY = OrderedDict([
@@ -858,8 +861,8 @@ def run(target_folder, g):
     columns = [
         'Name',
         'Peak Demand (kW)',
-        'Suggested MV Line Length (m)',
-        'Suggested Technology',
+        'Proposed MV Line Length (m)',
+        'Proposed Technology',
         'Levelized Cost',
         'Connection Order',
         'WKT',
@@ -871,13 +874,13 @@ def run(target_folder, g):
         if 'name' not in node_d:
             continue  # Exclude fake nodes
         longitude, latitude = node_d['longitude'], node_d['latitude']
-        technology = node_d['suggested_technology']
+        technology = node_d['proposed_technology']
         rows.append({
             'Name': node_d['name'],
             'Peak Demand (kW)': node_d['peak_demand_in_kw'],
-            'Suggested MV Line Length (m)': node_d[
+            'Proposed MV Line Length (m)': node_d[
                 'grid_mv_line_adjusted_length_in_meters'],
-            'Suggested Technology': format_technology(technology),
+            'Proposed Technology': format_technology(technology),
             'Levelized Cost': node_d[technology + '_total_levelized_cost'],
             'Connection Order': node_d['order'],
             'WKT': Point(latitude, longitude).wkt,
@@ -900,8 +903,8 @@ def run(target_folder, g):
         rows.append({
             'Name': name,
             'Peak Demand (kW)': peak_demand,
-            'Suggested MV Line Length (m)': line_length,
-            'Suggested Technology': 'grid',
+            'Proposed MV Line Length (m)': line_length,
+            'Proposed Technology': 'Grid',
             'WKT': geometry_wkt,
             'FillColor': COLOR_BY_TECHNOLOGY['grid'],
         })
@@ -909,7 +912,7 @@ def run(target_folder, g):
         for geometry_wkt in g['grid_mv_line_geotable']['WKT']:
             rows.append({
                 'Name': '(Existing Grid)',
-                'Suggested Technology': 'grid',
+                'Proposed Technology': 'grid',
                 'WKT': geometry_wkt,
                 'FillColor': COLOR_BY_TECHNOLOGY['grid'],
             })
@@ -961,14 +964,14 @@ def run(target_folder, g):
         columns = [node_d['name'], node_d['order']]
         columns.extend(node_d[
             x + '_total_levelized_cost'] for x in TECHNOLOGIES)
-        columns.append(format_technology(node_d['suggested_technology']))
+        columns.append(format_technology(node_d['proposed_technology']))
         rows.append(columns)
     table_path = join(target_folder, 'levelized_cost_by_technology.csv')
     DataFrame(rows, columns=[
         'Name', 'Connection Order',
     ] + [
         format_technology(x) for x in TECHNOLOGIES
-    ] + ['Suggested Technology']).sort_values(
+    ] + ['Proposed Technology']).sort_values(
         'Connection Order',
     ).to_csv(table_path, index=False)
     d['levelized_cost_by_technology_table_path'] = table_path
@@ -1018,18 +1021,18 @@ def prepare_demand_point_table(demand_point_table):
 
 def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
-    grid_mv_lines = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
-    if grid_mv_lines:
-        edge_xy = tuple(GeometryCollection(grid_mv_lines).centroid.coords[0])
-        edge_yx = edge_xy[1], edge_xy[0]
-        node_xy = tuple(demand_point_table[['longitude', 'latitude']].mean())
+    geometries = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
+    if geometries:
+        regular = tuple(GeometryCollection(geometries).centroid.coords[0])[:2]
+        flipped = regular[1], regular[0]
+        reference = tuple(demand_point_table[['latitude', 'longitude']].mean())
         # If the flipped coordinates are closer,
-        if get_distance(node_xy, edge_yx) < get_distance(node_xy, edge_xy):
+        if get_distance(reference, flipped) < get_distance(reference, regular):
             # Flip coordinates to get (latitude, longitude) coordinate order
-            for line in grid_mv_lines:
+            for line in geometries:
                 line.coords = [flip_xy(xyz) for xyz in line.coords]
             # ISO 6709 specifies (latitude, longitude) coordinate order
-            grid_mv_line_geotable['WKT'] = [x.wkt for x in grid_mv_lines]
+            grid_mv_line_geotable['WKT'] = [x.wkt for x in geometries]
     return [
         ('grid_mv_line_geotable', grid_mv_line_geotable),
     ]
@@ -1118,6 +1121,7 @@ def save_common_values(target_folder, g):
         (k, v) for k, v in g.items() if
         not k.endswith('_by_year') and
         not k.endswith('_table') and
+        not k.endswith('_geotable') and
         not k.endswith('_path') and
         not k.endswith('_folder') and
         not k.endswith('locale')]
@@ -1177,10 +1181,11 @@ def flip_xy(xyz):
 
 
 def save_shapefile(target_path, geotable):
-    # TODO: Support WKT
-    # TODO: Support Latitude, Longitude
     # TODO: Save extra attributes
     geometries = [wkt.loads(x) for x in geotable['WKT']]
+    # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
+    for geometry in geometries:
+        geometry.coords = [flip_xy(xyz) for xyz in geometry.coords]
     geometryIO.save(target_path, geometryIO.proj4LL, geometries)
     return target_path
 

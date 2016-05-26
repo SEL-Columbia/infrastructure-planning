@@ -2,14 +2,14 @@
 
 ## Infrastructure Map
 Radius indicates relative **peak demand**.
-Color indicates **suggested technology**.
+Color indicates **proposed technology**.
 
 {infrastructure_streets_satellite_geotable}
 
 ## Executive Summary
 {executive_summary_table}
 
-## Suggested Grid Medium Voltage Line Table
+## Proposed Grid Medium Voltage Line Table
 {grid_mv_line_table}
 
 ## Levelized Cost Comparison by Location

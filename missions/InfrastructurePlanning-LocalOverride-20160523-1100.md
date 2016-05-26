@@ -162,7 +162,31 @@ Option 2: Do not truncate the keys.
 
 For now, let's just keep it flat, get it working and think about this later.
 
+20160526-1100 - 20160526-1200
+
+There are two issues:
+
+1. For some reason, grid mv external cost is constant across all nodes. This is a bug.
+
+The issue happens when computing grid external cost. I called it as local/nodal when it was coded as total.
+
+    Option 1a: Change code so that it really is local.
+    Option 1b: Just make it run as total.
+
+2. I also need to integrate line adjustment factor into the budget.
+
+    Option 2a: Divide the budget by the line adjustment factor.
+    _ Option 2b: Send line adjustment factor to networker and multiply each distance by the adjustment factor.
+
+I think option 2a is acceptable.
+
 # Tasks
+
+    Fix bugs
+        Fix input to sequencer to use only points selected for grid
+            Check why grid mv external cost is constant
+        Think of how to integrate line adjustment factor
+        Rename nodal to local
 
     Draft JSON file from Senegal defaults in configuration file
         Check that Senegal defaults really line up with old defaults from network-planner
@@ -173,9 +197,8 @@ For now, let's just keep it flat, get it working and think about this later.
 
     Draft JSON file from Nigeria defaults
 
-    Fix bugs
+    Fix more bugs
         Use number of people per connection
-        Fix input to sequencer to use only points selected for grid
         Change finance units to years explicitly
 
     Check whether local overrides work
