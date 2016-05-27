@@ -401,7 +401,8 @@ def estimate_local_grid_mv_line_budget_in_meters(
     d['grid_mv_line_discounted_cost_per_meter'] = \
         grid_mv_line_discounted_cost_per_meter
     d['grid_mv_line_budget_in_meters'] = mv_line_budget / float(
-        grid_mv_line_discounted_cost_per_meter)
+        grid_mv_line_discounted_cost_per_meter) / float(
+        keywords['line_length_adjustment_factor'])
     return d
 
 
@@ -476,7 +477,7 @@ def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
     return {'infrastructure_graph': infrastructure_graph}
 
 
-def estimate_total_external_cost_by_technology(**keywords):
+def estimate_local_external_cost_by_technology(**keywords):
     'Estimate external cost for each technology independently'
     # Compute
     d = OrderedDefaultDict(OrderedDict)
@@ -494,61 +495,33 @@ def estimate_total_external_cost_by_technology(**keywords):
     return d
 
 
-def estimate_grid_external_cost(**keywords):
-    # TODO: Fix this hack
-    external_discounted_cost = 0
-    for node_id, node_d in keywords['infrastructure_graph'].nodes_iter(data=True):
-        node_d.update(compute(estimate_grid_mv_line_adjusted_length_in_meters, keywords))
-        node_d.update(compute(estimate_grid_mv_line_discounted_cost, keywords))
-        node_d['grid_external_discounted_cost'] = node_d['grid_mv_line_discounted_cost']
-        external_discounted_cost += node_d['grid_external_discounted_cost']
+def estimate_grid_external_cost(
+        node_id, latitude, longitude, infrastructure_graph,
+        line_length_adjustment_factor, grid_mv_line_discounted_cost_per_meter):
+    node_line_discounted_cost = 0
+    node_line_adjusted_length = 0
+    node_ll = latitude, longitude
+    for edge_node_id, edge_d in infrastructure_graph.edge[node_id].items():
+        edge_node_d = infrastructure_graph.node[edge_node_id]
+        edge_node_ll = edge_node_d['latitude'], edge_node_d['longitude']
+        edge_line_halved_length = get_distance(
+            node_ll, edge_node_ll).meters / 2.
+        edge_line_adjusted_length = edge_line_halved_length * \
+            line_length_adjustment_factor
+        edge_line_discounted_cost = edge_line_adjusted_length * \
+            grid_mv_line_discounted_cost_per_meter
+        node_line_adjusted_length += edge_line_adjusted_length
+        node_line_discounted_cost += edge_line_discounted_cost
+        edge_d['grid_mv_line_adjusted_length_in_meters'] = \
+            edge_d.get('grid_mv_line_adjusted_length_in_meters', 0) + \
+            edge_line_adjusted_length
+        edge_d['grid_mv_line_discounted_cost'] = \
+            edge_d.get('grid_mv_line_discounted_cost', 0) + \
+            edge_line_discounted_cost
     return [
-        ('external_discounted_cost', external_discounted_cost),
+        ('mv_line_adjusted_length_in_meters', node_line_adjusted_length),
+        ('external_discounted_cost', node_line_discounted_cost),
     ]
-
-
-def estimate_grid_mv_line_adjusted_length_in_meters(
-        infrastructure_graph, line_length_adjustment_factor):
-    grid_mv_line_adjusted_length_in_meters = 0
-    graph = infrastructure_graph
-    for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
-        nodes = [graph.node[x] for x in (node1_id, node2_id)]
-        node_lls = [(x['latitude'], x['longitude']) for x in nodes]
-        straight_length_in_meters = get_distance(*node_lls).meters
-        adjustment_factor = np.mean([graph.node[x].get(
-            'line_length_adjustment_factor', line_length_adjustment_factor,
-        ) for x in [node1_id, node2_id]])
-        adjusted_length_in_meters = adjustment_factor * \
-            straight_length_in_meters
-        grid_mv_line_adjusted_length_in_meters += adjusted_length_in_meters
-        edge_d[
-            'grid_mv_line_adjusted_length_in_meters'
-        ] = adjusted_length_in_meters
-        graph.node[node1_id][
-            'grid_mv_line_adjusted_length_in_meters'
-        ] = graph.node[node2_id][
-            'grid_mv_line_adjusted_length_in_meters'
-        ] = adjusted_length_in_meters / 2.
-    return [(
-        'grid_mv_line_adjusted_length_in_meters',
-        grid_mv_line_adjusted_length_in_meters,
-    )]
-
-
-def estimate_grid_mv_line_discounted_cost(infrastructure_graph):
-    grid_mv_line_discounted_cost = 0
-    graph = infrastructure_graph
-    for node_id, node_d in graph.nodes_iter(data=True):
-        mv_line_discounted_cost = node_d.get(
-            'grid_mv_line_discounted_cost_per_meter', 0) * node_d.get(
-            'grid_mv_line_adjusted_length_in_meters', 0)
-        grid_mv_line_discounted_cost += mv_line_discounted_cost
-        node_d['grid_mv_line_discounted_cost'] = mv_line_discounted_cost
-    for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
-        edge_d['grid_mv_line_discounted_cost'] = graph.node[
-            node1_id]['grid_mv_line_discounted_cost'] + graph.node[
-            node2_id]['grid_mv_line_discounted_cost']
-    return [('grid_mv_line_discounted_cost', grid_mv_line_discounted_cost)]
 
 
 def estimate_diesel_mini_grid_external_cost():
@@ -781,7 +754,7 @@ MAIN_FUNCTIONS = [
     estimate_local_grid_mv_line_budget_in_meters,
     assemble_total_grid_mv_line_network,
     sequence_total_grid_mv_line_network,
-    estimate_total_external_cost_by_technology,
+    estimate_local_external_cost_by_technology,
     estimate_total_cost,
 ]
 COST_FUNCTIONS_BY_TECHNOLOGY = OrderedDict([
@@ -834,7 +807,7 @@ def run(target_folder, g):
                 continue  # We have a fake node
             # Perform node-level override
             node_defaults = dict(g['demand_point_table'].ix[node_id])
-            l = merge_dictionaries(node_d, node_defaults)
+            l = merge_dictionaries(node_d, node_defaults, {'node_id': node_id})
             try:
                 node_d.update(compute(f, l, g))
             except InfrastructurePlanningError as e:

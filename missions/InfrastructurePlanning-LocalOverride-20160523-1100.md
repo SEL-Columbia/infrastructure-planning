@@ -171,7 +171,7 @@ There are two issues:
 The issue happens when computing grid external cost. I called it as local/nodal when it was coded as total.
 
     Option 1a: Change code so that it really is local.
-    Option 1b: Just make it run as total.
+    _ Option 1b: Just make it run as total.
 
 2. I also need to integrate line adjustment factor into the budget.
 
@@ -180,28 +180,34 @@ The issue happens when computing grid external cost. I called it as local/nodal 
 
 I think option 2a is acceptable.
 
+    + Rename nodal to local
+
+20160527-1200 - 20160527-1300
+
+I keep getting distracted.
+
+20160527-1400 - 20160527-1700
+
+    + Check that yesterday's fix actually made grid mv external cost variable
+    + Fix input to sequencer to use only points selected for grid
+        + Check why grid mv external cost is constant
+    + Think of how to integrate line adjustment factor
+
 # Tasks
 
     Fix bugs
-        Fix input to sequencer to use only points selected for grid
-            Check why grid mv external cost is constant
-        Think of how to integrate line adjustment factor
-        Rename nodal to local
+        Use number of people per connection
+        Change finance units to years explicitly
+    Check whether local overrides work
+        Expose minimum node count per subnetwork
+        Expose maximum_connection_count
+        Expose maximum_consumption_per_year_in_kwh
 
+    Revise parameter defaults to fit Nigeria defaults
     Draft JSON file from Senegal defaults in configuration file
         Check that Senegal defaults really line up with old defaults from network-planner
     Adjust script so that it accepts JSON file
     Adjust script so that it accepts alterative ways to specify source_folder and target_folder
     Support relative paths using source_folder
-    Write JSON schema
-
     Draft JSON file from Nigeria defaults
-
-    Fix more bugs
-        Use number of people per connection
-        Change finance units to years explicitly
-
-    Check whether local overrides work
-        Expose minimum node count per subnetwork
-        Expose maximum_connection_count
-        Expose maximum_consumption_per_year_in_kwh
+    Write JSON schema
