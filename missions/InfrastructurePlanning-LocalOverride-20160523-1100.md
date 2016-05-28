@@ -217,12 +217,20 @@ I'm not sure what I meant by "Change finance units to years explicitly." It look
 
     + Add selected_technologies argument
 
+20160527-2100 - 20160527-2200
+
+I just realized that levelized cost for grid is meaningless if there is no external component.
+
+20160527-2200 - 20160527-2300
+
+    + Select grid if it is connected, otherwise choose standalone
+
 # Tasks
 
+    Expose minimum node count per subnetwork
+    Expose maximum_connection_count
+    Expose maximum_consumption_per_year_in_kwh
     Check whether local overrides work
-        Expose minimum node count per subnetwork
-        Expose maximum_connection_count
-        Expose maximum_consumption_per_year_in_kwh
 
     Revise parameter defaults to fit Nigeria defaults
     Draft JSON file from Senegal defaults in configuration file
@@ -231,4 +239,3 @@ I'm not sure what I meant by "Change finance units to years explicitly." It look
     Adjust script so that it accepts alterative ways to specify source_folder and target_folder
     Support relative paths using source_folder
     Draft JSON file from Nigeria defaults
-    Write JSON schema

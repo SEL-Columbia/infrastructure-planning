@@ -1,5 +1,4 @@
 import geometryIO
-import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
 from copy import copy, deepcopy
@@ -106,20 +105,28 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
-        local_levelized_costs = []
+        best_standalone_cost = float('inf')
+        best_standalone_technology = 'grid'
         for technology in selected_technologies:
             discounted_cost = node_d[
-                technology + '_internal_discounted_cost'] + node_d.get(
-                technology + '_external_discounted_cost', 0)
+                technology + '_internal_discounted_cost'] + node_d[
+                technology + '_external_discounted_cost']
             discounted_production = node_d[
                 technology + '_electricity_discounted_production_in_kwh']
             levelized_cost = discounted_cost / float(
                 discounted_production) if discounted_production else 0
-            local_levelized_costs.append(levelized_cost)
             node_d[technology + '_total_discounted_cost'] = discounted_cost
             node_d[technology + '_total_levelized_cost'] = levelized_cost
-        node_d['proposed_technology'] = selected_technologies[
-            np.argmin(local_levelized_costs)]
+            if technology != 'grid' and discounted_cost < best_standalone_cost:
+                best_standalone_cost = discounted_cost
+                best_standalone_technology = technology
+        if infrastructure_graph.edge[node_id]:
+            proposed_technology = 'grid'
+        else:
+            proposed_technology = best_standalone_technology
+            node_d['grid_total_discounted_cost'] = ''
+            node_d['grid_total_levelized_cost'] = ''
+        node_d['proposed_technology'] = proposed_technology
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
