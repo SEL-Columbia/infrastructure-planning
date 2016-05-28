@@ -192,12 +192,33 @@ I keep getting distracted.
     + Fix input to sequencer to use only points selected for grid
         + Check why grid mv external cost is constant
     + Think of how to integrate line adjustment factor
+    + Use number of people per connection
+
+I'm not sure what I meant by "Change finance units to years explicitly." It looks like all the finance stuff is in years already and I might have done this and forgotten about it.
+
+    _ from infrastructure_planning.utilities import compute
+    _ from infrastructure_planning.utils import compute
+    _ from infrastructure_planning.funcs import compute
+    _ from infrastructure_planning.functions import compute
+    from infrastructure_planning.macros import compute
+    _ from infrastructure_planning.meta import compute
+
+    _ from infrastructure_planning.resource.electricity import
+    _ from infrastructure_planning.resource.water import
+    _ from infrastructure_planning.resource.capacity import
+    _ from infrastructure_planning.resource.loss import
+
+    _ from infrastructure_planning.capacity import
+    _ from infrastructure_planning.loss import
+
+    from infrastructure_planning.electricity import
+    from infrastructure_planning.water import
+    from infrastructure_planning.production import adjust_for_losses
+
+    + Add selected_technologies argument
 
 # Tasks
 
-    Fix bugs
-        Use number of people per connection
-        Change finance units to years explicitly
     Check whether local overrides work
         Expose minimum node count per subnetwork
         Expose maximum_connection_count

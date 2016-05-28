@@ -1,5 +1,4 @@
 import geometryIO
-import inspect
 import numpy as np
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -10,403 +9,29 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
-from itertools import product
-from math import ceil
 from networkx import Graph, write_gpickle
-from operator import mul
 from os.path import join
 from pandas import DataFrame, MultiIndex, Series, concat, read_csv
 from shapely.geometry import GeometryCollection, LineString, Point
 from shapely import wkt
 
+from infrastructure_planning.demography.exponential import estimate_population
+from infrastructure_planning.electricity.consumption.linear import (
+    estimate_consumption)
+from infrastructure_planning.electricity.demand import estimate_peak_demand
+from infrastructure_planning.electricity.cost import (
+    estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
+from infrastructure_planning.electricity.cost.grid import (
+    estimate_mv_line_budget)
+
 from infrastructure_planning.exceptions import InfrastructurePlanningError
+from infrastructure_planning.macros import compute
 from networker.networker_runner import NetworkerRunner
 from sequencer import NetworkPlan
 from sequencer.Models import EnergyMaximizeReturn
 
 
-def estimate_local_population(
-        population,
-        population_year,
-        population_growth_as_percent_of_population_per_year,
-        financing_year,
-        time_horizon_in_years):
-    if financing_year < population_year:
-        raise InfrastructurePlanningError('financing_year', M[
-            'bad_financing_year'] % (financing_year, population_year))
-    # Compute the population at financing_year
-    base_population = grow_exponentially(
-        population, population_growth_as_percent_of_population_per_year,
-        financing_year - population_year)
-    # Compute the population over time_horizon_in_years
-    year_increments = Series(range(time_horizon_in_years + 1))
-    years = financing_year + year_increments
-    populations = grow_exponentially(
-        base_population, population_growth_as_percent_of_population_per_year,
-        year_increments)
-    populations.index = years
-    return [
-        ('population_by_year', populations),
-    ]
-
-
-def estimate_local_consumption_in_kwh(
-        population_by_year,
-        connection_count_per_thousand_people,
-        consumption_per_connection_in_kwh):
-    t = DataFrame({'population': population_by_year})
-    t['connection_count'] = connection_count_per_thousand_people * t[
-        'population'] / 1000.
-    t['consumption_in_kwh'] = consumption_per_connection_in_kwh * t[
-        'connection_count']
-    return [
-        ('connection_count_by_year', t['connection_count']),
-        ('consumption_in_kwh_by_year', t['consumption_in_kwh']),
-    ]
-
-
-def estimate_local_peak_demand_in_kw(
-        consumption_in_kwh_by_year,
-        consumption_during_peak_hours_as_percent_of_total_consumption,
-        peak_hours_of_consumption_per_year):
-    maximum_consumption_per_year_in_kwh = consumption_in_kwh_by_year.max()
-    consumption_during_peak_hours_in_kwh = \
-        maximum_consumption_per_year_in_kwh * \
-        consumption_during_peak_hours_as_percent_of_total_consumption / 100.
-    peak_demand_in_kw = consumption_during_peak_hours_in_kwh / float(
-        peak_hours_of_consumption_per_year)
-    return [
-        ('peak_demand_in_kw', peak_demand_in_kw),
-    ]
-
-
-def estimate_local_internal_cost_by_technology(**keywords):
-    'Estimate internal cost for each technology independently'
-    # Compute
-    d = OrderedDefaultDict(OrderedDict)
-    for (
-        technology, (estimate_internal_cost, estimate_external_cost),
-    ) in COST_FUNCTIONS_BY_TECHNOLOGY.items():
-        value_by_key = OrderedDict(compute(estimate_internal_cost, keywords))
-        d.update(rename_keys(value_by_key, prefix=technology + '_'))
-    # Summarize
-    keys = [
-        'internal_discounted_cost',
-        'internal_levelized_cost',
-    ]
-    for technology, k in product(TECHNOLOGIES, keys):
-        d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
-    return d
-
-
-def estimate_grid_internal_cost(**keywords):
-    return prepare_internal_cost([
-        estimate_grid_electricity_production_cost,
-        estimate_grid_electricity_internal_distribution_cost,
-    ], keywords)
-
-
-def estimate_grid_electricity_production_cost(
-        consumption_in_kwh_by_year,
-        grid_system_loss_as_percent_of_total_production,
-        grid_mv_transformer_load_power_factor,
-        grid_electricity_production_cost_per_kwh):
-    if not -1 <= grid_mv_transformer_load_power_factor <= 1:
-        raise InfrastructurePlanningError(
-            'grid_mv_transformer_load_power_factor', M[
-                'bad_power_factor'
-            ] % grid_mv_transformer_load_power_factor)
-    production_in_kwh_by_year = adjust_for_losses(
-        consumption_in_kwh_by_year,
-        grid_system_loss_as_percent_of_total_production / 100.,
-        1 - grid_mv_transformer_load_power_factor)
-    d = OrderedDict()
-    d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
-    d['electricity_production_cost_by_year'] = \
-        grid_electricity_production_cost_per_kwh * production_in_kwh_by_year
-    return d
-
-
-def estimate_grid_electricity_internal_distribution_cost(**keywords):
-    d = prepare_component_cost_by_year([
-        ('mv_transformer', estimate_grid_mv_transformer_cost),
-        ('lv_line', estimate_grid_lv_line_cost),
-        ('lv_connection', estimate_grid_lv_connection_cost),
-    ], keywords, prefix='grid_')
-    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
-    return d
-
-
-def estimate_grid_mv_transformer_cost(
-        peak_demand_in_kw,
-        grid_system_loss_as_percent_of_total_production,
-        grid_mv_transformer_load_power_factor,
-        grid_mv_transformer_table):
-    # Estimate desired capacity
-    desired_system_capacity_in_kva = adjust_for_losses(
-        peak_demand_in_kw,
-        grid_system_loss_as_percent_of_total_production / 100.,
-        1 - grid_mv_transformer_load_power_factor)
-    # Choose transformer type
-    return prepare_actual_system_capacity(
-        desired_system_capacity_in_kva,
-        grid_mv_transformer_table, 'capacity_in_kva')
-
-
-def estimate_grid_lv_line_cost(
-        connection_count_by_year,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        grid_lv_line_installation_lm_cost_per_meter,
-        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
-        grid_lv_line_lifetime_in_years):
-    return prepare_lv_line_cost(
-        connection_count_by_year,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        grid_lv_line_installation_lm_cost_per_meter,
-        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
-        grid_lv_line_lifetime_in_years)
-
-
-def estimate_grid_lv_connection_cost(
-        connection_count_by_year,
-        grid_lv_connection_installation_lm_cost_per_connection,
-        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
-        grid_lv_connection_lifetime_in_years):
-    return prepare_lv_connection_cost(
-        connection_count_by_year,
-        grid_lv_connection_installation_lm_cost_per_connection,
-        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
-        grid_lv_connection_lifetime_in_years)
-
-
-def estimate_grid_mv_line_cost_per_meter(
-        grid_mv_line_installation_lm_cost_per_meter,
-        grid_mv_line_maintenance_lm_cost_per_meter_per_year,
-        grid_mv_line_lifetime_in_years):
-    grid_mv_line_replacement_lm_cost_per_year_per_meter = \
-        grid_mv_line_installation_lm_cost_per_meter / float(
-            grid_mv_line_lifetime_in_years)
-    return [
-        ('installation_lm_cost_per_meter',
-            grid_mv_line_installation_lm_cost_per_meter),
-        ('maintenance_lm_cost_per_meter_per_year',
-            grid_mv_line_maintenance_lm_cost_per_meter_per_year),
-        ('replacement_lm_cost_per_meter_per_year',
-            grid_mv_line_replacement_lm_cost_per_year_per_meter),
-    ]
-
-
-def estimate_diesel_mini_grid_internal_cost(**keywords):
-    return prepare_internal_cost([
-        estimate_diesel_mini_grid_electricity_production_cost,
-        estimate_diesel_mini_grid_electricity_internal_distribution_cost,
-    ], keywords)
-
-
-def estimate_diesel_mini_grid_electricity_production_cost(**keywords):
-    d = prepare_component_cost_by_year([
-        ('generator', estimate_diesel_mini_grid_generator_cost),
-    ], keywords, prefix='diesel_mini_grid_')
-    d.update(compute(estimate_diesel_mini_grid_fuel_cost, keywords, d))
-    d['electricity_production_cost_by_year'] = d.pop('cost_by_year') + d[
-        'diesel_mini_grid_fuel_cost_by_year']
-    return d
-
-
-def estimate_diesel_mini_grid_electricity_internal_distribution_cost(
-        **keywords):
-    d = prepare_component_cost_by_year([
-        ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
-        ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
-    ], keywords, prefix='diesel_mini_grid_')
-    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
-    return d
-
-
-def estimate_diesel_mini_grid_generator_cost(
-        peak_demand_in_kw,
-        diesel_mini_grid_system_loss_as_percent_of_total_production,
-        diesel_mini_grid_generator_table):
-    # Estimate desired capacity
-    desired_system_capacity_in_kw = adjust_for_losses(
-        peak_demand_in_kw,
-        diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
-    # Choose generator type
-    return prepare_actual_system_capacity(
-        desired_system_capacity_in_kw,
-        diesel_mini_grid_generator_table, 'capacity_in_kw')
-
-
-def estimate_diesel_mini_grid_fuel_cost(
-        consumption_in_kwh_by_year,
-        diesel_mini_grid_system_loss_as_percent_of_total_production,
-        diesel_mini_grid_generator_actual_system_capacity_in_kw,
-        diesel_mini_grid_generator_minimum_hours_of_production_per_year,
-        diesel_mini_grid_generator_fuel_liters_consumed_per_kwh,
-        diesel_mini_grid_fuel_cost_per_liter):
-    d = OrderedDict()
-    production_in_kwh_by_year = adjust_for_losses(
-        consumption_in_kwh_by_year,
-        diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
-    desired_hours_of_production_by_year = production_in_kwh_by_year / float(
-        diesel_mini_grid_generator_actual_system_capacity_in_kw)
-    years = production_in_kwh_by_year.index
-    minimum_hours_of_production_by_year = Series([
-        diesel_mini_grid_generator_minimum_hours_of_production_per_year,
-    ] * len(years), index=years)
-    effective_hours_of_production_by_year = DataFrame({
-        'desired': desired_hours_of_production_by_year,
-        'minimum': minimum_hours_of_production_by_year,
-    }).max(axis=1)
-    d['diesel_mini_grid_effective_hours_of_production_by_year'] = \
-        effective_hours_of_production_by_year
-    d['diesel_mini_grid_fuel_cost_by_year'] = reduce(mul, [
-        diesel_mini_grid_fuel_cost_per_liter,
-        diesel_mini_grid_generator_fuel_liters_consumed_per_kwh,
-        diesel_mini_grid_generator_actual_system_capacity_in_kw,
-        effective_hours_of_production_by_year,
-    ], 1)
-    d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
-    return d
-
-
-def estimate_diesel_mini_grid_lv_line_cost(
-        connection_count_by_year,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
-        diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
-        diesel_mini_grid_lv_line_lifetime_in_years):
-    return prepare_lv_line_cost(
-        connection_count_by_year,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
-        diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
-        diesel_mini_grid_lv_line_lifetime_in_years)
-
-
-def estimate_diesel_mini_grid_lv_connection_cost(
-        connection_count_by_year,
-        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
-        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
-        diesel_mini_grid_lv_connection_lifetime_in_years):
-    return prepare_lv_connection_cost(
-        connection_count_by_year,
-        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
-        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
-        diesel_mini_grid_lv_connection_lifetime_in_years)
-
-
-def estimate_solar_home_internal_cost(**keywords):
-    return prepare_internal_cost([
-        estimate_solar_home_electricity_production_cost,
-        estimate_solar_home_electricity_internal_distribution_cost,
-    ], keywords)
-
-
-def estimate_solar_home_electricity_production_cost(**keywords):
-    d = prepare_component_cost_by_year([
-        ('panel', estimate_solar_home_panel_cost),
-        ('battery', estimate_solar_home_battery_cost),
-        ('balance', estimate_solar_home_balance_cost),
-    ], keywords, prefix='solar_home_')
-    solar_home_system_loss_as_percent_of_total_production = keywords[
-        'solar_home_system_loss_as_percent_of_total_production']
-    d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
-        keywords['consumption_in_kwh_by_year'],
-        solar_home_system_loss_as_percent_of_total_production / 100.)
-    d['electricity_production_cost_by_year'] = d.pop('cost_by_year')
-    return d
-
-
-def estimate_solar_home_electricity_internal_distribution_cost(**keywords):
-    d = OrderedDict()
-    years = keywords['population_by_year'].index
-    d['electricity_internal_distribution_cost_by_year'] = Series(
-        np.zeros(len(years)), index=years)
-    return d
-
-
-def estimate_solar_home_panel_cost(
-        consumption_in_kwh_by_year,
-        peak_hours_of_sun_per_year,
-        solar_home_system_loss_as_percent_of_total_production,
-        solar_home_panel_table):
-    # Estimate desired capacity
-    maximum_consumption_per_year_in_kwh = consumption_in_kwh_by_year.max()
-    maximum_production_per_year_in_kwh = adjust_for_losses(
-        maximum_consumption_per_year_in_kwh,
-        solar_home_system_loss_as_percent_of_total_production / 100.)
-    desired_system_capacity_in_kw = maximum_production_per_year_in_kwh / float(
-        peak_hours_of_sun_per_year)
-    # Choose panel type
-    return prepare_actual_system_capacity(
-        desired_system_capacity_in_kw,
-        solar_home_panel_table, 'capacity_in_kw')
-
-
-def estimate_solar_home_battery_cost(
-        solar_home_panel_actual_system_capacity_in_kw,
-        solar_home_battery_kwh_per_panel_kw,
-        solar_home_battery_installation_lm_cost_per_battery_kwh,
-        solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
-        solar_home_battery_lifetime_in_years):
-    battery_storage_in_kwh = solar_home_panel_actual_system_capacity_in_kw * \
-        solar_home_battery_kwh_per_panel_kw
-    installation_lm_cost = battery_storage_in_kwh * \
-        solar_home_battery_installation_lm_cost_per_battery_kwh
-    d = OrderedDict()
-    d['installation_lm_cost'] = installation_lm_cost
-    d['maintenance_lm_cost_per_year'] = battery_storage_in_kwh * \
-        solar_home_battery_maintenance_lm_cost_per_kwh_per_year
-    d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
-        solar_home_battery_lifetime_in_years)
-    return d
-
-
-def estimate_solar_home_balance_cost(
-        solar_home_panel_actual_system_capacity_in_kw,
-        solar_home_balance_installation_lm_cost_per_panel_kw,
-        solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year,
-        solar_home_balance_lifetime_in_years):
-    installation_lm_cost = solar_home_panel_actual_system_capacity_in_kw * \
-        solar_home_balance_installation_lm_cost_per_panel_kw
-    d = OrderedDict()
-    d['installation_lm_cost'] = installation_lm_cost
-    d['maintenance_lm_cost_per_year'] = \
-        solar_home_panel_actual_system_capacity_in_kw * \
-        solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year
-    d['replacement_lm_cost_per_year'] = installation_lm_cost / float(
-        solar_home_balance_lifetime_in_years)
-    return d
-
-
-def estimate_local_grid_mv_line_budget_in_meters(
-        internal_discounted_cost_by_technology, **keywords):
-    standalone_cost = min(
-        v for k, v in internal_discounted_cost_by_technology.items()
-        if k != 'grid')
-    mv_line_budget = \
-        standalone_cost - internal_discounted_cost_by_technology['grid']
-    d = prepare_component_cost_by_year([
-        ('mv_line', estimate_grid_mv_line_cost_per_meter),
-    ], keywords, prefix='grid_')
-    grid_mv_line_discounted_cost_per_meter = compute_discounted_cash_flow(
-        d.pop('cost_by_year'),
-        keywords['financing_year'],
-        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
-    d['grid_mv_line_discounted_cost_per_meter'] = \
-        grid_mv_line_discounted_cost_per_meter
-    d['grid_mv_line_budget_in_meters'] = mv_line_budget / float(
-        grid_mv_line_discounted_cost_per_meter) / float(
-        keywords['line_length_adjustment_factor'])
-    return d
-
-
-def assemble_total_grid_mv_line_network(
+def assemble_total_mv_line_network(
         target_folder, infrastructure_graph, grid_mv_line_geotable):
     geocode = GoogleV3().geocode
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
@@ -417,7 +42,7 @@ def assemble_total_grid_mv_line_network(
             lon, lat = location.longitude, location.latitude
         node_d.update(longitude=lon, latitude=lat)
     node_table = get_table_from_graph(infrastructure_graph, [
-        'longitude', 'latitude', 'grid_mv_line_budget_in_meters'])
+        'longitude', 'latitude', 'grid_mv_line_adjusted_budget'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = {
@@ -425,7 +50,7 @@ def assemble_total_grid_mv_line_network(
             'filename': node_table_path,
             'x_column': 'longitude',
             'y_column': 'latitude',
-            'budget_column': 'grid_mv_line_budget_in_meters',
+            'budget_column': 'grid_mv_line_adjusted_budget',
         },
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {'minimum_node_count': 2},
@@ -458,7 +83,7 @@ def assemble_total_grid_mv_line_network(
     }
 
 
-def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
+def sequence_total_mv_line_network(target_folder, infrastructure_graph):
     node_table = get_table_from_graph(infrastructure_graph, [
         'longitude', 'latitude', 'population', 'peak_demand_in_kw'])
     node_table = node_table.rename(columns={'longitude': 'X', 'latitude': 'Y'})
@@ -477,67 +102,12 @@ def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
     return {'infrastructure_graph': infrastructure_graph}
 
 
-def estimate_local_external_cost_by_technology(**keywords):
-    'Estimate external cost for each technology independently'
-    # Compute
-    d = OrderedDefaultDict(OrderedDict)
-    for (
-        technology, (estimate_internal_cost, estimate_external_cost),
-    ) in COST_FUNCTIONS_BY_TECHNOLOGY.items():
-        value_by_key = OrderedDict(compute(estimate_external_cost, keywords))
-        d.update(rename_keys(value_by_key, prefix=technology + '_'))
-    # Summarize
-    keys = [
-        'external_discounted_cost',
-    ]
-    for technology, k in product(TECHNOLOGIES, keys):
-        d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
-    return d
-
-
-def estimate_grid_external_cost(
-        node_id, latitude, longitude, infrastructure_graph,
-        line_length_adjustment_factor, grid_mv_line_discounted_cost_per_meter):
-    node_line_discounted_cost = 0
-    node_line_adjusted_length = 0
-    node_ll = latitude, longitude
-    for edge_node_id, edge_d in infrastructure_graph.edge[node_id].items():
-        edge_node_d = infrastructure_graph.node[edge_node_id]
-        edge_node_ll = edge_node_d['latitude'], edge_node_d['longitude']
-        edge_line_halved_length = get_distance(
-            node_ll, edge_node_ll).meters / 2.
-        edge_line_adjusted_length = edge_line_halved_length * \
-            line_length_adjustment_factor
-        edge_line_discounted_cost = edge_line_adjusted_length * \
-            grid_mv_line_discounted_cost_per_meter
-        node_line_adjusted_length += edge_line_adjusted_length
-        node_line_discounted_cost += edge_line_discounted_cost
-        edge_d['grid_mv_line_adjusted_length_in_meters'] = \
-            edge_d.get('grid_mv_line_adjusted_length_in_meters', 0) + \
-            edge_line_adjusted_length
-        edge_d['grid_mv_line_discounted_cost'] = \
-            edge_d.get('grid_mv_line_discounted_cost', 0) + \
-            edge_line_discounted_cost
-    return [
-        ('mv_line_adjusted_length_in_meters', node_line_adjusted_length),
-        ('external_discounted_cost', node_line_discounted_cost),
-    ]
-
-
-def estimate_diesel_mini_grid_external_cost():
-    return [('external_discounted_cost', 0)]
-
-
-def estimate_solar_home_external_cost():
-    return [('external_discounted_cost', 0)]
-
-
-def estimate_total_cost(infrastructure_graph):
+def estimate_total_cost(selected_technologies, infrastructure_graph):
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
         local_levelized_costs = []
-        for technology in TECHNOLOGIES:
+        for technology in selected_technologies:
             discounted_cost = node_d[
                 technology + '_internal_discounted_cost'] + node_d.get(
                 technology + '_external_discounted_cost', 0)
@@ -548,10 +118,10 @@ def estimate_total_cost(infrastructure_graph):
             local_levelized_costs.append(levelized_cost)
             node_d[technology + '_total_discounted_cost'] = discounted_cost
             node_d[technology + '_total_levelized_cost'] = levelized_cost
-        node_d['proposed_technology'] = TECHNOLOGIES[
+        node_d['proposed_technology'] = selected_technologies[
             np.argmin(local_levelized_costs)]
     # Compute levelized costs for selected technology across all nodes
-    count_by_technology = {x: 0 for x in TECHNOLOGIES}
+    count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
     discounted_production_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
@@ -564,7 +134,7 @@ def estimate_total_cost(infrastructure_graph):
         discounted_production_by_technology[technology] += node_d[
             technology + '_electricity_discounted_production_in_kwh']
     levelized_cost_by_technology = OrderedDict()
-    for technology in TECHNOLOGIES:
+    for technology in selected_technologies:
         discounted_cost = discounted_cost_by_technology[
             technology]
         discounted_production = discounted_production_by_technology[
@@ -578,201 +148,18 @@ def estimate_total_cost(infrastructure_graph):
     ]
 
 
-def grow_exponentially(value, growth_as_percent, growth_count):
-    return value * (1 + growth_as_percent / 100.) ** growth_count
-
-
-def prepare_internal_cost(functions, keywords):
-    d = OrderedDict()
-    # Compute
-    for f in functions:
-        d.update(compute(f, keywords))
-    cost_by_year = sum([
-        d['electricity_production_cost_by_year'],
-        d['electricity_internal_distribution_cost_by_year'],
-    ])
-    financing_year = keywords['financing_year']
-    discount_rate = keywords['discount_rate_as_percent_of_cash_flow_per_year']
-    discounted_production_in_kwh = compute_discounted_cash_flow(
-        d['electricity_production_in_kwh_by_year'],
-        financing_year, discount_rate)
-    discounted_cost = compute_discounted_cash_flow(
-        cost_by_year, financing_year, discount_rate)
-    levelized_cost = discounted_cost / float(discounted_production_in_kwh)
-    d['electricity_discounted_production_in_kwh'] = \
-        discounted_production_in_kwh
-    # Summarize
-    d['internal_discounted_cost'] = discounted_cost
-    d['internal_levelized_cost'] = levelized_cost
-    return d
-
-
-def prepare_actual_system_capacity(
-        desired_system_capacity, option_table, capacity_column):
-    t = option_table
-    # Select option
-    eligible_t = t[t[capacity_column] < desired_system_capacity]
-    if len(eligible_t):
-        t = eligible_t
-        # Choose the largest capacity from eligible types
-        selected_t = t[t[capacity_column] == t[capacity_column].max()]
-    else:
-        # Choose the smallest capacity from all types
-        selected_t = t[t[capacity_column] == t[capacity_column].min()]
-    selected = selected_t.ix[selected_t.index[0]]
-    # Get capacity and count
-    selected_capacity = selected[capacity_column]
-    selected_count = int(ceil(desired_system_capacity / float(
-        selected_capacity)))
-    actual_system_capacity = selected_capacity * selected_count
-    # Get costs
-    installation_lm_cost = selected_count * selected['installation_lm_cost']
-    maintenance_lm_cost_per_year = selected_count * selected[
-        'maintenance_lm_cost_per_year']
-    replacement_lm_cost_per_year = installation_lm_cost / float(selected[
-        'lifetime_in_years'])
-    return [
-        ('desired_system_' + capacity_column, desired_system_capacity),
-        ('selected_' + capacity_column, selected_capacity),
-        ('selected_count', selected_count),
-        ('actual_system_' + capacity_column, actual_system_capacity),
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
-
-
-def prepare_component_cost_by_year(component_packs, keywords, prefix):
-    d = OrderedDict()
-    cost_by_year_index = np.zeros(keywords['time_horizon_in_years'] + 1)
-    for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(compute(estimate_component_cost, keywords, d))
-        # Add initial costs
-        cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
-        # Add recurring costs
-        cost_by_year_index[1:] += \
-            get_by_prefix(v_by_k, 'maintenance') + \
-            get_by_prefix(v_by_k, 'replacement')
-        # Save
-        d.update(rename_keys(v_by_k, prefix=prefix + component + '_'))
-    years = keywords['population_by_year'].index
-    d['cost_by_year'] = Series(cost_by_year_index, index=years)
-    return d
-
-
-def prepare_lv_line_cost(
-        connection_count_by_year,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        lv_line_installation_lm_cost_per_meter,
-        lv_line_maintenance_lm_cost_per_meter_per_year,
-        lv_line_lifetime_in_years):
-    # TODO: Compute lv line cost by year as connections come online
-    maximum_connection_count = connection_count_by_year.max()
-    line_length_in_meters = average_distance_between_buildings_in_meters * (
-        maximum_connection_count - 1) * line_length_adjustment_factor
-    installation_lm_cost = line_length_in_meters * \
-        lv_line_installation_lm_cost_per_meter
-    maintenance_lm_cost_per_year = line_length_in_meters * \
-        lv_line_maintenance_lm_cost_per_meter_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_line_lifetime_in_years)
-    return [
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
-
-
-def prepare_lv_connection_cost(
-        connection_count_by_year,
-        lv_connection_installation_lm_cost_per_connection,
-        lv_connection_maintenance_lm_cost_per_connection_per_year,
-        lv_connection_lifetime_in_years):
-    # TODO: Compute lv connection cost by year as connections come online
-    maximum_connection_count = connection_count_by_year.max()
-    installation_lm_cost = maximum_connection_count * \
-        lv_connection_installation_lm_cost_per_connection
-    maintenance_lm_cost_per_year = maximum_connection_count * \
-        lv_connection_maintenance_lm_cost_per_connection_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_connection_lifetime_in_years)
-    return [
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
-
-
-def adjust_for_losses(x, *fractional_losses):
-
-    def adjust_for_loss(x, fractional_loss):
-        divisor = 1 - fractional_loss
-        if not divisor:
-            return x
-        return x / float(divisor)
-
-    y = x
-    for fractional_loss in fractional_losses:
-        y = adjust_for_loss(y, fractional_loss)
-    return y
-
-
-def compute_discounted_cash_flow(
-        cash_flow_by_year, financing_year, discount_rate_as_percent):
-    'Discount cash flow starting from the year of financing'
-    year_increments = np.array(cash_flow_by_year.index - financing_year)
-    year_increments[year_increments < 0] = 0  # Do not discount prior years
-    discount_rate_as_factor = 1 + discount_rate_as_percent / 100.
-    return sum(cash_flow_by_year / discount_rate_as_factor ** year_increments)
-
-
-def load_abbreviations(locale):
-    return {
-        'diesel_mini_grid_generator_minimum_hours_of_production_per_year': 'dmg_gen_mhoppy',  # noqa
-    }
-
-
-def load_messages(locale):
-    return {
-        'bad_financing_year': (
-            'financing year (%s) must be greater than or equal to '
-            'population year (%s)'),
-        'bad_power_factor': 'power factor (%s) must be between -1 and 1',
-    }
-
-
-A = load_abbreviations('en-US')
-M = load_messages('en-US')
-
-
 MAIN_FUNCTIONS = [
-    estimate_local_population,
-    estimate_local_consumption_in_kwh,
-    estimate_local_peak_demand_in_kw,
-    estimate_local_internal_cost_by_technology,
-    estimate_local_grid_mv_line_budget_in_meters,
-    assemble_total_grid_mv_line_network,
-    sequence_total_grid_mv_line_network,
-    estimate_local_external_cost_by_technology,
+    estimate_population,
+    estimate_consumption,
+    estimate_peak_demand,
+    estimate_internal_cost_by_technology,
+    estimate_mv_line_budget,
+    assemble_total_mv_line_network,
+    sequence_total_mv_line_network,
+    estimate_external_cost_by_technology,
     estimate_total_cost,
 ]
-COST_FUNCTIONS_BY_TECHNOLOGY = OrderedDict([
-    ('grid', (
-        estimate_grid_internal_cost,
-        estimate_grid_external_cost)),
-    ('diesel_mini_grid', (
-        estimate_diesel_mini_grid_internal_cost,
-        estimate_diesel_mini_grid_external_cost)),
-    ('solar_home', (
-        estimate_solar_home_internal_cost,
-        estimate_solar_home_external_cost)),
-])
-TECHNOLOGIES = COST_FUNCTIONS_BY_TECHNOLOGY.keys()
 COLORS = 'bgrcmykw'
-COLOR_BY_TECHNOLOGY = {
-    technology: COLORS[index] for index, technology in enumerate(TECHNOLOGIES)
-}
 TABLE_NAMES = [
     'demand_point_table',
     'grid_mv_transformer_table',
@@ -793,7 +180,6 @@ def run(target_folder, g):
     g = prepare_parameters(g, TABLE_NAMES, COLUMN_NAMES)
 
     # Compute
-
     for f in MAIN_FUNCTIONS:
         if '_total_' in f.func_name:
             try:
@@ -817,7 +203,6 @@ def run(target_folder, g):
         'infrastructure_graph'
     ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
     ls, g = sift_common_values(ls, g)
-    # compute should produce ls, g
 
     # Save
     save_common_values(target_folder, g)
@@ -830,7 +215,10 @@ def run(target_folder, g):
     write_gpickle(graph, join(target_folder, 'infrastructure_graph.pkl'))
 
     # Map
-    # The map is a type of report, but it is not included in the summary folder
+    technologies = g['selected_technologies']
+    color_by_technology = {
+        technology: COLORS[i] for i, technology in enumerate(technologies)
+    }
     columns = [
         'Name',
         'Peak Demand (kW)',
@@ -857,7 +245,7 @@ def run(target_folder, g):
             'Levelized Cost': node_d[technology + '_total_levelized_cost'],
             'Connection Order': node_d['order'],
             'WKT': Point(latitude, longitude).wkt,
-            'FillColor': COLOR_BY_TECHNOLOGY[technology],
+            'FillColor': color_by_technology[technology],
             'RadiusInPixelsRange2-8': node_d['peak_demand_in_kw'],
         })
     for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
@@ -879,7 +267,7 @@ def run(target_folder, g):
             'Proposed MV Line Length (m)': line_length,
             'Proposed Technology': 'Grid',
             'WKT': geometry_wkt,
-            'FillColor': COLOR_BY_TECHNOLOGY['grid'],
+            'FillColor': color_by_technology['grid'],
         })
     if 'grid_mv_line_geotable' in g:
         for geometry_wkt in g['grid_mv_line_geotable']['WKT']:
@@ -887,15 +275,13 @@ def run(target_folder, g):
                 'Name': '(Existing Grid)',
                 'Proposed Technology': 'grid',
                 'WKT': geometry_wkt,
-                'FillColor': COLOR_BY_TECHNOLOGY['grid'],
+                'FillColor': color_by_technology['grid'],
             })
     infrastructure_geotable_path = join(
         target_folder, 'infrastructure_map.csv')
     DataFrame(rows)[columns].to_csv(infrastructure_geotable_path, index=False)
     d['infrastructure_streets_satellite_geotable_path'] = \
         infrastructure_geotable_path
-
-    # The executive summary is also not included in the summary folder
 
     # Show executive summary
     keys = [
@@ -910,7 +296,6 @@ def run(target_folder, g):
     table_path = join(target_folder, 'executive_summary.csv')
     table.to_csv(table_path)
     d['executive_summary_table_path'] = table_path
-
     # Show edge summary
     rows = []
     for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
@@ -928,7 +313,6 @@ def run(target_folder, g):
         'Length (m)',
     ).to_csv(table_path, index=False)
     d['grid_mv_line_table_path'] = table_path
-
     # Show node summary
     rows = []
     for node_id, node_d in graph.nodes_iter(data=True):
@@ -936,14 +320,14 @@ def run(target_folder, g):
             continue  # We have a fake node
         columns = [node_d['name'], node_d['order']]
         columns.extend(node_d[
-            x + '_total_levelized_cost'] for x in TECHNOLOGIES)
+            x + '_total_levelized_cost'] for x in technologies)
         columns.append(format_technology(node_d['proposed_technology']))
         rows.append(columns)
     table_path = join(target_folder, 'levelized_cost_by_technology.csv')
     DataFrame(rows, columns=[
         'Name', 'Connection Order',
     ] + [
-        format_technology(x) for x in TECHNOLOGIES
+        format_technology(x) for x in technologies
     ] + ['Proposed Technology']).sort_values(
         'Connection Order',
     ).to_csv(table_path, index=False)
@@ -1025,24 +409,6 @@ def get_table_from_graph(graph, keys=None):
     return DataFrame(rows, index=index)
 
 
-def compute(f, l, g=None):
-    'Compute the function using local arguments if possible'
-    if not g:
-        g = {}
-    # If the function wants every argument, provide every argument
-    argument_specification = inspect.getargspec(f)
-    if argument_specification.keywords:
-        return f(**merge_dictionaries(g, l))
-    # Otherwise, provide only requested arguments
-    keywords = {}
-    for argument_name in argument_specification.args:
-        argument_value = l.get(argument_name, g.get(argument_name))
-        if argument_value is None:
-            raise KeyError(argument_name)
-        keywords[argument_name] = argument_value
-    return f(**keywords)
-
-
 def sift_common_values(ls, g):
     'Move local arguments with common values into global arguments'
     ls, g = deepcopy(ls), copy(g)
@@ -1069,27 +435,9 @@ def sift_common_values(ls, g):
     return ls, g
 
 
-def rename_keys(value_by_key, prefix='', suffix=''):
-    d = OrderedDict()
-    for key, value in value_by_key.items():
-        if prefix and not key.startswith(prefix):
-            key = prefix + key
-        if suffix and not key.endswith(suffix):
-            key = key + suffix
-        d[key] = value
-    return d
-
-
-def get_by_prefix(value_by_key, prefix):
-    for key, value in value_by_key.items():
-        if key.startswith(prefix):
-            return value
-
-
 def save_common_values(target_folder, g):
     target_path = join(target_folder, 'common_values.csv')
     # TODO: Clean this messiness
-    # rows = [(A[k], v) for k, v in g.items()]
     rows = [
         (k, v) for k, v in g.items() if
         not k.endswith('_by_year') and
@@ -1113,7 +461,6 @@ def save_unique_values(target_folder, ls):
         k != 'name'
     }) for l in ls]
     table = concat(rows, axis=1)
-    # table.columns = [A[k] for k in table.columns]
     table.columns = [l['name'] for l in ls]
     table.to_csv(target_path)
     table.transpose().to_csv(join(
@@ -1130,11 +477,8 @@ def save_yearly_values(target_folder, ls):
             if not k.endswith('_by_year') or v.empty:
                 continue
             column = Series(v)
-            # column.index = MultiIndex.from_tuples([(
-            # name, x) for x in column.index], names=[A['name'], A['year']])
             column.index = MultiIndex.from_tuples([(
                 name, x) for x in column.index], names=['name', 'year'])
-            # columns[A[k.replace('_by_year', '')]].append(column)
             columns[k.replace('_by_year', '')].append(column)
     table = DataFrame()
     for name, columns in columns.items():
@@ -1168,179 +512,178 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--target_folder',
         metavar='FOLDER', type=make_folder)
+
     argument_parser.add_argument(
-        '--locale',
-        metavar='LOCALE', default='en-US')
+        '--selected_technologies_text_path',
+        metavar='PATH')
 
     argument_parser.add_argument(
         '--financing_year',
-        metavar='YEAR', required=True, type=int)
+        metavar='YEAR', type=int)
     argument_parser.add_argument(
         '--time_horizon_in_years',
-        metavar='INTEGER', required=True, type=int)
+        metavar='INTEGER', type=int)
     argument_parser.add_argument(
         '--discount_rate_as_percent_of_cash_flow_per_year',
-        metavar='PERCENT', required=True, type=float)
+        metavar='PERCENT', type=float)
 
     argument_parser.add_argument(
         '--demand_point_table_path',
-        metavar='PATH', required=True)
+        metavar='PATH')
     argument_parser.add_argument(
         '--population_year',
-        metavar='YEAR', required=True, type=int)
+        metavar='YEAR', type=int)
     argument_parser.add_argument(
         '--population_growth_as_percent_of_population_per_year',
-        metavar='INTEGER', required=True, type=int)
+        metavar='INTEGER', type=int)
 
     argument_parser.add_argument(
         '--line_length_adjustment_factor',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--average_distance_between_buildings_in_meters',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--connection_count_per_thousand_people',
-        metavar='FLOAT', required=True, type=float)
+        '--peak_hours_of_sun_per_year',
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
+        '--number_of_people_per_connection',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
         '--consumption_per_connection_in_kwh',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
-        metavar='PERCENT', required=True, type=float)
+        metavar='PERCENT', type=float)
     argument_parser.add_argument(
         '--peak_hours_of_consumption_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--grid_electricity_production_cost_per_kwh',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_system_loss_as_percent_of_total_production',
-        metavar='PERCENT', required=True, type=float)
+        metavar='PERCENT', type=float)
 
     argument_parser.add_argument(
         '--grid_mv_line_geotable_path',
-        metavar='PATH', required=True)
+        metavar='PATH')
     argument_parser.add_argument(
         '--grid_mv_line_installation_lm_cost_per_meter',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_mv_line_maintenance_lm_cost_per_meter_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_mv_line_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--grid_mv_transformer_load_power_factor',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_mv_transformer_table_path',
-        metavar='PATH', required=True)
+        metavar='PATH')
 
     argument_parser.add_argument(
         '--grid_lv_line_installation_lm_cost_per_meter',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_lv_line_maintenance_lm_cost_per_meter_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_lv_line_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--grid_lv_connection_installation_lm_cost_per_connection',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_lv_connection_maintenance_lm_cost_per_connection_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_lv_connection_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--diesel_mini_grid_system_loss_as_percent_of_total_production',
-        metavar='PERCENT', required=True, type=float)
+        metavar='PERCENT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_generator_table_path',
-        metavar='PATH', required=True)
+        metavar='PATH')
     argument_parser.add_argument(
         '--diesel_mini_grid_generator_minimum_hours_of_production_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_generator_fuel_liters_consumed_per_kwh',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_fuel_cost_per_liter',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_installation_lm_cost_per_meter',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_connection_installation_lm_cost_per_connection',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year',  # noqa
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_connection_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
-        '--peak_hours_of_sun_per_year',
-        metavar='FLOAT', required=True, type=float)
-    argument_parser.add_argument(
         '--solar_home_system_loss_as_percent_of_total_production',
-        metavar='PERCENT', required=True, type=float)
+        metavar='PERCENT', type=float)
     argument_parser.add_argument(
         '--solar_home_panel_table_path',
-        metavar='PATH', required=True)
+        metavar='PATH')
 
     argument_parser.add_argument(
         '--solar_home_battery_kwh_per_panel_kw',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_battery_installation_lm_cost_per_battery_kwh',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_battery_maintenance_lm_cost_per_kwh_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_battery_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--solar_home_balance_installation_lm_cost_per_panel_kw',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_balance_lifetime_in_years',
-        metavar='FLOAT', required=True, type=float)
+        metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
-    A = load_abbreviations(args.locale)
-    M = load_messages(args.locale)
     g = args.__dict__.copy()
-    g['demand_point_table'] = read_csv(
-        args.demand_point_table_path)
-    g['grid_mv_line_geotable'] = read_csv(
-        args.grid_mv_line_geotable_path)
-    g['grid_mv_transformer_table'] = read_csv(
-        args.grid_mv_transformer_table_path)
-    g['diesel_mini_grid_generator_table'] = read_csv(
-        args.diesel_mini_grid_generator_table_path)
-    g['solar_home_panel_table'] = read_csv(
-        args.solar_home_panel_table_path)
+    g['selected_technologies'] = open(g.pop(
+        'selected_technologies_text_path')).read().split()
+    g['demand_point_table'] = read_csv(g.pop('demand_point_table_path'))
+    g['grid_mv_line_geotable'] = read_csv(g.pop('grid_mv_line_geotable_path'))
+    g['grid_mv_transformer_table'] = read_csv(g.pop(
+        'grid_mv_transformer_table_path'))
+    g['diesel_mini_grid_generator_table'] = read_csv(g.pop(
+        'diesel_mini_grid_generator_table_path'))
+    g['solar_home_panel_table'] = read_csv(g.pop(
+        'solar_home_panel_table_path'))
     d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
     print(format_summary(d))

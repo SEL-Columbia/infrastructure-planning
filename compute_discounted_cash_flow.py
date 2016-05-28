@@ -3,7 +3,7 @@ from invisibleroads_macros.log import format_summary
 from pandas import read_csv
 
 from infrastructure_planning.finance.valuation import (
-    compute_discounted_cash_flow,
+    compute_discounted_cash_flow_xxx,
     compute_break_even_time,
     compute_internal_return_rate)
 
@@ -13,7 +13,7 @@ def run(
         time_column, value_column,
         discount_rate_percent):
     time_value_packs = time_value_table[[time_column, value_column]].values
-    discounted_cash_flow = compute_discounted_cash_flow(
+    discounted_cash_flow = compute_discounted_cash_flow_xxx(
         time_value_packs, discount_rate_percent)
     break_even_time = compute_break_even_time(
         time_value_packs, discount_rate_percent)

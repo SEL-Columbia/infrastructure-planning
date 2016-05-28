@@ -4,6 +4,21 @@ from ...growth import get_default_slope, get_future_years
 from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
 
 
+def estimate_consumption(
+        population_by_year,
+        number_of_people_per_connection,
+        consumption_per_connection_in_kwh):
+    t = DataFrame({'population': population_by_year})
+    t['connection_count'] = t['population'] / float(
+        number_of_people_per_connection)
+    t['consumption_in_kwh'] = consumption_per_connection_in_kwh * t[
+        'connection_count']
+    return [
+        ('connection_count_by_year', t['connection_count']),
+        ('consumption_in_kwh_by_year', t['consumption_in_kwh']),
+    ]
+
+
 def estimate_electricity_consumption_using_recent_records(
         demographic_by_year_table,
         demographic_by_year_table_name_column,

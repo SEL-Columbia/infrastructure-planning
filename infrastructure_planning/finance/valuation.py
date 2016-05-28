@@ -8,15 +8,24 @@ def compute_levelized_cost(time_production_cost_packs, discount_rate_percent):
     time_production_packs = time_production_cost_array[:, [0, 1]]
     time_cost_packs = time_production_cost_array[:, [0, 2]]
 
-    discounted_cost = compute_discounted_cash_flow(
+    discounted_cost = compute_discounted_cash_flow_xxx(
         time_cost_packs, discount_rate_percent)
-    discounted_production = compute_discounted_cash_flow(
+    discounted_production = compute_discounted_cash_flow_xxx(
         time_production_packs, discount_rate_percent)
 
     return discounted_cost / discounted_production
 
 
-def compute_discounted_cash_flow(time_value_packs, discount_rate_percent):
+def compute_discounted_cash_flow(
+        cash_flow_by_year, financing_year, discount_rate_as_percent):
+    'Discount cash flow starting from the year of financing'
+    year_increments = np.array(cash_flow_by_year.index - financing_year)
+    year_increments[year_increments < 0] = 0  # Do not discount prior years
+    discount_rate_as_factor = 1 + discount_rate_as_percent / 100.
+    return sum(cash_flow_by_year / discount_rate_as_factor ** year_increments)
+
+
+def compute_discounted_cash_flow_xxx(time_value_packs, discount_rate_percent):
     time_value_packs = sort_time_packs(time_value_packs)
     discount_rate_factor = 1 + discount_rate_percent / 100.
     values = [value for time, value in time_value_packs]
@@ -26,7 +35,7 @@ def compute_discounted_cash_flow(time_value_packs, discount_rate_percent):
 def compute_break_even_time(time_value_packs, discount_rate_percent):
     time_value_packs = sort_time_packs(time_value_packs)
     for end_index in xrange(1, len(time_value_packs) + 1):
-        discounted_cash_flow = compute_discounted_cash_flow(
+        discounted_cash_flow = compute_discounted_cash_flow_xxx(
             time_value_packs[:end_index], discount_rate_percent)
         if discounted_cash_flow >= 0:
             break_even_time = time_value_packs[end_index - 1][0]
@@ -39,7 +48,7 @@ def compute_break_even_time(time_value_packs, discount_rate_percent):
 def compute_internal_return_rate(time_value_packs):
 
     def f(discount_rate_percent):
-        return compute_discounted_cash_flow(
+        return compute_discounted_cash_flow_xxx(
             time_value_packs, discount_rate_percent)
 
     return fsolve(f, 0)[0]

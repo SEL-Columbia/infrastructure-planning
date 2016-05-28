@@ -25,19 +25,19 @@ Fix miscellaneous issues
     Rename to existing mv line and proposed mv line
 
 Split components into package and separate tools
-    estimate_nodal_population
-    estimate_nodal_consumption_in_kwh
-    estimate_nodal_peak_demand_in_kw
-    estimate_nodal_internal_cost_by_technology
+    + estimate_local_population
+    estimate_local_consumption_in_kwh
+    estimate_local_peak_demand_in_kw
+    estimate_local_internal_cost_by_technology
         estimate_grid_internal_cost
         estimate_diesel_mini_grid_internal_cost
         estimate_solar_home_internal_cost
-    estimate_nodal_grid_mv_network_budget_in_meters
+    estimate_local_grid_mv_network_budget_in_meters
     assemble_total_grid_mv_network
         Submit pull request to networker
     sequence_total_grid_mv_network
         Submit pull request to sequencer
-    estimate_nodal_external_cost_by_technology
+    estimate_local_external_cost_by_technology
         estimate_grid_external_cost
         estimate_diesel_mini_grid_external_cost
         estimate_solar_home_external_cost
@@ -76,3 +76,8 @@ Update compute-discounted-cost
 Check that we only use most recent year if muliple years are given
 Return geotable if table has longitude and latitude
 Return geotable if table has city or address
+
+Clean up
+    Move grow_exponentially into growth
+    Make it possible to swap estimate_local_population
+    Make it possible to swap estimate_electricity_consumption

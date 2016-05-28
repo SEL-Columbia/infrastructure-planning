@@ -3,6 +3,10 @@ Each technology has initial installation costs and recurring production, mainten
 
 Mini-grid technologies include a central production facility and a low-voltage distribution network.
 
+#### Selected Technologies
+{selected_technologies_text}
+
+
 ## Finance
 The amount of money needed to fund an infrastructure project includes both initial and recurring costs. The initial costs are paid upfront and the recurring costs are paid later.
 
@@ -17,6 +21,7 @@ The net present value or discounted cost of an infrastructure project assumes th
 #### Discount Rate as Percent of Cash Flow per Year
 {discount_rate_as_percent_of_cash_flow_per_year}
 
+
 ## Demography
 Assume that population grows at a fixed rate each year. If the population is 100 and the growth rate is 10%, then the population will be 110 after the first year and 121 after the second year.
 
@@ -30,8 +35,8 @@ To override a computed value, upload a CSV with an additional column. The column
 #### Population Growth Rate as Percent of Population per Year
 {population_growth_as_percent_of_population_per_year}
 
-## Consumption
-Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
+
+## Geography
 
 #### Line Length Adjustment Factor
 The length of line used to connect two locations is often greater than the distance between the two locations.
@@ -40,8 +45,15 @@ The length of line used to connect two locations is often greater than the dista
 #### Average Distance Between Buildings in Meters
 {average_distance_between_buildings_in_meters}
 
-#### Connection Count per Thousand People
-{connection_count_per_thousand_people}
+#### Peak Hours of Sun per Year
+{peak_hours_of_sun_per_year}
+
+
+## Consumption
+Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
+
+#### Number of People per Connection
+{number_of_people_per_connection}
 
 #### Consumption per Connection in Kilowatt-Hours
 {consumption_per_connection_in_kwh}
@@ -51,6 +63,7 @@ The length of line used to connect two locations is often greater than the dista
 
 #### Peak Hours of Consumption per Year
 {peak_hours_of_consumption_per_year}
+
 
 ## Technology: Grid
 A remote source produces electricity that is distributed to consumers.
@@ -146,6 +159,7 @@ The low voltage connection connects a building to low voltage line.
 #### Grid Low Voltage Connection Lifetime in Years
 {grid_lv_connection_lifetime_in_years}
 
+
 ## Technology: Diesel Mini Grid
 A local diesel generator produces electricity that is distributed to consumers.
 
@@ -203,11 +217,9 @@ The cost model is identical to grid low voltage line.
 #### Diesel Mini Grid Low Voltage Connection Lifetime in Years
 {diesel_mini_grid_lv_connection_lifetime_in_years}
 
+
 ## Technology: Solar Home System
 A photovoltaic system produces electricity from sunlight for each [building](https://vimeo.com/158065353).
-
-#### Solar Home System Peak Hours of Sun per Year
-{peak_hours_of_sun_per_year}
 
 #### Solar Home System Loss as Percent of Total Production
 {solar_home_system_loss_as_percent_of_total_production}

@@ -1,4 +1,6 @@
 {
+  "selected_technologies": "grid diesel_mini_grid solar_home",
+
   "financing_year": 2016,
   "time_horizon_in_years": 10,
   "discount_rate_as_percent_of_cash_flow_per_year": 10,
@@ -9,7 +11,7 @@
 
   "line_length_adjustment_factor": 1.4,
   "average_distance_between_buildings_in_meters": 25,
-  "connection_count_per_thousand_people": 120,
+  "number_of_people_per_connection": 8.33,
 
   "consumption_per_connection_in_kwh": 456,
   "consumption_during_peak_hours_as_percent_of_total_consumption": 40,
