@@ -247,9 +247,11 @@ I just realized that levelized cost for grid is meaningless if there is no exter
     + Expose consumption_per_year_in_kwh
     + Expose proposed_cost_per_connection
 
-# Tasks
+20160529-0000 - 20160528-0130
 
-    Check whether local overrides work
+    + Check whether local overrides work
+
+# Tasks
 
     Revise parameter defaults to fit Nigeria defaults
     Draft JSON file from Senegal defaults in configuration file
@@ -258,3 +260,4 @@ I just realized that levelized cost for grid is meaningless if there is no exter
     Adjust script so that it accepts alterative ways to specify source_folder and target_folder
     Support relative paths using source_folder
     Draft JSON file from Nigeria defaults
+    Deploy temporary cloud server
