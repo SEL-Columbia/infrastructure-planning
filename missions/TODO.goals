@@ -83,3 +83,6 @@ Clean up
     Move grow_exponentially into growth
     Make it possible to swap estimate_local_population
     Make it possible to swap estimate_electricity_consumption
+
+Test
+    Check what happens when there are no demand points

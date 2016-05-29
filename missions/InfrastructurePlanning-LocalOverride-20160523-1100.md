@@ -225,12 +225,22 @@ I just realized that levelized cost for grid is meaningless if there is no exter
 
     + Select grid if it is connected, otherwise choose standalone
 
+20160528-1500 - 20160528-2000
+
+    + Remove duplicate required columns
+    _ Split transpose across multiple files
+
+20160528-2100 - 20160528-2300
+
 # Tasks
 
+    Generate complete variable file for one example
+
+    Check whether local overrides work
     Expose minimum node count per subnetwork
     Expose maximum_connection_count
     Expose maximum_consumption_per_year_in_kwh
-    Check whether local overrides work
+    Compute discounted cost per connection
 
     Revise parameter defaults to fit Nigeria defaults
     Draft JSON file from Senegal defaults in configuration file

@@ -1,18 +1,22 @@
 import geometryIO
 from argparse import ArgumentParser
 from collections import OrderedDict
-from copy import copy, deepcopy
 from geopy import GoogleV3
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
-from networkx import Graph, write_gpickle
-from os.path import join
-from pandas import DataFrame, MultiIndex, Series, concat, read_csv
+from networkx import write_gpickle
+from os.path import basename, join
+from pandas import DataFrame, Series, concat, read_csv
 from shapely.geometry import GeometryCollection, LineString, Point
 from shapely import wkt
+
+from infrastructure_planning.exceptions import InfrastructurePlanningError
+from infrastructure_planning.macros import (
+    compute, get_graph_from_table, get_table_from_graph,
+    get_table_from_variables)
 
 from infrastructure_planning.demography.exponential import estimate_population
 from infrastructure_planning.electricity.consumption.linear import (
@@ -22,9 +26,6 @@ from infrastructure_planning.electricity.cost import (
     estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
 from infrastructure_planning.electricity.cost.grid import (
     estimate_mv_line_budget)
-
-from infrastructure_planning.exceptions import InfrastructurePlanningError
-from infrastructure_planning.macros import compute
 from networker.networker_runner import NetworkerRunner
 from sequencer import NetworkPlan
 from sequencer.Models import EnergyMaximizeReturn
@@ -173,7 +174,7 @@ TABLE_NAMES = [
     'diesel_mini_grid_generator_table',
     'solar_home_panel_table',
 ]
-COLUMN_NAMES = {
+NORMALIZED_NAME_BY_COLUMN_NAME = {
     'capacity in kva': 'capacity_in_kva',
     'capacity in kw': 'capacity_in_kw',
     'installation labor and material cost': 'installation_lm_cost',
@@ -181,10 +182,13 @@ COLUMN_NAMES = {
         'maintenance_lm_cost_per_year',
     'lifetime in years': 'lifetime_in_years'
 }
+VARIABLE_NAMES_PATH = join('templates', basename(
+    __file__).replace('.py', '').replace('_', '-'), 'summary-columns.txt')
+VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
 def run(target_folder, g):
-    g = prepare_parameters(g, TABLE_NAMES, COLUMN_NAMES)
+    g = prepare_parameters(g, TABLE_NAMES, NORMALIZED_NAME_BY_COLUMN_NAME)
 
     # Compute
     for f in MAIN_FUNCTIONS:
@@ -209,12 +213,12 @@ def run(target_folder, g):
     ls = [node_d for node_id, node_d in g[
         'infrastructure_graph'
     ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
-    ls, g = sift_common_values(ls, g)
 
     # Save
-    save_common_values(target_folder, g)
-    save_unique_values(target_folder, ls)
-    save_yearly_values(target_folder, ls)
+    summary_folder = make_folder(join(target_folder, 'summary'))
+    save_summary(summary_folder, ls, g, VARIABLE_NAMES)
+    save_glossary(summary_folder, ls, g)
+
     # Prepare summaries
     d = OrderedDict()
     graph = g['infrastructure_graph']
@@ -343,10 +347,11 @@ def run(target_folder, g):
     return d
 
 
-def prepare_parameters(g, table_names, column_names):
+def prepare_parameters(g, table_names, normalized_name_by_column_name):
     for table_name in table_names:
         table = g[table_name]
-        table.columns = normalize_column_names(table.columns, column_names)
+        table.columns = normalize_column_names(
+            table.columns, normalized_name_by_column_name)
     for prepare_parameter in [
             prepare_demand_point_table,
             prepare_grid_mv_line_geotable]:
@@ -402,96 +407,43 @@ def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     ]
 
 
-def get_graph_from_table(table):
-    graph = Graph()
-    for index, row in table.iterrows():
-        graph.add_node(index, dict(row))
-    return graph
+def save_summary(target_folder, ls, g, variable_names):
+    keys = []
+    for x in g['demand_point_table'].columns:
+        if x in variable_names:
+            continue
+        keys.append(x)
+    if len(keys) > 1:
+        keys.append('')
+    for x in variable_names:
+        keys.append(x)
+    table = get_table_from_variables(ls, g, keys)
+    table.to_csv(join(target_folder, 'costs.csv'))
+    example_table = table.reset_index().groupby(
+        'proposed_technology').first().reset_index().transpose()
+    example_table.to_csv(join(target_folder, 'examples.csv'), header=False)
 
 
-def get_table_from_graph(graph, keys=None):
-    index, rows = zip(*graph.nodes_iter(data=True))
-    if keys:
-        rows = ({k: d[k] for k in keys} for d in rows)
-    return DataFrame(rows, index=index)
+def save_glossary(target_folder, ls, g):
+    l = ls[0] if len(ls) > 1 else {}
 
+    keys = []
+    keys.extend(l.keys())
+    keys.extend(g.keys())
+    keys.sort()
 
-def sift_common_values(ls, g):
-    'Move local arguments with common values into global arguments'
-    ls, g = deepcopy(ls), copy(g)
-    try:
-        common_value_by_key = ls[0].copy()
-    except IndexError:
-        return ls, g
-    for l in ls:
-        for k, v in l.items():
-            try:
-                value = common_value_by_key[k]
-            except KeyError:
-                continue
-            try:
-                if v != value:
-                    common_value_by_key.pop(k)
-            except ValueError:
-                if not v.equals(value):
-                    common_value_by_key.pop(k)
-    for key, value in common_value_by_key.items():
-        g[key] = value
-        for l in ls:
-            l.pop(key, None)
-    return ls, g
+    selected_keys = []
+    for key in keys:
+        value = l.get(key, g.get(key))
+        if hasattr(value, '__iter__'):
+            continue
+        selected_keys.append(key)
+    selected_keys.remove('target_folder')
 
-
-def save_common_values(target_folder, g):
-    target_path = join(target_folder, 'common_values.csv')
-    # TODO: Clean this messiness
-    rows = [
-        (k, v) for k, v in g.items() if
-        not k.endswith('_by_year') and
-        not k.endswith('_table') and
-        not k.endswith('_geotable') and
-        not k.endswith('_path') and
-        not k.endswith('_folder') and
-        not k.endswith('locale')]
-    table = DataFrame(rows, columns=['Argument', 'Value'])
-    table.to_csv(target_path, header=False, index=False)
-    return target_path
-
-
-def save_unique_values(target_folder, ls):
-    target_path = join(target_folder, 'unique_values.csv')
-    # TODO: Clean this messiness
-    rows = [Series({
-        k: v for k, v in l.items() if
-        not k.endswith('_by_year') and
-        not k.endswith('_by_technology') and
-        k != 'name'
-    }) for l in ls]
-    table = concat(rows, axis=1)
-    table.columns = [l['name'] for l in ls]
-    table.to_csv(target_path)
-    table.transpose().to_csv(join(
-        target_folder, 'unique_values_transposed.csv'), index=False)
-    return target_path
-
-
-def save_yearly_values(target_folder, ls):
-    target_path = join(target_folder, 'yearly_values.csv')
-    columns = OrderedDefaultDict(list)
-    for l in ls:
-        name = l['name']
-        for k, v in l.items():
-            if not k.endswith('_by_year') or v.empty:
-                continue
-            column = Series(v)
-            column.index = MultiIndex.from_tuples([(
-                name, x) for x in column.index], names=['name', 'year'])
-            columns[k.replace('_by_year', '')].append(column)
-    table = DataFrame()
-    for name, columns in columns.items():
-        table[name] = concat(columns)
-    table.to_csv(target_path)
-    return target_path
+    table = get_table_from_variables(ls, g, selected_keys)
+    if not len(table):
+        return
+    table.ix[table.index[0]].to_csv(join(target_folder, 'glossary.csv'))
 
 
 def format_technology(x):
