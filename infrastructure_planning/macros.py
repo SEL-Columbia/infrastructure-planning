@@ -1,12 +1,20 @@
 import inspect
-from collections import OrderedDict
 from invisibleroads_macros.iterable import merge_dictionaries
 from networkx import Graph
 from pandas import DataFrame
 
 
-def compute(f, l, g=None):
+def compute(f, l, g=None, prefix=''):
     'Compute the function using local arguments if possible'
+    value_by_key = rename_keys(compute_raw(f, l, g), prefix=prefix)
+    local_overrides = l.get('local_overrides', {})
+    for key in local_overrides:
+        if key in value_by_key:
+            value_by_key[key] = local_overrides[key]
+    return value_by_key
+
+
+def compute_raw(f, l, g=None):
     if not g:
         g = {}
     # If the function wants every argument, provide every argument
@@ -49,7 +57,7 @@ def get_table_from_variables(ls, g, keys):
 
 
 def rename_keys(value_by_key, prefix='', suffix=''):
-    d = OrderedDict()
+    d = {}
     for key, value in value_by_key.items():
         if prefix and not key.startswith(prefix):
             key = prefix + key

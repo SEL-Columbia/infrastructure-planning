@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from pandas import DataFrame, Series
 
 from ...macros import compute
@@ -16,7 +15,7 @@ def estimate_internal_cost(**keywords):
 
 
 def estimate_external_cost():
-    return [('external_discounted_cost', 0)]
+    return {'external_discounted_cost': 0}
 
 
 def estimate_electricity_production_cost(**keywords):
@@ -60,7 +59,7 @@ def estimate_fuel_cost(
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,
         diesel_mini_grid_generator_fuel_liters_consumed_per_kwh,
         diesel_mini_grid_fuel_cost_per_liter):
-    d = OrderedDict()
+    d = {}
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)

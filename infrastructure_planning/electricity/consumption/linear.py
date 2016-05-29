@@ -13,12 +13,12 @@ def estimate_consumption(
         number_of_people_per_connection)
     t['consumption'] = consumption_in_kwh_per_connection * t[
         'connection_count']
-    return [
-        ('connection_count_by_year', t['connection_count']),
-        ('consumption_in_kwh_by_year', t['consumption']),
-        ('maximum_connection_count', t['connection_count'].max()),
-        ('maximum_consumption_in_kwh_per_year', t['consumption'].max()),
-    ]
+    return {
+        'connection_count_by_year': t['connection_count'],
+        'consumption_in_kwh_by_year': t['consumption'],
+        'maximum_connection_count': t['connection_count'].max(),
+        'maximum_consumption_in_kwh_per_year': t['consumption'].max(),
+    }
 
 
 def estimate_electricity_consumption_using_recent_records(

@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from geopy.distance import vincenty as get_distance
 
 from ...exceptions import InfrastructurePlanningError
@@ -39,10 +38,10 @@ def estimate_external_cost(
         edge_d['grid_mv_line_discounted_cost'] = \
             edge_d.get('grid_mv_line_discounted_cost', 0) + \
             edge_line_discounted_cost
-    return [
-        ('mv_line_adjusted_length_in_meters', node_line_adjusted_length),
-        ('external_discounted_cost', node_line_discounted_cost),
-    ]
+    return {
+        'mv_line_adjusted_length_in_meters': node_line_adjusted_length,
+        'external_discounted_cost': node_line_discounted_cost,
+    }
 
 
 def estimate_electricity_production_cost(
@@ -59,7 +58,7 @@ def estimate_electricity_production_cost(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production / 100.,
         1 - grid_mv_transformer_load_power_factor)
-    d = OrderedDict()
+    d = {}
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
     d['electricity_production_cost_by_year'] = \
         grid_electricity_production_cost_per_kwh * production_in_kwh_by_year
@@ -105,14 +104,14 @@ def estimate_mv_line_cost_per_meter(
     grid_mv_line_replacement_lm_cost_per_year_per_meter = \
         grid_mv_line_installation_lm_cost_per_meter / float(
             grid_mv_line_lifetime_in_years)
-    return [
-        ('installation_lm_cost_per_meter',
-            grid_mv_line_installation_lm_cost_per_meter),
-        ('maintenance_lm_cost_per_meter_per_year',
-            grid_mv_line_maintenance_lm_cost_per_meter_per_year),
-        ('replacement_lm_cost_per_meter_per_year',
-            grid_mv_line_replacement_lm_cost_per_year_per_meter),
-    ]
+    return {
+        'installation_lm_cost_per_meter':
+            grid_mv_line_installation_lm_cost_per_meter,
+        'maintenance_lm_cost_per_meter_per_year':
+            grid_mv_line_maintenance_lm_cost_per_meter_per_year,
+        'replacement_lm_cost_per_meter_per_year':
+            grid_mv_line_replacement_lm_cost_per_year_per_meter,
+    }
 
 
 def estimate_mv_transformer_cost(

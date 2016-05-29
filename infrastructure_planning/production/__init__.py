@@ -39,12 +39,12 @@ def prepare_actual_system_capacity(
         'maintenance_lm_cost_per_year']
     replacement_lm_cost_per_year = installation_lm_cost / float(selected[
         'lifetime_in_years'])
-    return [
-        ('desired_system_' + capacity_column, desired_system_capacity),
-        ('selected_' + capacity_column, selected_capacity),
-        ('selected_count', selected_count),
-        ('actual_system_' + capacity_column, actual_system_capacity),
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
+    return {
+        'desired_system_' + capacity_column: desired_system_capacity,
+        'selected_' + capacity_column: selected_capacity,
+        'selected_count': selected_count,
+        'actual_system_' + capacity_column: actual_system_capacity,
+        'installation_lm_cost': installation_lm_cost,
+        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
+        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
+    }

@@ -87,6 +87,8 @@ def assemble_total_mv_line_network(
 
 
 def sequence_total_mv_line_network(target_folder, infrastructure_graph):
+    if not infrastructure_graph.edges():
+        return {}  # The network is empty and there is nothing to sequence
     node_table = get_table_from_graph(infrastructure_graph, [
         'longitude', 'latitude', 'population', 'peak_demand_in_kw'])
     node_table = node_table.rename(columns={'longitude': 'X', 'latitude': 'Y'})
@@ -155,11 +157,11 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             technology]
         levelized_cost_by_technology[technology] = discounted_cost / float(
             discounted_production) if discounted_cost else 0
-    return [
-        ('count_by_technology', count_by_technology),
-        ('discounted_cost_by_technology', discounted_cost_by_technology),
-        ('levelized_cost_by_technology', levelized_cost_by_technology),
-    ]
+    return {
+        'count_by_technology': count_by_technology,
+        'discounted_cost_by_technology': discounted_cost_by_technology,
+        'levelized_cost_by_technology': levelized_cost_by_technology,
+    }
 
 
 MAIN_FUNCTIONS = [
@@ -208,9 +210,9 @@ def run(target_folder, g):
         for node_id, node_d in graph.nodes_iter(data=True):
             if 'name' not in node_d:
                 continue  # We have a fake node
-            # Perform node-level override
-            node_defaults = dict(g['demand_point_table'].ix[node_id])
-            l = merge_dictionaries(node_d, node_defaults, {'node_id': node_id})
+            l = merge_dictionaries(node_d, {
+                'node_id': node_id,
+                'local_overrides': dict(g['demand_point_table'].ix[node_id])})
             try:
                 node_d.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
@@ -260,7 +262,7 @@ def run(target_folder, g):
                 'grid_mv_line_adjusted_length_in_meters'],
             'Proposed Technology': format_technology(technology),
             'Levelized Cost': node_d[technology + '_total_levelized_cost'],
-            'Connection Order': node_d['order'],
+            'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
             'RadiusInPixelsRange2-8': node_d['peak_demand_in_kw'],
@@ -335,7 +337,7 @@ def run(target_folder, g):
     for node_id, node_d in graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
-        columns = [node_d['name'], node_d['order']]
+        columns = [node_d['name'], node_d.get('order', '')]
         columns.extend(node_d[
             x + '_total_levelized_cost'] for x in technologies)
         columns.append(format_technology(node_d['proposed_technology']))
@@ -389,9 +391,7 @@ def prepare_demand_point_table(demand_point_table):
         # Use most recent population_year if there are many population_years
         demand_point_table = demand_point_table.sort_values(
             'population_year').groupby('name').last().reset_index()
-    return [
-        ('demand_point_table', demand_point_table),
-    ]
+    return {'demand_point_table': demand_point_table}
 
 
 def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
@@ -408,9 +408,7 @@ def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
                 line.coords = [flip_xy(xyz) for xyz in line.coords]
             # ISO 6709 specifies (latitude, longitude) coordinate order
             grid_mv_line_geotable['WKT'] = [x.wkt for x in geometries]
-    return [
-        ('grid_mv_line_geotable', grid_mv_line_geotable),
-    ]
+    return {'grid_mv_line_geotable': grid_mv_line_geotable}
 
 
 def save_summary(target_folder, ls, g, variable_names):

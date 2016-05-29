@@ -30,9 +30,7 @@ def estimate_population(
         base_population, population_growth_as_percent_of_population_per_year,
         year_increments)
     populations.index = years
-    return [
-        ('population_by_year', populations),
-    ]
+    return {'population_by_year': populations}
 
 
 def _grow_exponentially(value, growth_as_percent, growth_count):

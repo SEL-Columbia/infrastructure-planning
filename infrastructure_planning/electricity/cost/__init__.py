@@ -1,23 +1,21 @@
 import numpy as np
-from collections import OrderedDict
+from collections import defaultdict
 from importlib import import_module
-from invisibleroads_macros.iterable import OrderedDefaultDict
 from itertools import product
 from pandas import Series
 
 from ...finance.valuation import compute_discounted_cash_flow
-from ...macros import compute, get_by_prefix, rename_keys
+from ...macros import compute, get_by_prefix
 
 
 def estimate_internal_cost_by_technology(selected_technologies, **keywords):
     'Estimate internal cost for each technology independently'
     # Compute
-    d = OrderedDefaultDict(OrderedDict)
+    d = defaultdict(dict)
     for technology in selected_technologies:
         technology_module = import_module('%s.%s' % (__package__, technology))
         f = technology_module.estimate_internal_cost
-        value_by_key = OrderedDict(compute(f, keywords))
-        d.update(rename_keys(value_by_key, prefix=technology + '_'))
+        d.update(compute(f, keywords, prefix=technology + '_'))
     # Summarize
     keys = [
         'internal_discounted_cost',
@@ -31,12 +29,11 @@ def estimate_internal_cost_by_technology(selected_technologies, **keywords):
 def estimate_external_cost_by_technology(selected_technologies, **keywords):
     'Estimate external cost for each technology independently'
     # Compute
-    d = OrderedDefaultDict(OrderedDict)
+    d = defaultdict(dict)
     for technology in selected_technologies:
         technology_module = import_module('%s.%s' % (__package__, technology))
         f = technology_module.estimate_external_cost
-        value_by_key = OrderedDict(compute(f, keywords))
-        d.update(rename_keys(value_by_key, prefix=technology + '_'))
+        d.update(compute(f, keywords, prefix=technology + '_'))
     # Summarize
     keys = [
         'external_discounted_cost',
@@ -47,25 +44,28 @@ def estimate_external_cost_by_technology(selected_technologies, **keywords):
 
 
 def prepare_component_cost_by_year(component_packs, keywords, prefix):
-    d = OrderedDict()
+    d = {}
     cost_by_year_index = np.zeros(keywords['time_horizon_in_years'] + 1)
     for component, estimate_component_cost in component_packs:
-        v_by_k = OrderedDict(compute(estimate_component_cost, keywords, d))
+        component_prefix = prefix + component + '_'
+        v_by_k = compute(
+            estimate_component_cost, keywords, d, prefix=component_prefix)
         # Add initial costs
-        cost_by_year_index[0] += get_by_prefix(v_by_k, 'installation')
+        cost_by_year_index[0] += \
+            get_by_prefix(v_by_k, component_prefix + 'installation')
         # Add recurring costs
         cost_by_year_index[1:] += \
-            get_by_prefix(v_by_k, 'maintenance') + \
-            get_by_prefix(v_by_k, 'replacement')
+            get_by_prefix(v_by_k, component_prefix + 'maintenance') + \
+            get_by_prefix(v_by_k, component_prefix + 'replacement')
         # Save
-        d.update(rename_keys(v_by_k, prefix=prefix + component + '_'))
+        d.update(v_by_k)
     years = keywords['population_by_year'].index
     d['cost_by_year'] = Series(cost_by_year_index, index=years)
     return d
 
 
 def prepare_internal_cost(functions, keywords):
-    d = OrderedDict()
+    d = {}
     # Compute
     for f in functions:
         d.update(compute(f, keywords))
@@ -105,11 +105,11 @@ def prepare_lv_line_cost(
         lv_line_maintenance_lm_cost_per_meter_per_year
     replacement_lm_cost_per_year = \
         installation_lm_cost / float(lv_line_lifetime_in_years)
-    return [
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
+    return {
+        'installation_lm_cost': installation_lm_cost,
+        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
+        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
+    }
 
 
 def prepare_lv_connection_cost(
@@ -124,8 +124,8 @@ def prepare_lv_connection_cost(
         lv_connection_maintenance_lm_cost_per_connection_per_year
     replacement_lm_cost_per_year = \
         installation_lm_cost / float(lv_connection_lifetime_in_years)
-    return [
-        ('installation_lm_cost', installation_lm_cost),
-        ('maintenance_lm_cost_per_year', maintenance_lm_cost_per_year),
-        ('replacement_lm_cost_per_year', replacement_lm_cost_per_year),
-    ]
+    return {
+        'installation_lm_cost': installation_lm_cost,
+        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
+        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
+    }
