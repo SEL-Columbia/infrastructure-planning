@@ -41,16 +41,15 @@ def estimate_electricity_internal_distribution_cost(**keywords):
 
 
 def estimate_panel_cost(
-        consumption_in_kwh_by_year,
+        maximum_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         solar_home_system_loss_as_percent_of_total_production,
         solar_home_panel_table):
     # Estimate desired capacity
-    maximum_consumption_per_year_in_kwh = consumption_in_kwh_by_year.max()
-    maximum_production_per_year_in_kwh = adjust_for_losses(
-        maximum_consumption_per_year_in_kwh,
+    maximum_production_in_kwh_per_year = adjust_for_losses(
+        maximum_consumption_in_kwh_per_year,
         solar_home_system_loss_as_percent_of_total_production / 100.)
-    desired_system_capacity_in_kw = maximum_production_per_year_in_kwh / float(
+    desired_system_capacity_in_kw = maximum_production_in_kwh_per_year / float(
         peak_hours_of_sun_per_year)
     # Choose panel type
     return prepare_actual_system_capacity(

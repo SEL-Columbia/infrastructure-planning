@@ -55,8 +55,8 @@ Assume that consumption is fixed per capita. Estimate consumption based on the p
 #### Number of People per Connection
 {number_of_people_per_connection}
 
-#### Consumption per Connection in Kilowatt-Hours
-{consumption_per_connection_in_kwh}
+#### Consumption in Kilowatt-Hours per Connection
+{consumption_in_kwh_per_connection}
 
 #### Consumption during Peak Hours as Percent of Total Consumption
 {consumption_during_peak_hours_as_percent_of_total_consumption}
@@ -88,7 +88,10 @@ Medium voltage lines carry electricity over large distances.
 * Recurring Replacement Cost
     * Divide the installation cost by the lifetime of MV line.
 
-#### Existing Grid Medium Voltage Line
+#### Grid Medium Voltage Network Minimum Point Count
+{grid_mv_network_minimum_point_count}
+
+#### Grid Medium Voltage Line (Existing)
 {grid_mv_line_geotable}
 
 #### Grid Medium Voltage Line Installation Labor and Material Cost per Meter

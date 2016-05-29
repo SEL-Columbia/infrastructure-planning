@@ -7,15 +7,17 @@ from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_f
 def estimate_consumption(
         population_by_year,
         number_of_people_per_connection,
-        consumption_per_connection_in_kwh):
+        consumption_in_kwh_per_connection):
     t = DataFrame({'population': population_by_year})
     t['connection_count'] = t['population'] / float(
         number_of_people_per_connection)
-    t['consumption_in_kwh'] = consumption_per_connection_in_kwh * t[
+    t['consumption'] = consumption_in_kwh_per_connection * t[
         'connection_count']
     return [
         ('connection_count_by_year', t['connection_count']),
-        ('consumption_in_kwh_by_year', t['consumption_in_kwh']),
+        ('consumption_in_kwh_by_year', t['consumption']),
+        ('maximum_connection_count', t['connection_count'].max()),
+        ('maximum_consumption_in_kwh_per_year', t['consumption'].max()),
     ]
 
 

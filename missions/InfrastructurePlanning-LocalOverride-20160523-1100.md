@@ -232,15 +232,24 @@ I just realized that levelized cost for grid is meaningless if there is no exter
 
 20160528-2100 - 20160528-2300
 
+    + Generate glossary of variable names using one example
+    + Expose minimum node count per subnetwork
+
+        _ grid_mv_minimum_node_count_per_subnetwork
+        _ grid_mv_minimum_network_size
+        _ grid_mv_network_minimum_node_count
+        grid_mv_network_minimum_point_count
+        _ grid_mv_network_point_minimum_count
+        _ grid_mv_network_point_count_minimum
+        _ grid_mv_network_minimum_size
+
+    + Expose connection_count
+    + Expose consumption_per_year_in_kwh
+    + Expose proposed_cost_per_connection
+
 # Tasks
 
-    Generate complete variable file for one example
-
     Check whether local overrides work
-    Expose minimum node count per subnetwork
-    Expose maximum_connection_count
-    Expose maximum_consumption_per_year_in_kwh
-    Compute discounted cost per connection
 
     Revise parameter defaults to fit Nigeria defaults
     Draft JSON file from Senegal defaults in configuration file

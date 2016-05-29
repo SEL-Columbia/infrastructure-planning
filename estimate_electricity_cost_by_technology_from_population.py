@@ -32,7 +32,8 @@ from sequencer.Models import EnergyMaximizeReturn
 
 
 def assemble_total_mv_line_network(
-        target_folder, infrastructure_graph, grid_mv_line_geotable):
+        target_folder, infrastructure_graph, grid_mv_line_geotable,
+        grid_mv_network_minimum_point_count):
     geocode = GoogleV3().geocode
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         lon = node_d.get('longitude')
@@ -53,7 +54,9 @@ def assemble_total_mv_line_network(
             'budget_column': 'grid_mv_line_adjusted_budget',
         },
         'network_algorithm': 'mod_boruvka',
-        'network_parameters': {'minimum_node_count': 2},
+        'network_parameters': {
+            'minimum_node_count': grid_mv_network_minimum_point_count,
+        },
     }
     if len(grid_mv_line_geotable):
         grid_mv_line_shapefile_path = join(
@@ -128,6 +131,9 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             node_d['grid_total_discounted_cost'] = ''
             node_d['grid_total_levelized_cost'] = ''
         node_d['proposed_technology'] = proposed_technology
+        node_d['proposed_cost_per_connection'] = node_d[
+            proposed_technology + '_total_discounted_cost'] / float(node_d[
+                'maximum_connection_count'])
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
@@ -510,7 +516,7 @@ if __name__ == '__main__':
         '--number_of_people_per_connection',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--consumption_per_connection_in_kwh',
+        '--consumption_in_kwh_per_connection',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
@@ -526,6 +532,9 @@ if __name__ == '__main__':
         '--grid_system_loss_as_percent_of_total_production',
         metavar='PERCENT', type=float)
 
+    argument_parser.add_argument(
+        '--grid_mv_network_minimum_point_count',
+        metavar='INTEGER', type=int)
     argument_parser.add_argument(
         '--grid_mv_line_geotable_path',
         metavar='PATH')

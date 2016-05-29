@@ -132,14 +132,14 @@ def estimate_mv_transformer_cost(
 
 
 def estimate_lv_line_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         grid_lv_line_installation_lm_cost_per_meter,
         grid_lv_line_maintenance_lm_cost_per_meter_per_year,
         grid_lv_line_lifetime_in_years):
     return prepare_lv_line_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         grid_lv_line_installation_lm_cost_per_meter,
@@ -148,12 +148,12 @@ def estimate_lv_line_cost(
 
 
 def estimate_lv_connection_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         grid_lv_connection_installation_lm_cost_per_connection,
         grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
         grid_lv_connection_lifetime_in_years):
     return prepare_lv_connection_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         grid_lv_connection_installation_lm_cost_per_connection,
         grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
         grid_lv_connection_lifetime_in_years)

@@ -90,14 +90,13 @@ def prepare_internal_cost(functions, keywords):
 
 
 def prepare_lv_line_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         lv_line_installation_lm_cost_per_meter,
         lv_line_maintenance_lm_cost_per_meter_per_year,
         lv_line_lifetime_in_years):
     # TODO: Compute lv line cost by year as connections come online
-    maximum_connection_count = connection_count_by_year.max()
     line_length_in_meters = average_distance_between_buildings_in_meters * (
         maximum_connection_count - 1) * line_length_adjustment_factor
     installation_lm_cost = line_length_in_meters * \
@@ -114,12 +113,11 @@ def prepare_lv_line_cost(
 
 
 def prepare_lv_connection_cost(
-        connection_count_by_year,
+        maximum_connection_count,
         lv_connection_installation_lm_cost_per_connection,
         lv_connection_maintenance_lm_cost_per_connection_per_year,
         lv_connection_lifetime_in_years):
     # TODO: Compute lv connection cost by year as connections come online
-    maximum_connection_count = connection_count_by_year.max()
     installation_lm_cost = maximum_connection_count * \
         lv_connection_installation_lm_cost_per_connection
     maintenance_lm_cost_per_year = maximum_connection_count * \
