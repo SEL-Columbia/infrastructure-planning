@@ -14,8 +14,8 @@ The user must be able to override variables on a case by case basis.
 20160523-1130 - 20160526-1130: 3 days estimated
 
 # Objectives
-1. Identify key variables.
-2. Make sure that local overrides for key variables work.
+1. + Identify key variables.
+2. + Make sure that local overrides for key variables work.
 3. Make sure the script accepts parameters in JSON format.
 
 # Log
@@ -246,6 +246,7 @@ I just realized that levelized cost for grid is meaningless if there is no exter
     + Expose connection_count
     + Expose consumption_per_year_in_kwh
     + Expose proposed_cost_per_connection
+    + Generate executive summary as specified by Naichen and Edwin
 
 20160529-0000 - 20160528-0130
 
@@ -260,4 +261,4 @@ I just realized that levelized cost for grid is meaningless if there is no exter
     Adjust script so that it accepts alterative ways to specify source_folder and target_folder
     Support relative paths using source_folder
     Draft JSON file from Nigeria defaults
-    Deploy temporary cloud server
+    Add acknowledgments to integrated tool
