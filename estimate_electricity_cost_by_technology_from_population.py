@@ -1,4 +1,5 @@
 import geometryIO
+import json
 from argparse import ArgumentParser
 from collections import OrderedDict
 from geopy import GoogleV3
@@ -470,11 +471,21 @@ def save_shapefile(target_path, geotable):
     return target_path
 
 
+def render_json(d):
+    d = d.copy()
+    del d['target_folder']
+    del d['json']
+    print(json.dumps(d, sort_keys=True, indent=2, separators=(',', ': ')))
+    exit()
+
+
 if __name__ == '__main__':
     argument_parser = ArgumentParser()
     argument_parser.add_argument(
         '--target_folder',
         metavar='FOLDER', type=make_folder)
+    argument_parser.add_argument(
+        '--json', action='store_true')
 
     argument_parser.add_argument(
         '--selected_technologies_text_path',
@@ -514,7 +525,7 @@ if __name__ == '__main__':
         '--number_of_people_per_connection',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--consumption_in_kwh_per_connection',
+        '--consumption_in_kwh_per_year_per_connection',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
@@ -640,6 +651,8 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
+    if args.json:
+        render_json(args.__dict__)
     g = args.__dict__.copy()
     g['selected_technologies'] = open(g.pop(
         'selected_technologies_text_path')).read().split()

@@ -55,8 +55,8 @@ Assume that consumption is fixed per capita. Estimate consumption based on the p
 #### Number of People per Connection
 {number_of_people_per_connection}
 
-#### Consumption in Kilowatt-Hours per Connection
-{consumption_in_kwh_per_connection}
+#### Consumption in Kilowatt-Hours per Year per Connection
+{consumption_in_kwh_per_year_per_connection}
 
 #### Consumption during Peak Hours as Percent of Total Consumption
 {consumption_during_peak_hours_as_percent_of_total_consumption}

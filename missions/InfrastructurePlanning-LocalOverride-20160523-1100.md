@@ -252,13 +252,23 @@ I just realized that levelized cost for grid is meaningless if there is no exter
 
     + Check whether local overrides work
 
+20160610-1530 - 20160610-1700: 90 minutes
+
+    _ as_json
+    json
+    _ render_json
+    _ show_json
+
 # Tasks
 
-    Revise parameter defaults to fit Nigeria defaults
+    Check which Senegal defaults correspond to old defaults from network-planner
+
     Draft JSON file from Senegal defaults in configuration file
-        Check that Senegal defaults really line up with old defaults from network-planner
-    Adjust script so that it accepts JSON file
-    Adjust script so that it accepts alterative ways to specify source_folder and target_folder
-    Support relative paths using source_folder
     Draft JSON file from Nigeria defaults
+    Revise parameter defaults to fit Nigeria defaults
+
+    Adjust script so that it accepts JSON file
+    Adjust script so that it accepts alternate ways to specify source_folder and target_folder
+    Support relative paths using source_folder
+
     Add acknowledgments to integrated tool
