@@ -9,7 +9,7 @@ from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from networkx import write_gpickle
-from os.path import basename, join
+from os.path import isabs, basename, join
 from pandas import DataFrame, Series, concat, read_csv
 from shapely.geometry import GeometryCollection, LineString, Point
 from shapely import wkt
@@ -196,7 +196,7 @@ VARIABLE_NAMES_PATH = join('templates', basename(
 VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
-def run(target_folder, g):
+def run(g):
     g = prepare_parameters(g, TABLE_NAMES, NORMALIZED_NAME_BY_COLUMN_NAME)
 
     # Compute
@@ -224,6 +224,7 @@ def run(target_folder, g):
     ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
 
     # Save
+    target_folder = g['target_folder']
     summary_folder = make_folder(join(target_folder, 'summary'))
     save_summary(summary_folder, ls, g, VARIABLE_NAMES)
     save_glossary(summary_folder, ls, g)
@@ -473,16 +474,46 @@ def save_shapefile(target_path, geotable):
 
 def render_json(d):
     d = d.copy()
+    del d['source_folder']
     del d['target_folder']
     del d['json']
     print(json.dumps(d, sort_keys=True, indent=2, separators=(',', ': ')))
-    exit()
+
+
+def load_global_parameters(d, script_path):
+    if d['json']:
+        render_json(d)
+        exit()
+    configuration_path = d['configuration_path']
+    source_folder = d['source_folder']
+    target_folder = d['target_folder']
+    g = json.load(open(configuration_path)) if configuration_path else {}
+    # Resolve relative paths using source_folder
+    if source_folder:
+        for k, v in g.items():
+            if not k.endswith('_path') or k == 'configuration_path':
+                continue
+            if v and not isabs(v):
+                g[k] = join(source_folder, v)
+    # Command-line arguments override configuration arguments
+    for k, v in d.items():
+        if v is not None:
+            g[k] = v
+    g['target_folder'] = target_folder or make_enumerated_folder_for(
+        script_path)
+    return g
 
 
 if __name__ == '__main__':
     argument_parser = ArgumentParser()
     argument_parser.add_argument(
-        '--target_folder',
+        'configuration_path',
+        metavar='PATH')
+    argument_parser.add_argument(
+        '-w', '--source_folder',
+        metavar='FOLDER')
+    argument_parser.add_argument(
+        '-o', '--target_folder',
         metavar='FOLDER', type=make_folder)
     argument_parser.add_argument(
         '--json', action='store_true')
@@ -651,9 +682,7 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
-    if args.json:
-        render_json(args.__dict__)
-    g = args.__dict__.copy()
+    g = load_global_parameters(args.__dict__, __file__)
     g['selected_technologies'] = open(g.pop(
         'selected_technologies_text_path')).read().split()
     g['demand_point_table'] = read_csv(g.pop('demand_point_table_path'))
@@ -664,5 +693,6 @@ if __name__ == '__main__':
         'diesel_mini_grid_generator_table_path'))
     g['solar_home_panel_table'] = read_csv(g.pop(
         'solar_home_panel_table_path'))
-    d = run(args.target_folder or make_enumerated_folder_for(__file__), g)
+
+    d = run(g)
     print(format_summary(d))

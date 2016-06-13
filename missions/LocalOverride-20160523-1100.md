@@ -13,6 +13,8 @@ The user must be able to override variables on a case by case basis.
 # Timeframe
 20160523-1130 - 20160526-1130: 3 days estimated
 
+20160523-1130 - 20160613-1800: 20 days actual
+
 # Objectives
 1. + Identify key variables.
 2. + Make sure that local overrides for key variables work.
@@ -259,16 +261,20 @@ I just realized that levelized cost for grid is meaningless if there is no exter
     _ render_json
     _ show_json
 
-# Tasks
+20160613-1600 - 20160613-1700: 1 hour
 
-    Check which Senegal defaults correspond to old defaults from network-planner
+Let's start by making a dummy JSON file.
 
-    Draft JSON file from Senegal defaults in configuration file
-    Draft JSON file from Nigeria defaults
-    Revise parameter defaults to fit Nigeria defaults
+    + Make a dummy JSON file
+    + Adjust script so that it accepts alternate ways to specify source_folder and target_folder
+    + Accept JSON file as first argument
 
-    Adjust script so that it accepts JSON file
-    Adjust script so that it accepts alternate ways to specify source_folder and target_folder
-    Support relative paths using source_folder
+If a source_folder is specified, then adjust relative paths accordingly.
 
-    Add acknowledgments to integrated tool
+    + Support relative paths using source_folder
+
+If a configuration path is specified, then use it.
+
+    + Adjust script so that it accepts JSON file
+
+20160613-1800
