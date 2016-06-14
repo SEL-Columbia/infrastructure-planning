@@ -1,3 +1,5 @@
+Consider having a facility table that corresponds to facility counts in the village table
+
 Have calculator generate geojson file
 Add instructions on how to set up the system on a new machine
 Add acknowledgments to integrated tool

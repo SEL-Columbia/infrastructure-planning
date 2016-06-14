@@ -48,7 +48,7 @@ From the grid installation cost, we get 3406.235143537246 total connections.
 
 That means that our "consumption_in_kwh_per_year_per_connection" is 338.47941161905663 kWh / year. We'll round that to 339 kWh / year.
 
-I might need a step by step document that shows how to convert paramets from the old NetworkPlanner to the new infrastructure-planning system.
+I might need a step by step document that shows how to convert parameters from the old NetworkPlanner to the new infrastructure-planning system.
 
 # Tasks
 
