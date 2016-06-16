@@ -18,7 +18,7 @@ The user must be able to override variables on a case by case basis.
 # Objectives
 1. + Identify key variables.
 2. + Make sure that local overrides for key variables work.
-3. Make sure the script accepts parameters in JSON format.
+3. + Make sure the script accepts parameters in JSON format.
 
 # Log
 20160523-1130 - 20160523-1230

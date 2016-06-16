@@ -1,6 +1,10 @@
 Consider having a facility table that corresponds to facility counts in the village table
+Show how parameters from old networkplanner map to new parameters
+Separate calculator
+    Have calculator generate geojson file
 
-Have calculator generate geojson file
+Write positive test
+
 Add instructions on how to set up the system on a new machine
 Add acknowledgments to integrated tool
 
@@ -14,7 +18,7 @@ Clean up output folder
     /infrastructure_map.csv
     /infrastructure_summary.csv
     /infrastructure_details.csv
-    /infrastructure_graph.pkl (eventually topojson)
+    /infrastructure_graph.json
     /summary/parameters.json
     /summary/points.csv
     /summary/points.shp
@@ -23,43 +27,15 @@ Clean up output folder
     /summary/lines-proposed.shp
     /summary/costs.csv
 
-Setup independent cloud server
-Setup laptop
-
 Fix miscellaneous issues
     Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
     Rename to existing mv line and proposed mv line
 
-Split components into package and separate tools
-    + estimate_local_population
-    estimate_local_consumption_in_kwh
-    estimate_local_peak_demand_in_kw
-    estimate_local_internal_cost_by_technology
-        estimate_grid_internal_cost
-        estimate_diesel_mini_grid_internal_cost
-        estimate_solar_home_internal_cost
-    estimate_local_grid_mv_network_budget_in_meters
-    assemble_total_grid_mv_network
-        Submit pull request to networker
-    sequence_total_grid_mv_network
-        Submit pull request to sequencer
-    estimate_local_external_cost_by_technology
-        estimate_grid_external_cost
-        estimate_diesel_mini_grid_external_cost
-        estimate_solar_home_external_cost
-    estimate_total_cost
-
-Add acknowledgments to separate tools
 Consider saving the input and output for each function for debugging purposes (we can do this in compute)
 Consider converting rows across multiple years into x_by_year
 
-Build separate consumption model
-    Estimate number of households based on household size
-    Specify number of schools and school demand
-    Specify number of hospitals and hospital demand
-
-Consider filling certain values based on urban vs rural
-Consider filling certain values based on administrative boundary
+Consider tools that fill certain values based on urban vs rural
+Consider tools that fill certain values based on administrative boundary
 
 Make script for each technology that only does modelling for that technology
 Consider accepting net present value vs consumption curve for energy source X
@@ -80,8 +56,6 @@ Update compute-discounted-cost
     Check whether different loan year affects breakeven time (whether we need to add loan year)
 
 Check that we only use most recent year if muliple years are given
-Return geotable if table has longitude and latitude
-Return geotable if table has city or address
 
 Clean up
     Move grow_exponentially into growth

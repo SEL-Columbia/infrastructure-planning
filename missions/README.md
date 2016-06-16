@@ -18,3 +18,6 @@ Specify at most three goals that must be achieved for the mission to be successf
 
 # Log
 Record progress toward objectives.
+
+# Tasks
+List remaining tasks.

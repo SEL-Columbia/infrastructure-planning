@@ -4,7 +4,40 @@ from ...growth import get_default_slope, get_future_years
 from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
 
 
-def estimate_consumption(
+"""
+def estimate_consumption_from_connection_type(
+        population_by_year,
+        number_of_people_per_household,
+        connection_type_table, **keywords):
+    # Compute household_count_by_year
+    # household_count should override estimated if defined
+
+total_consumption_in_kwh_per_year = 0
+total_connection_count = 0
+for row_index, row in connection_type_table.iterrows():
+    connection_type = row['connection_type'].lower()
+    try:
+        connection_count = keywords[connection_type + '_count']
+    except KeyError:
+        continue
+    consumption_per_connection = row['consumption_in_kwh_per_year']
+    total_consumption_in_kwh_per_year += consumption_per_connection * connection_count
+    total_connection_count += connection_count
+print(consumption_in_kwh_per_year)
+print(total_connection_count)
+
+    # Define t['connection_count']
+    # Define t['consumption']
+    return {
+        'connection_count_by_year': t['connection_count'],
+        'consumption_in_kwh_by_year': t['consumption'],
+        'maximum_connection_count': t['connection_count'].max(),
+        'maximum_consumption_in_kwh_per_year': t['consumption'].max(),
+    }
+"""
+
+
+def estimate_consumption_from_connection_count(
         population_by_year,
         number_of_people_per_connection,
         consumption_in_kwh_per_year_per_connection):
