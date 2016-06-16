@@ -21,7 +21,7 @@ from infrastructure_planning.macros import (
 
 from infrastructure_planning.demography.exponential import estimate_population
 from infrastructure_planning.electricity.consumption.linear import (
-    estimate_consumption)
+    estimate_consumption_from_connection_count)
 from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.cost import (
     estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
@@ -167,7 +167,7 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
 
 MAIN_FUNCTIONS = [
     estimate_population,
-    estimate_consumption,
+    estimate_consumption_from_connection_count,
     estimate_peak_demand,
     estimate_internal_cost_by_technology,
     estimate_mv_line_budget,
@@ -508,7 +508,7 @@ if __name__ == '__main__':
     argument_parser = ArgumentParser()
     argument_parser.add_argument(
         'configuration_path',
-        metavar='PATH')
+        metavar='CONFIGURATION_PATH', nargs='?')
     argument_parser.add_argument(
         '-w', '--source_folder',
         metavar='FOLDER')
