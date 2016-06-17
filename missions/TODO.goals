@@ -1,5 +1,15 @@
 Submit pull request for networker
 Submit pull request for sequencer
+    git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
+    diff --git a/.gitignore b/.gitignore
+    diff --git a/demo_sequencer.py b/demo_sequencer.py
+    diff --git a/requirements.txt b/requirements.txt
+    diff --git a/sequencer/Models.py b/sequencer/Models.py
+    diff --git a/sequencer/NetworkPlan.py b/sequencer/NetworkPlan.py
+    diff --git a/sequencer/Sequencer.py b/sequencer/Sequencer.py
+    diff --git a/sequencer/Utils.py b/sequencer/Utils.py
+
+
 Show how parameters from old networkplanner map to new parameters
 Separate calculator
     Have calculator generate geojson file
