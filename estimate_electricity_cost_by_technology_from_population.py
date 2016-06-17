@@ -21,7 +21,7 @@ from infrastructure_planning.macros import (
 
 from infrastructure_planning.demography.exponential import estimate_population
 from infrastructure_planning.electricity.consumption.linear import (
-    estimate_consumption_from_connection_count)
+    estimate_consumption_from_connection_type)
 from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.cost import (
     estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
@@ -167,7 +167,7 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
 
 MAIN_FUNCTIONS = [
     estimate_population,
-    estimate_consumption_from_connection_count,
+    estimate_consumption_from_connection_type,
     estimate_peak_demand,
     estimate_internal_cost_by_technology,
     estimate_mv_line_budget,
@@ -177,19 +177,10 @@ MAIN_FUNCTIONS = [
     estimate_total_cost,
 ]
 COLORS = 'bgrcmykw'
-TABLE_NAMES = [
-    'demand_point_table',
-    'grid_mv_transformer_table',
-    'diesel_mini_grid_generator_table',
-    'solar_home_panel_table',
-]
 NORMALIZED_NAME_BY_COLUMN_NAME = {
-    'capacity in kva': 'capacity_in_kva',
-    'capacity in kw': 'capacity_in_kw',
     'installation labor and material cost': 'installation_lm_cost',
     'maintenance labor and material cost per year':
         'maintenance_lm_cost_per_year',
-    'lifetime in years': 'lifetime_in_years'
 }
 VARIABLE_NAMES_PATH = join('templates', basename(
     __file__).replace('.py', '').replace('_', '-'), 'summary-columns.txt')
@@ -197,7 +188,7 @@ VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
 def run(g):
-    g = prepare_parameters(g, TABLE_NAMES, NORMALIZED_NAME_BY_COLUMN_NAME)
+    g = prepare_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
 
     # Compute
     for f in MAIN_FUNCTIONS:
@@ -291,7 +282,7 @@ def run(g):
             'FillColor': color_by_technology['grid'],
         })
     if 'grid_mv_line_geotable' in g:
-        for geometry_wkt in g['grid_mv_line_geotable']['WKT']:
+        for geometry_wkt in g['grid_mv_line_geotable']['wkt']:
             rows.append({
                 'Name': '(Existing Grid)',
                 'Proposed Technology': 'grid',
@@ -357,13 +348,15 @@ def run(g):
     return d
 
 
-def prepare_parameters(g, table_names, normalized_name_by_column_name):
-    for table_name in table_names:
-        table = g[table_name]
-        table.columns = normalize_column_names(
-            table.columns, normalized_name_by_column_name)
+def prepare_parameters(g, normalized_name_by_column_name):
+    for k, v in g.items():
+        if not hasattr(v, 'columns'):
+            continue
+        v.columns = normalize_column_names(
+            v.columns, normalized_name_by_column_name)
     for prepare_parameter in [
             prepare_demand_point_table,
+            prepare_connection_type_table,
             prepare_grid_mv_line_geotable]:
         g.update(compute(prepare_parameter, g))
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
@@ -378,7 +371,7 @@ def normalize_column_names(column_names, normalized_name_by_column_name):
         try:
             column_name = normalized_name_by_column_name[column_name]
         except KeyError:
-            pass
+            column_name = column_name.replace(' ', '_')
         normalized_names.append(column_name)
     return normalized_names
 
@@ -396,9 +389,15 @@ def prepare_demand_point_table(demand_point_table):
     return {'demand_point_table': demand_point_table}
 
 
+def prepare_connection_type_table(connection_type_table):
+    connection_type_table['connection_type'] = connection_type_table[
+        'connection_type'].apply(lambda x: x.lower().replace(' ', '_'))
+    return {'connection_type_table': connection_type_table}
+
+
 def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
-    geometries = [wkt.loads(x) for x in grid_mv_line_geotable['WKT']]
+    geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
     if geometries:
         regular = tuple(GeometryCollection(geometries).centroid.coords[0])[:2]
         flipped = regular[1], regular[0]
@@ -409,7 +408,7 @@ def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
             for line in geometries:
                 line.coords = [flip_xy(xyz) for xyz in line.coords]
             # ISO 6709 specifies (latitude, longitude) coordinate order
-            grid_mv_line_geotable['WKT'] = [x.wkt for x in geometries]
+            grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}
 
 
@@ -464,7 +463,7 @@ def flip_xy(xyz):
 
 def save_shapefile(target_path, geotable):
     # TODO: Save extra attributes
-    geometries = [wkt.loads(x) for x in geotable['WKT']]
+    geometries = [wkt.loads(x) for x in geotable['wkt']]
     # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
     for geometry in geometries:
         geometry.coords = [flip_xy(xyz) for xyz in geometry.coords]
@@ -552,11 +551,19 @@ if __name__ == '__main__':
         '--peak_hours_of_sun_per_year',
         metavar='FLOAT', type=float)
 
+    """
     argument_parser.add_argument(
         '--number_of_people_per_connection',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--consumption_in_kwh_per_year_per_connection',
+        metavar='FLOAT', type=float)
+    """
+    argument_parser.add_argument(
+        '--connection_type_table_path',
+        metavar='PATH')
+    argument_parser.add_argument(
+        '--number_of_people_per_household',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
@@ -686,6 +693,7 @@ if __name__ == '__main__':
     g['selected_technologies'] = open(g.pop(
         'selected_technologies_text_path')).read().split()
     g['demand_point_table'] = read_csv(g.pop('demand_point_table_path'))
+    g['connection_type_table'] = read_csv(g.pop('connection_type_table_path'))
     g['grid_mv_line_geotable'] = read_csv(g.pop('grid_mv_line_geotable_path'))
     g['grid_mv_transformer_table'] = read_csv(g.pop(
         'grid_mv_transformer_table_path'))

@@ -1,56 +1,52 @@
-from pandas import DataFrame, concat, merge
+from pandas import DataFrame, Series, concat, merge
 
 from ...growth import get_default_slope, get_future_years
 from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
 
 
-"""
 def estimate_consumption_from_connection_type(
         population_by_year,
         number_of_people_per_household,
         connection_type_table, **keywords):
-    # Compute household_count_by_year
-    # household_count should override estimated if defined
-
-total_consumption_in_kwh_per_year = 0
-total_connection_count = 0
-for row_index, row in connection_type_table.iterrows():
-    connection_type = row['connection_type'].lower()
-    try:
-        connection_count = keywords[connection_type + '_count']
-    except KeyError:
-        continue
-    consumption_per_connection = row['consumption_in_kwh_per_year']
-    total_consumption_in_kwh_per_year += consumption_per_connection * connection_count
-    total_connection_count += connection_count
-print(consumption_in_kwh_per_year)
-print(total_connection_count)
-
-    # Define t['connection_count']
-    # Define t['consumption']
+    """
+    Note that connection_count and consumption will be constant year over year
+    if there is a local override for household_count.
+    """
+    connection_count_by_year = Series(0, index=population_by_year.index)
+    consumption_by_year = Series(0, index=population_by_year.index)
+    for row_index, row in connection_type_table.iterrows():
+	connection_type = row['connection_type']
+	try:
+	    connection_count = keywords[connection_type + '_count']
+	except KeyError:
+	    if connection_type != 'household':
+		continue
+            # Estimate household_count from population
+	    connection_count = population_by_year / float(number_of_people_per_household)
+	consumption_per_connection = row['consumption_in_kwh_per_year']
+	consumption_by_year += consumption_per_connection * connection_count
+	connection_count_by_year += connection_count
     return {
-        'connection_count_by_year': t['connection_count'],
-        'consumption_in_kwh_by_year': t['consumption'],
-        'maximum_connection_count': t['connection_count'].max(),
-        'maximum_consumption_in_kwh_per_year': t['consumption'].max(),
+        'connection_count_by_year': connection_count_by_year,
+        'consumption_in_kwh_by_year': consumption_by_year,
+        'maximum_connection_count': connection_count_by_year.max(),
+        'maximum_consumption_in_kwh_per_year': consumption_by_year.max(),
     }
-"""
 
 
 def estimate_consumption_from_connection_count(
         population_by_year,
         number_of_people_per_connection,
         consumption_in_kwh_per_year_per_connection):
-    t = DataFrame({'population': population_by_year})
-    t['connection_count'] = t['population'] / float(
+    connection_count_by_year = population_by_year / float(
         number_of_people_per_connection)
-    t['consumption'] = consumption_in_kwh_per_year_per_connection * t[
-        'connection_count']
+    consumption_by_year = consumption_in_kwh_per_year_per_connection * \
+        connection_count_by_year
     return {
-        'connection_count_by_year': t['connection_count'],
-        'consumption_in_kwh_by_year': t['consumption'],
-        'maximum_connection_count': t['connection_count'].max(),
-        'maximum_consumption_in_kwh_per_year': t['consumption'].max(),
+        'connection_count_by_year': connection_count_by_year,
+        'consumption_in_kwh_by_year': consumption_by_year ,
+        'maximum_connection_count': connection_count_by_year.max(),
+        'maximum_consumption_in_kwh_per_year': consumption_by_year.max(),
     }
 
 

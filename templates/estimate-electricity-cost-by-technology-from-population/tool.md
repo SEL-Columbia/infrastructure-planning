@@ -52,11 +52,11 @@ The length of line used to connect two locations is often greater than the dista
 ## Consumption
 Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
 
-#### Number of People per Connection
-{number_of_people_per_connection}
+#### Connection Type Table
+{connection_type_table}
 
-#### Consumption in Kilowatt-Hours per Year per Connection
-{consumption_in_kwh_per_year_per_connection}
+#### Number of People per Household
+{number_of_people_per_household}
 
 #### Consumption during Peak Hours as Percent of Total Consumption
 {consumption_during_peak_hours_as_percent_of_total_consumption}

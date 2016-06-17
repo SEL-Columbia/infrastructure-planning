@@ -1,3 +1,23 @@
+# Vision
+Describe your long-term goal for the project.
+
+# Mission
+Describe your short-term goal for the project.
+
+# Owner
+Roy Hyunjin Han
+
+# Context
+Explain why the mission is important.
+
+# Timeframe
+Provide your estimated timeframe for completing the mission.
+
+# Objectives
+Specify at most three goals that must be achieved for the mission to be successful.
+
+# Log
+
 # Tasks
 
     Split components into package and separate tools

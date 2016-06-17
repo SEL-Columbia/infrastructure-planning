@@ -1,5 +1,24 @@
-# Log
+# Vision
+Ensure a successful transition to the new infrastructure-planning system.
 
+# Mission
+Derive default values from Leona in Senegal and Kaduna in Nigeria.
+
+# Owner
+Roy Hyunjin Han
+
+# Context
+We would like to make it easy for Naichen, Shaky, Edwin to start testing the new system.
+
+# Timeframe
+20160613-1100 - 20160617-1600: 4 days estimated
+
+# Objectives
+1. Derive default values for Leona in Senegal.
+2. Derive default values for Kaduna in Nigeria.
+3. Draft some notes on how to derive certain values.
+
+# Log
 20160613-1115 - 20160613-1215
 
 Let's first fill the Senegal default values.
@@ -50,11 +69,30 @@ That means that our "consumption_in_kwh_per_year_per_connection" is 338.47941161
 
 I might need a step by step document that shows how to convert parameters from the old NetworkPlanner to the new infrastructure-planning system.
 
+20160617-1300 - 20160617-1600: 3 hours
+
+Let's first finishing implementing estimate_consumption_from_connection_type. Then we'll finish with the JSON parameters for Senegal and Nigeria so that the system is ready for testing by Naichen, Shaky, Edwin and then we'll call it a day.
+
+It looks like I had the original estimate_consumption return arrays of values by year.
+
+    connection_count_by_year
+    consumption_in_kwh_by_year
+
+I think this was because I wanted some downstream values to compute things year by year, such as perhaps the recurring cost of low voltage line. However, for various reasons we decided to use only the maximum value. At the same time, I would like to preserve the yearly values just in case someone wants to use these later.
+
+Let's aim to finish estimate_consumption_from_connection_type by 2pm. Then I'll have two hours to finish the JSON parameters
+
+    Option 1: Identify connection type components then add them together.
+    _ Option 2: Convert everything into yearly values then add them together.
+
+20160617-1530
+
+We finished estimate_consumption_from_connection_type.
+
 # Tasks
 
     Check which Senegal defaults correspond to old defaults from network-planner
     Draft JSON file from Senegal defaults in configuration file
     Draft JSON file from Nigeria defaults
     Revise parameter defaults to fit Nigeria defaults
-
     Draft step by step tutorial for converting from old NetworkPlanner parameters to new infrastructure-planning parameters
