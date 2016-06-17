@@ -1,14 +1,14 @@
-Consider having a facility table that corresponds to facility counts in the village table
+Submit pull request for networker
+Submit pull request for sequencer
 Show how parameters from old networkplanner map to new parameters
 Separate calculator
     Have calculator generate geojson file
-
 Write positive test
-
 Add instructions on how to set up the system on a new machine
 Add acknowledgments to integrated tool
 
-Write JSON schema
+
+
 
 Clean up output folder
     /result.cfg
@@ -33,10 +33,8 @@ Fix miscellaneous issues
 
 Consider saving the input and output for each function for debugging purposes (we can do this in compute)
 Consider converting rows across multiple years into x_by_year
-
 Consider tools that fill certain values based on urban vs rural
 Consider tools that fill certain values based on administrative boundary
-
 Make script for each technology that only does modelling for that technology
 Consider accepting net present value vs consumption curve for energy source X
 Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
@@ -54,13 +52,29 @@ Cite sources for data in interface markdown
 Update compute-discounted-cost
     Define loan_year in compute discounted cost
     Check whether different loan year affects breakeven time (whether we need to add loan year)
-
 Check that we only use most recent year if muliple years are given
-
 Clean up
     Move grow_exponentially into growth
     Make it possible to swap estimate_local_population
     Make it possible to swap estimate_electricity_consumption
-
 Test
     Check what happens when there are no demand points
+Split components into package and separate tools
+    + estimate_local_population
+    estimate_local_consumption_in_kwh
+    estimate_local_peak_demand_in_kw
+    estimate_local_internal_cost_by_technology
+        estimate_grid_internal_cost
+        estimate_diesel_mini_grid_internal_cost
+        estimate_solar_home_internal_cost
+    estimate_local_grid_mv_network_budget_in_meters
+    assemble_total_grid_mv_network
+        Submit pull request to networker
+    sequence_total_grid_mv_network
+        Submit pull request to sequencer
+    estimate_local_external_cost_by_technology
+        estimate_grid_external_cost
+        estimate_diesel_mini_grid_external_cost
+        estimate_solar_home_external_cost
+    estimate_total_cost
+Add acknowledgments to separate tools
