@@ -1,4 +1,14 @@
-Submit pull request for networker
+Fix mv line assignments to node for mv lines to fake points
+
+Make training laptop dual boot windows and linux
+
+Include essential properties in qgis
+    Check shapefile column name length limit
+
+Consider how user can change cost by administrative boundary
+Add meta tool to explore demand threshold by varying household demand to change mvMax
+
+Check pull request for networker
 Submit pull request for sequencer
     git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
     diff --git a/.gitignore b/.gitignore
