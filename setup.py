@@ -7,7 +7,7 @@ DESCRIPTION = '\n\n'.join(open(join(FOLDER, x)).read().strip() for x in [
     'README.rst', 'CHANGES.rst'])
 setup(
     name='infrastructure-planning',
-    version='0.0.2',
+    version='2.0.6',
     description='Infrastructure planning tools',
     long_description=DESCRIPTION,
     classifiers=[

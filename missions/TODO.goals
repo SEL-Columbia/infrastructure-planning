@@ -8,6 +8,27 @@ Include essential properties in qgis
 Consider how user can change cost by administrative boundary
 Add meta tool to explore demand threshold by varying household demand to change mvMax
 
+
+Check duplicate keys in costs, examples, glossary
+Get rid of underscores in columns
+Update executive summary by technology
+    Show initial
+    Show projected recurring
+    Show levelized cost
+    Show location count
+    Show connection count
+    Show population count
+    Show initial cost per connection
+Let user download example table for each table
+Let user override consumption by connection type
+Consider letting user add row or column
+Make existing grid a different color or stroke
+Show simple map in addition to satellite map
+Increase size of smallest point radius
+Consider auto parameter conversion from old np to new np
+Estimate population growth using projected population year
+
+
 Check pull request for networker
 Submit pull request for sequencer
     git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
