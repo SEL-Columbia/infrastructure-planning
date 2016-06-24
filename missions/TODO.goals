@@ -1,6 +1,16 @@
 Show overrided columns
 Look into on screen table override
 
+Fix mv line assignments to node for mv lines to fake points
+
+Make training laptop dual boot windows and linux
+
+Include essential properties in qgis
+    Check shapefile column name length limit
+
+Consider how user can change cost by administrative boundary
+Add meta tool to explore demand threshold by varying household demand to change mvMax
+
 Check duplicate keys in costs, examples, glossary
 Get rid of underscores in columns
 Update executive summary by technology
@@ -21,7 +31,7 @@ Consider auto parameter conversion from old np to new np
 Estimate population growth using projected population year
 
 
-Submit pull request for networker
+Check pull request for networker
 Submit pull request for sequencer
     git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
     diff --git a/.gitignore b/.gitignore
