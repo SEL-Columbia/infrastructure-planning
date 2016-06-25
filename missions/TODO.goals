@@ -1,3 +1,6 @@
+Show overrided columns
+Look into on screen table override
+
 Fix mv line assignments to node for mv lines to fake points
 
 Make training laptop dual boot windows and linux
@@ -7,7 +10,6 @@ Include essential properties in qgis
 
 Consider how user can change cost by administrative boundary
 Add meta tool to explore demand threshold by varying household demand to change mvMax
-
 
 Check duplicate keys in costs, examples, glossary
 Get rid of underscores in columns
