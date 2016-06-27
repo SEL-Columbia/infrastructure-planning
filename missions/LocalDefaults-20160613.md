@@ -95,4 +95,4 @@ We finished estimate_consumption_from_connection_type.
     Draft JSON file from Senegal defaults in configuration file
     Draft JSON file from Nigeria defaults
     Revise parameter defaults to fit Nigeria defaults
-    Draft step by step tutorial for converting from old NetworkPlanner parameters to new infrastructure-planning parameters
+    Write script to convert old parameters to new parameters
