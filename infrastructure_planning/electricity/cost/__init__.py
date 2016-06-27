@@ -65,6 +65,16 @@ def prepare_component_cost_by_year(component_packs, keywords, prefix):
 
 
 def prepare_internal_cost(functions, keywords):
+    """
+    Each function must return a dictionary with these keys:
+        electricity_production_in_kwh_by_year
+        electricity_production_cost_by_year
+        electricity_internal_distribution_cost_by_year
+
+    The keywords dictionary must contain these keys:
+        financing_year
+        discount_rate_as_percent_of_cash_flow_per_year
+    """
     d = {}
     # Compute
     for f in functions:
@@ -87,45 +97,3 @@ def prepare_internal_cost(functions, keywords):
     d['internal_discounted_cost'] = discounted_cost
     d['internal_levelized_cost'] = levelized_cost
     return d
-
-
-def prepare_lv_line_cost(
-        maximum_connection_count,
-        line_length_adjustment_factor,
-        average_distance_between_buildings_in_meters,
-        lv_line_installation_lm_cost_per_meter,
-        lv_line_maintenance_lm_cost_per_meter_per_year,
-        lv_line_lifetime_in_years):
-    # TODO: Compute lv line cost by year as connections come online
-    line_length_in_meters = average_distance_between_buildings_in_meters * (
-        maximum_connection_count - 1) * line_length_adjustment_factor
-    installation_lm_cost = line_length_in_meters * \
-        lv_line_installation_lm_cost_per_meter
-    maintenance_lm_cost_per_year = line_length_in_meters * \
-        lv_line_maintenance_lm_cost_per_meter_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_line_lifetime_in_years)
-    return {
-        'installation_lm_cost': installation_lm_cost,
-        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
-        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
-    }
-
-
-def prepare_lv_connection_cost(
-        maximum_connection_count,
-        lv_connection_installation_lm_cost_per_connection,
-        lv_connection_maintenance_lm_cost_per_connection_per_year,
-        lv_connection_lifetime_in_years):
-    # TODO: Compute lv connection cost by year as connections come online
-    installation_lm_cost = maximum_connection_count * \
-        lv_connection_installation_lm_cost_per_connection
-    maintenance_lm_cost_per_year = maximum_connection_count * \
-        lv_connection_maintenance_lm_cost_per_connection_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_connection_lifetime_in_years)
-    return {
-        'installation_lm_cost': installation_lm_cost,
-        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
-        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
-    }

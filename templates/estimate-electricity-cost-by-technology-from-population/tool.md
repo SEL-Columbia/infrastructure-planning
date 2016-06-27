@@ -78,7 +78,7 @@ A remote source produces electricity that is distributed to consumers.
 #### Grid System Loss as Percent of Total Production
 {grid_system_loss_as_percent_of_total_production}
 
-### Medium Voltage Line
+### Grid Medium Voltage Line
 Medium voltage lines carry electricity over large distances.
 
 * Initial Installation Cost
@@ -103,7 +103,7 @@ Medium voltage lines carry electricity over large distances.
 #### Grid Medium Voltage Line Lifetime in Years
 {grid_mv_line_lifetime_in_years}
 
-### Medium Voltage Transformer
+### Grid Medium Voltage Transformer
 Medium voltage transformers convert medium voltage to low voltage.
 
 * Initial Installation Cost
@@ -123,7 +123,7 @@ Medium voltage transformers convert medium voltage to low voltage.
 #### Grid Medium Voltage Transformer Table
 {grid_mv_transformer_table}
 
-### Low Voltage Line
+### Grid Low Voltage Line
 Low voltage lines distribute electricity over small distances.
 
 * Initial Installation Cost
@@ -143,7 +143,7 @@ Low voltage lines distribute electricity over small distances.
 #### Grid Low Voltage Line Lifetime in Years
 {grid_lv_line_lifetime_in_years}
 
-### Low Voltage Connection
+### Grid Low Voltage Connection
 The low voltage connection connects a building to low voltage line.
 
 * Initial Installation Cost
@@ -197,7 +197,7 @@ Generators consume fuel to produce electricity.
 #### Diesel Mini Grid Generator Fuel Liters Consumed per Kilowatt-Hour
 {diesel_mini_grid_generator_fuel_liters_consumed_per_kwh}
 
-### Low Voltage Line
+### Diesel Mini Grid Low Voltage Line
 The cost model is identical to grid low voltage line.
 
 #### Diesel Mini Grid Low Voltage Line Installation Labor and Material Cost per Meter
@@ -209,7 +209,7 @@ The cost model is identical to grid low voltage line.
 #### Diesel Mini Grid Low Voltage Line Lifetime in Years
 {diesel_mini_grid_lv_line_lifetime_in_years}
 
-### Low Voltage Connection
+### Diesel Mini Grid Low Voltage Connection
 
 #### Diesel Mini Grid Low Voltage Connection Installation Labor and Material Cost per Connection
 {diesel_mini_grid_lv_connection_installation_lm_cost_per_connection}
@@ -269,3 +269,76 @@ Balance costs are proportional to panel costs.
 
 #### Solar Home System Balance Lifetime in Years
 {solar_home_balance_lifetime_in_years}
+
+
+## Technology: Solar Mini Grid
+A photovoltaic system produces electricity that is distributed to consumers.
+
+#### Solar Mini Grid System Loss as Percent of Total Production
+{solar_mini_grid_system_loss_as_percent_of_total_production}
+
+### Panel
+The photovoltaic panel converts sunlight into electricity.
+
+* Initial Installation Cost
+    * Size panel capacity based on consumption. Since we have a battery, we do not need to consider peak demand and can use consumption directly.
+    * Adjust consumption to account for system efficiency loss. Divide the loss adjusted consumption by the number of peak hours of sun per year to get desired panel capacity.
+    * Select the largest panel capacity that will satisfy the desired panel capacity.
+    * Estimate the number of those panels that will satisfy the desired panel capacity.
+* Recurring Maintenance Cost
+    * Multiply the maintenance cost per year of the selected panel by the number of panels.
+* Recurring Replacement Cost
+    * Divide the installation cost by the lifetime of the selected panel.
+
+#### Solar Mini Grid System Panel Table
+{solar_mini_grid_panel_table}
+
+### Battery
+Battery costs are proportional to panel costs.
+
+#### Solar Mini Grid System Battery Storage Size in Kilowatt-Hours per Panel Kilowatt
+{solar_mini_grid_battery_kwh_per_panel_kw}
+
+#### Solar Mini Grid System Battery Installation Labor and Material Cost per Battery Kilowatt-Hour
+{solar_mini_grid_battery_installation_lm_cost_per_battery_kwh}
+
+#### Solar Mini Grid System Battery Maintenance Labor and Material Cost per Kilowatt-Hour per Year
+{solar_mini_grid_battery_maintenance_lm_cost_per_kwh_per_year}
+
+#### Solar Mini Grid System Battery Lifetime in Years
+{solar_mini_grid_battery_lifetime_in_years}
+
+### Balance
+Balance costs are proportional to panel costs.
+
+#### Solar Mini Grid System Balance Installation Labor and Material Cost per Panel Kilowatt
+{solar_mini_grid_balance_installation_lm_cost_per_panel_kw}
+
+#### Solar Mini Grid System Balance Maintenance Labor and Material Cost per Panel Kilowatt per Year
+{solar_mini_grid_balance_maintenance_lm_cost_per_panel_kw_per_year}
+
+#### Solar Mini Grid System Balance Lifetime in Years
+{solar_mini_grid_balance_lifetime_in_years}
+
+### Solar Mini Grid Low Voltage Line
+The cost model is identical to grid low voltage line.
+
+#### Solar Mini Grid Low Voltage Line Installation Labor and Material Cost per Meter
+{solar_mini_grid_lv_line_installation_lm_cost_per_meter}
+
+#### Solar Mini Grid Low Voltage Line Maintenance Labor and Material Cost per Meter per Year
+{solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year}
+
+#### Solar Mini Grid Low Voltage Line Lifetime in Years
+{solar_mini_grid_lv_line_lifetime_in_years}
+
+### Solar Mini Grid Low Voltage Connection
+
+#### Solar Mini Grid Low Voltage Connection Installation Labor and Material Cost per Connection
+{solar_mini_grid_lv_connection_installation_lm_cost_per_connection}
+
+#### Solar Mini Grid Low Voltage Connection Maintenance Labor and Material Cost per Connection per Year
+{solar_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year}
+
+#### Solar Mini Grid Low Voltage Connection Lifetime in Years
+{solar_mini_grid_lv_connection_lifetime_in_years}

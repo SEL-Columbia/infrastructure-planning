@@ -26,7 +26,7 @@ from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.cost import (
     estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
 from infrastructure_planning.electricity.cost.grid import (
-    estimate_mv_line_budget)
+    estimate_grid_mv_line_budget)
 from networker.networker_runner import NetworkerRunner
 from sequencer import NetworkPlan
 from sequencer.Models import EnergyMaximizeReturn
@@ -170,7 +170,7 @@ MAIN_FUNCTIONS = [
     estimate_consumption_from_connection_type,
     estimate_peak_demand,
     estimate_internal_cost_by_technology,
-    estimate_mv_line_budget,
+    estimate_grid_mv_line_budget,
     assemble_total_mv_line_network,
     sequence_total_mv_line_network,
     estimate_external_cost_by_technology,
@@ -240,7 +240,7 @@ def run(g):
         'Connection Order',
         'WKT',
         'FillColor',
-        'RadiusInPixelsRange2-8',
+        'RadiusInPixelsRange5-10',
     ]
     rows = []
     for node_id, node_d in graph.nodes_iter(data=True):
@@ -258,7 +258,7 @@ def run(g):
             'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
-            'RadiusInPixelsRange2-8': node_d['peak_demand_in_kw'],
+            'RadiusInPixelsRange5-10': node_d['peak_demand_in_kw'],
         })
     for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
         node1_d, node2_d = graph.node[node1_id], graph.node[node2_id]
@@ -473,6 +473,7 @@ def save_shapefile(target_path, geotable):
 
 def render_json(d):
     d = d.copy()
+    del d['configuration_path']
     del d['source_folder']
     del d['target_folder']
     del d['json']
@@ -551,14 +552,6 @@ if __name__ == '__main__':
         '--peak_hours_of_sun_per_year',
         metavar='FLOAT', type=float)
 
-    """
-    argument_parser.add_argument(
-        '--number_of_people_per_connection',
-        metavar='FLOAT', type=float)
-    argument_parser.add_argument(
-        '--consumption_in_kwh_per_year_per_connection',
-        metavar='FLOAT', type=float)
-    """
     argument_parser.add_argument(
         '--connection_type_table_path',
         metavar='PATH')
@@ -578,7 +571,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--grid_system_loss_as_percent_of_total_production',
         metavar='PERCENT', type=float)
-
     argument_parser.add_argument(
         '--grid_mv_network_minimum_point_count',
         metavar='INTEGER', type=int)
@@ -594,14 +586,12 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--grid_mv_line_lifetime_in_years',
         metavar='FLOAT', type=float)
-
     argument_parser.add_argument(
         '--grid_mv_transformer_load_power_factor',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_mv_transformer_table_path',
         metavar='PATH')
-
     argument_parser.add_argument(
         '--grid_lv_line_installation_lm_cost_per_meter',
         metavar='FLOAT', type=float)
@@ -611,7 +601,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--grid_lv_line_lifetime_in_years',
         metavar='FLOAT', type=float)
-
     argument_parser.add_argument(
         '--grid_lv_connection_installation_lm_cost_per_connection',
         metavar='FLOAT', type=float)
@@ -637,7 +626,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--diesel_mini_grid_fuel_cost_per_liter',
         metavar='FLOAT', type=float)
-
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_installation_lm_cost_per_meter',
         metavar='FLOAT', type=float)
@@ -647,7 +635,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_lifetime_in_years',
         metavar='FLOAT', type=float)
-
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_connection_installation_lm_cost_per_connection',
         metavar='FLOAT', type=float)
@@ -664,7 +651,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--solar_home_panel_table_path',
         metavar='PATH')
-
     argument_parser.add_argument(
         '--solar_home_battery_kwh_per_panel_kw',
         metavar='FLOAT', type=float)
@@ -677,7 +663,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '--solar_home_battery_lifetime_in_years',
         metavar='FLOAT', type=float)
-
     argument_parser.add_argument(
         '--solar_home_balance_installation_lm_cost_per_panel_kw',
         metavar='FLOAT', type=float)
@@ -686,6 +671,52 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_balance_lifetime_in_years',
+        metavar='FLOAT', type=float)
+
+    argument_parser.add_argument(
+        '--solar_mini_grid_system_loss_as_percent_of_total_production',
+        metavar='PERCENT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_panel_table_path',
+        metavar='PATH')
+    argument_parser.add_argument(
+        '--solar_mini_grid_battery_kwh_per_panel_kw',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_battery_installation_lm_cost_per_battery_kwh',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_battery_maintenance_lm_cost_per_kwh_per_year',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_battery_lifetime_in_years',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_balance_installation_lm_cost_per_panel_kw',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_balance_maintenance_lm_cost_per_panel_kw_per_year',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_balance_lifetime_in_years',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_line_installation_lm_cost_per_meter',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_line_lifetime_in_years',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_connection_installation_lm_cost_per_connection',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year',  # noqa
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_connection_lifetime_in_years',
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
@@ -701,6 +732,8 @@ if __name__ == '__main__':
         'diesel_mini_grid_generator_table_path'))
     g['solar_home_panel_table'] = read_csv(g.pop(
         'solar_home_panel_table_path'))
+    g['solar_mini_grid_panel_table'] = read_csv(g.pop(
+        'solar_mini_grid_panel_table_path'))
 
     d = run(g)
     print(format_summary(d))

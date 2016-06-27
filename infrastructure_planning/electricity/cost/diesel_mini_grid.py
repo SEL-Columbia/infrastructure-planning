@@ -2,9 +2,8 @@ from pandas import DataFrame, Series
 
 from ...macros import compute
 from ...production import adjust_for_losses, prepare_actual_system_capacity
-from . import (
-    prepare_component_cost_by_year, prepare_internal_cost,
-    prepare_lv_line_cost, prepare_lv_connection_cost)
+from .mini_grid import estimate_lv_line_cost, estimate_lv_connection_cost
+from . import prepare_component_cost_by_year, prepare_internal_cost
 
 
 def estimate_internal_cost(**keywords):
@@ -31,8 +30,8 @@ def estimate_electricity_production_cost(**keywords):
 def estimate_electricity_internal_distribution_cost(
         **keywords):
     d = prepare_component_cost_by_year([
-        ('lv_line', estimate_lv_line_cost),
-        ('lv_connection', estimate_lv_connection_cost),
+        ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
+        ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
     ], keywords, prefix='diesel_mini_grid_')
     d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
     return d
@@ -84,14 +83,14 @@ def estimate_fuel_cost(
     return d
 
 
-def estimate_lv_line_cost(
+def estimate_diesel_mini_grid_lv_line_cost(
         maximum_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         diesel_mini_grid_lv_line_installation_lm_cost_per_meter,
         diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
         diesel_mini_grid_lv_line_lifetime_in_years):
-    return prepare_lv_line_cost(
+    return estimate_lv_line_cost(
         maximum_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
@@ -100,12 +99,12 @@ def estimate_lv_line_cost(
         diesel_mini_grid_lv_line_lifetime_in_years)
 
 
-def estimate_lv_connection_cost(
+def estimate_diesel_mini_grid_lv_connection_cost(
         maximum_connection_count,
         diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
         diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
         diesel_mini_grid_lv_connection_lifetime_in_years):
-    return prepare_lv_connection_cost(
+    return estimate_lv_connection_cost(
         maximum_connection_count,
         diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
         diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa

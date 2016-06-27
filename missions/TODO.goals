@@ -1,10 +1,7 @@
 Fix bugs
+    Allow local override for unit household consumption
     Fix mv line assignments to node for mv lines to fake points
     Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
-
-Update model
-    Consider estimating population growth using projected population year
-    Rename to existing mv line and proposed mv line
 
 Update output files
     Check duplicate keys in costs, examples, glossary
@@ -26,6 +23,10 @@ Update output files
         /summary/lines-existing.shp
         /summary/lines-proposed.shp
         /summary/costs.csv
+    Rename to existing mv line and proposed mv line
+
+Update model
+    Consider estimating population growth using projected population year
 
 Prepare for production
     Write positive test
