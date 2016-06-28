@@ -1,12 +1,21 @@
+Review issues
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/6
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/7
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/8
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/9
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/10
+    https://github.com/SEL-Columbia/infrastructure-planning/issues/11
+
 Fix bugs
     Allow local override for unit household consumption
     Fix mv line assignments to node for mv lines to fake points
     Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
 
 Update output files
-    Check duplicate keys in costs, examples, glossary
     Include essential properties in shapefile
+        https://github.com/SEL-Columbia/infrastructure-planning/issues/3
         Check shapefile column name length limit
+    Check duplicate keys in costs, examples, glossary
     Clean up output folder
         /result.cfg
         /run.sh
@@ -32,6 +41,8 @@ Prepare for production
     Write positive test
 
 Update interface
+    Provide better error messages when a column is missing
+        https://github.com/SEL-Columbia/infrastructure-planning/issues/5
     Add acknowledgments to integrated tool
     Let user download example table for each table
     Get rid of underscores in columns
@@ -92,6 +103,9 @@ Submit pull request for sequencer
 Separate calculator
     Have calculator generate geojson file
 Add instructions on how to set up the system on a new machine
+
+Update validation
+    Consider how to send error messages regarding invalid numbers with commas
 
 
 
