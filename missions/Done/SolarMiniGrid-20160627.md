@@ -11,12 +11,14 @@ Roy Hyunjin Han
 The solar mini grid is a technology choice for local electricity generation and distribution that has recently become popular.
 
 # Timeframe
-20160627-1400 - 2016-1700: 3 hours
+20160627-1400 - 20160627-1700: 3 hours estimated
+
+20160627-1400 - 20160627-1900: 5 hours actual
 
 # Objectives
 1. _ Draft solar mini grid cost model in a notebook.
-2. Generate separate tool.
-3. Integrate module into integrated tool.
+2. _ Generate separate tool.
+3. + Integrate module into integrated tool.
 
 # Log
 20160627-1530 - 20160627-1600: 30 minutes
@@ -82,8 +84,6 @@ The solar mini grid is a technology choice for local electricity generation and 
         d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
         return d
 
-# Tasks
-
     _ Draft solar mini grid cost model in a notebook
-    Generate separate tool
-    Integrate module into integrated tool
+    _ Generate separate tool
+    + Integrate module into integrated tool
