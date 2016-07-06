@@ -1,11 +1,3 @@
-Review issues
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/6
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/7
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/8
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/9
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/10
-    https://github.com/SEL-Columbia/infrastructure-planning/issues/11
-
 Fix bugs
     Allow local override for unit household consumption
     Fix mv line assignments to node for mv lines to fake points
