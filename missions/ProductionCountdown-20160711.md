@@ -32,12 +32,16 @@ It is important to freeze work in a finished state in order to make it easy to p
     + Add column name to empty columns
     + Check that table sorts properly in standard spreadsheet programs
 
+20160711-2115 - 20160711-2200: 45 minutes
+
+    + Get rid of underscores in columns
+    + Fix mv line assignments to node for mv lines to fake points
+    + Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
+
+Note that the AttributeError bug was fixed in https://github.com/SEL-Columbia/networker/pull/91
+
 # Tasks
 
-    Get rid of underscores in columns
-    Fix mv line assignments to node for mv lines to fake points
-    Fix AttributeError: 'NoneType' object has no attribute 'is_aligned' for random geolocated cities
     Check duplicate keys in costs, examples, glossary
-
     Write test to make sure blank entries in local override columns use global value
     Write test to make sure local override for household consumption works

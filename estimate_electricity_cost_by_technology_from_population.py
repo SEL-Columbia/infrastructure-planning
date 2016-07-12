@@ -426,7 +426,7 @@ def save_summary(target_folder, ls, g, variable_names):
     table = get_table_from_variables(ls, g, keys)
     table.to_csv(join(target_folder, 'costs.csv'))
     example_table = table.reset_index().groupby(
-        'proposed_technology').first().reset_index().transpose()
+        'proposed technology').first().reset_index().transpose()
     example_table.to_csv(join(target_folder, 'examples.csv'), header=False)
 
 

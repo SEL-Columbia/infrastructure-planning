@@ -3,6 +3,8 @@ from invisibleroads_macros.iterable import merge_dictionaries
 from networkx import Graph
 from pandas import DataFrame, isnull
 
+from .exceptions import InfrastructurePlanningError
+
 
 def compute(f, l, g=None, prefix=''):
     'Compute the function using local arguments if possible'
@@ -29,7 +31,9 @@ def compute_raw(f, l, g=None):
     for argument_name in argument_specification.args:
         argument_value = l.get(argument_name, g.get(argument_name))
         if argument_value is None:
-            raise KeyError(argument_name)
+            raise InfrastructurePlanningError(
+                argument_name,
+                'missing required parameter (%s)' % argument_name)
         keywords[argument_name] = argument_value
     return f(**keywords)
 
@@ -57,7 +61,7 @@ def get_table_from_graph(graph, keys=None):
 def get_table_from_variables(ls, g, keys):
     rows = [[l.get(x, g.get(x, '')) for x in keys] for l in ls]
     # Encourage spreadsheet programs to include empty columns when sorting rows
-    columns = [x or '-' for x in keys]
+    columns = [x.replace('_', ' ') or '-' for x in keys]
     return DataFrame(rows, columns=columns).set_index('name')
 
 

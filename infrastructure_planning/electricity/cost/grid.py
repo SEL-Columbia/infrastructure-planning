@@ -20,17 +20,23 @@ def estimate_external_cost(
     node_line_discounted_cost = 0
     node_line_adjusted_length = 0
     node_ll = latitude, longitude
+    # We can be sure that node_id is not a fake node
+    # However, edge_node_id can be a fake node
     for edge_node_id, edge_d in infrastructure_graph.edge[node_id].items():
         edge_node_d = infrastructure_graph.node[edge_node_id]
         edge_node_ll = edge_node_d['latitude'], edge_node_d['longitude']
-        edge_line_halved_length = get_distance(
-            node_ll, edge_node_ll).meters / 2.
-        edge_line_adjusted_length = edge_line_halved_length * \
+        edge_line_length = get_distance(node_ll, edge_node_ll).meters
+        if 'name' in edge_node_d:
+            # If both nodes are real, then the computation will reappear when
+            # we process the other node, so we will halve it here.
+            edge_line_length /= 2.
+        edge_line_adjusted_length = edge_line_length * \
             line_length_adjustment_factor
         edge_line_discounted_cost = edge_line_adjusted_length * \
             grid_mv_line_discounted_cost_per_meter
         node_line_adjusted_length += edge_line_adjusted_length
         node_line_discounted_cost += edge_line_discounted_cost
+        # Aggregate values over each node that is connected to the edge
         edge_d['grid_mv_line_adjusted_length_in_meters'] = \
             edge_d.get('grid_mv_line_adjusted_length_in_meters', 0) + \
             edge_line_adjusted_length
