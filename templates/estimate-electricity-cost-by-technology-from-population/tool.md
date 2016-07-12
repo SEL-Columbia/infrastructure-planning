@@ -59,17 +59,17 @@ Assume that consumption is fixed per capita. Estimate consumption based on the p
 To override count and consumption by connection type for specific demand points, please use the following column name format in the *Demand Point Table* above:
 
 - xyz_count
-- xyz_consumption_in_kwh_per_year
+- xyz_consumption_in_kwh_per_year_per_xyz
 
 For example, the following column names in the *Demand Point Table* will override household count and consumption:
 
 - household_count
-- household_consumption_in_kwh_per_year
+- household_consumption_in_kwh_per_year_per_household
 
 The following column names in the *Demand Point Table* will override market count and consumption, but only if *market* exists as a connection type in the *Connection Type Table* below:
 
 - market_count
-- market_consumption_in_kwh_per_year
+- market_consumption_in_kwh_per_year_per_market
 
 {connection_type_table}
 

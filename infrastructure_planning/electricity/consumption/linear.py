@@ -25,10 +25,9 @@ def estimate_consumption_from_connection_type(
             keywords, connection_type, row['consumption_in_kwh_per_year'])
         # Add local override column names to glossary
         d.update({
-            connection_type + '_count': connection_count,
-            connection_type + '_consumption_in_kwh_per_year':
-                consumption_per_connection,
-        })
+            _name_connection_count(connection_type): connection_count,
+            _name_consumption_per_connection(connection_type):
+                consumption_per_connection})
         consumption_by_year += consumption_per_connection * connection_count
         connection_count_by_year += connection_count
     return dict(d, **{
@@ -134,8 +133,9 @@ def forecast_electricity_consumption_per_capita_using_recent_records(
 
 def _get_connection_count(
         keywords, connection_type, estimated_household_count):
+    column_name = _name_connection_count(connection_type)
     try:
-        connection_count = keywords[connection_type + '_count']
+        connection_count = keywords[column_name]
         if isnull(connection_count):
             raise KeyError
     except KeyError:
@@ -148,12 +148,20 @@ def _get_connection_count(
 
 def _get_consumption_per_connection(
         keywords, connection_type, estimated_consumption_per_connection):
+    column_name = _name_consumption_per_connection(connection_type)
     try:
-        # Enable local override for xyz_consumption_in_kwh_per_year
-        consumption_per_connection = keywords[
-            connection_type + '_consumption_in_kwh_per_year']
+        # Enable local override
+        consumption_per_connection = keywords[column_name]
         if isnull(consumption_per_connection):
             raise KeyError
     except KeyError:
         consumption_per_connection = estimated_consumption_per_connection
     return consumption_per_connection
+
+
+def _name_connection_count(connection_type):
+    return 'X_connection_count'.replace('X', connection_type)
+
+
+def _name_consumption_per_connection(connection_type):
+    return 'X_consumption_in_kwh_per_year_per_X'.replace('X', connection_type)

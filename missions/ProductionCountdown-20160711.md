@@ -41,6 +41,16 @@ It is important to freeze work in a finished state in order to make it easy to p
 
 Note that the AttributeError bug was fixed in https://github.com/SEL-Columbia/networker/pull/91
 
+20160712-1400
+
+    market_consumption_in_kwh_per_year_per_market
+    _ consumption_in_kwh_per_year_per_market
+    _ market_consumption_in_kwh_per_year
+    _ market_consumption_in_kwh_per_year_per_connection
+    _ market_consumption_in_kwh_per_year_per_unit
+    _ market_unit_consumption_in_kwh_per_year
+    _ single_market_consumption_in_kwh_per_year
+
 # Tasks
 
     Check duplicate keys in costs, examples, glossary
