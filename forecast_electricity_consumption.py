@@ -1,8 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
-import numpy as np
 from argparse import ArgumentParser
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
@@ -10,11 +7,12 @@ from infrastructure_planning.exceptions import EmptyDataset
 from infrastructure_planning.growth.interpolated import (
     get_interpolated_spline_extrapolated_linear_function)
 from os.path import join
-from pandas import DataFrame, read_csv
+from pandas import DataFrame, isnull, read_csv
 from six import string_types
 from StringIO import StringIO
 
 
+matplotlib.use('Agg')
 DATASETS_FOLDER = 'datasets'
 POPULATION_BY_YEAR_BY_COUNTRY_TABLE = read_csv(join(
     DATASETS_FOLDER, 'world-population-by-year-by-country.csv',
@@ -131,7 +129,7 @@ def estimate_electricity_consumption_per_capita(target_year, country_name):
         except ValueError:
             continue
         value = country_t[column_name].values[0]
-        if np.isnan(value):
+        if isnull(value):
             continue
         year_packs.append((year, value))
     if not year_packs:

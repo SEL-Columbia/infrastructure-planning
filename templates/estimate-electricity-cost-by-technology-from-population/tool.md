@@ -26,7 +26,10 @@ The net present value or discounted cost of an infrastructure project assumes th
 Assume that population grows at a fixed rate each year. If the population is 100 and the growth rate is 10%, then the population will be 110 after the first year and 121 after the second year.
 
 #### Demand Point Table
-To override a computed value, upload a CSV with an additional column. The column name should match the name of the variable that you are overriding. Variable names are available in the CSV that is generated after running this tool.
+To override a computed value for specific demand points, upload a CSV with an additional column. The column name should match the name of the variable that you are overriding. Variable names are available in the *glossary.csv* file that is generated after running this tool.
+
+Note that if you leave a blank entry in a local override column, then the system will not override the value for that demand point.
+
 {demand_point_table}
 
 #### Population Year
@@ -53,6 +56,21 @@ The length of line used to connect two locations is often greater than the dista
 Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
 
 #### Connection Type Table
+To override count and consumption by connection type for specific demand points, please use the following column name format in the *Demand Point Table* above:
+
+- xyz_count
+- xyz_consumption_in_kwh_per_year
+
+For example, the following column names in the *Demand Point Table* will override household count and consumption:
+
+- household_count
+- household_consumption_in_kwh_per_year
+
+The following column names in the *Demand Point Table* will override market count and consumption, but only if *market* exists as a connection type in the *Connection Type Table* below:
+
+- market_count
+- market_consumption_in_kwh_per_year
+
 {connection_type_table}
 
 #### Number of People per Household

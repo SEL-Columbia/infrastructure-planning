@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series, concat, merge
+from pandas import DataFrame, Series, concat, isnull, merge
 
 from ...growth import get_default_slope, get_future_years
 from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
@@ -12,26 +12,31 @@ def estimate_consumption_from_connection_type(
     Note that connection_count and consumption will be constant year over year
     if there is a local override for household_count.
     """
+    d = {}
     connection_count_by_year = Series(0, index=population_by_year.index)
     consumption_by_year = Series(0, index=population_by_year.index)
+    estimated_household_count = population_by_year / float(
+        number_of_people_per_household)
     for row_index, row in connection_type_table.iterrows():
-	connection_type = row['connection_type']
-	try:
-	    connection_count = keywords[connection_type + '_count']
-	except KeyError:
-	    if connection_type != 'household':
-		continue
-            # Estimate household_count from population
-	    connection_count = population_by_year / float(number_of_people_per_household)
-	consumption_per_connection = row['consumption_in_kwh_per_year']
-	consumption_by_year += consumption_per_connection * connection_count
-	connection_count_by_year += connection_count
-    return {
+        connection_type = row['connection_type']
+        connection_count = _get_connection_count(
+            keywords, connection_type, estimated_household_count)
+        consumption_per_connection = _get_consumption_per_connection(
+            keywords, connection_type, row['consumption_in_kwh_per_year'])
+        # Add local override column names to glossary
+        d.update({
+            connection_type + '_count': connection_count,
+            connection_type + '_consumption_in_kwh_per_year':
+                consumption_per_connection,
+        })
+        consumption_by_year += consumption_per_connection * connection_count
+        connection_count_by_year += connection_count
+    return dict(d, **{
         'connection_count_by_year': connection_count_by_year,
         'consumption_in_kwh_by_year': consumption_by_year,
         'maximum_connection_count': connection_count_by_year.max(),
         'maximum_consumption_in_kwh_per_year': consumption_by_year.max(),
-    }
+    })
 
 
 def estimate_consumption_from_connection_count(
@@ -44,7 +49,7 @@ def estimate_consumption_from_connection_count(
         connection_count_by_year
     return {
         'connection_count_by_year': connection_count_by_year,
-        'consumption_in_kwh_by_year': consumption_by_year ,
+        'consumption_in_kwh_by_year': consumption_by_year,
         'maximum_connection_count': connection_count_by_year.max(),
         'maximum_consumption_in_kwh_per_year': consumption_by_year.max(),
     }
@@ -125,3 +130,30 @@ def forecast_electricity_consumption_per_capita_using_recent_records(
     ]].sort([
         electricity_consumption_per_capita_by_year_table_year_column,
     ])
+
+
+def _get_connection_count(
+        keywords, connection_type, estimated_household_count):
+    try:
+        connection_count = keywords[connection_type + '_count']
+        if isnull(connection_count):
+            raise KeyError
+    except KeyError:
+        if connection_type == 'household':
+            connection_count = estimated_household_count
+        else:
+            connection_count = 0
+    return connection_count
+
+
+def _get_consumption_per_connection(
+        keywords, connection_type, estimated_consumption_per_connection):
+    try:
+        # Enable local override for xyz_consumption_in_kwh_per_year
+        consumption_per_connection = keywords[
+            connection_type + '_consumption_in_kwh_per_year']
+        if isnull(consumption_per_connection):
+            raise KeyError
+    except KeyError:
+        consumption_per_connection = estimated_consumption_per_connection
+    return consumption_per_connection

@@ -1,7 +1,7 @@
 import inspect
 from invisibleroads_macros.iterable import merge_dictionaries
 from networkx import Graph
-from pandas import DataFrame
+from pandas import DataFrame, isnull
 
 
 def compute(f, l, g=None, prefix=''):
@@ -9,8 +9,11 @@ def compute(f, l, g=None, prefix=''):
     value_by_key = rename_keys(compute_raw(f, l, g), prefix=prefix)
     local_overrides = l.get('local_overrides', {})
     for key in local_overrides:
+        local_value = local_overrides[key]
+        if isnull(local_value):
+            continue
         if key in value_by_key:
-            value_by_key[key] = local_overrides[key]
+            value_by_key[key] = local_value
     return value_by_key
 
 
@@ -53,7 +56,9 @@ def get_table_from_graph(graph, keys=None):
 
 def get_table_from_variables(ls, g, keys):
     rows = [[l.get(x, g.get(x, '')) for x in keys] for l in ls]
-    return DataFrame(rows, columns=keys).set_index('name')
+    # Encourage spreadsheet programs to include empty columns when sorting rows
+    columns = [x or '-' for x in keys]
+    return DataFrame(rows, columns=columns).set_index('name')
 
 
 def rename_keys(value_by_key, prefix='', suffix=''):

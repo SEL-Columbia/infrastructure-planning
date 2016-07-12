@@ -27,6 +27,7 @@ from infrastructure_planning.electricity.cost import (
     estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
 from infrastructure_planning.electricity.cost.grid import (
     estimate_grid_mv_line_budget)
+
 from networker.networker_runner import NetworkerRunner
 from sequencer import NetworkPlan
 from sequencer.Models import EnergyMaximizeReturn
