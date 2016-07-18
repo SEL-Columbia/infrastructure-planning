@@ -51,9 +51,14 @@ Note that the AttributeError bug was fixed in https://github.com/SEL-Columbia/ne
     _ market_unit_consumption_in_kwh_per_year
     _ single_market_consumption_in_kwh_per_year
 
-# Tasks
+20160718-1615 - 20160718-1645: 30 minutes
+
+Let's run the default example and check whether we have duplicate keys anywhere.
 
     Check duplicate keys in costs, examples, glossary
+
+# Tasks
+
     Write test to make sure blank entries in local override columns use global value
     Write test to make sure local override for household consumption works
 
