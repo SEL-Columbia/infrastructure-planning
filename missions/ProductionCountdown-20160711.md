@@ -59,6 +59,8 @@ Let's run the default example and check whether we have duplicate keys anywhere.
 
 # Tasks
 
+    Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
+
     Write test to make sure blank entries in local override columns use global value
     Write test to make sure local override for household consumption works
 
