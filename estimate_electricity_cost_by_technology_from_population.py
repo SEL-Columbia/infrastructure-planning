@@ -285,7 +285,7 @@ def run(g):
     if 'grid_mv_line_geotable' in g:
         for geometry_wkt in g['grid_mv_line_geotable']['wkt']:
             rows.append({
-                'Name': '(Existing Grid)',
+                'Name': '(Existing MV Line)',
                 'Proposed Technology': 'grid',
                 'WKT': geometry_wkt,
                 'FillColor': color_by_technology['grid'],
@@ -433,13 +433,8 @@ def save_summary(target_folder, ls, g, variable_names):
 def save_glossary(target_folder, ls, g):
     l = ls[0] if len(ls) > 1 else {}
 
-    keys = []
-    keys.extend(l.keys())
-    keys.extend(g.keys())
-    keys.sort()
-
     selected_keys = []
-    for key in keys:
+    for key in sorted(set(l.keys() + g.keys())):
         value = l.get(key, g.get(key))
         if hasattr(value, '__iter__'):
             continue

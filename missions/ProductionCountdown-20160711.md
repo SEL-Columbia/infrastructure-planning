@@ -55,14 +55,26 @@ Note that the AttributeError bug was fixed in https://github.com/SEL-Columbia/ne
 
 Let's run the default example and check whether we have duplicate keys anywhere.
 
-    Check duplicate keys in costs, examples, glossary
+    + Check duplicate keys in costs, examples, glossary
+
+20160725-1600 - 20160725-1700: 1 hour
+
+    + Check pull request for networker
+    + Review which keys are duplicate
+        grid_mv_line_installation_lm_cost_per_meter
+        grid_mv_line_maintenance_lm_cost_per_meter_per_year
+
+The duplicates are appearing because the keys are appearing both in ls and g. Specifically, the following function is returning the keys verbatim in order to use ``prepare_component_cost_by_year``.
+
+    estimate_grid_mv_line_cost_per_meter
+
+20160725-1715 - 20160725-1745: 30 minutes
+
+    + Rename to existing mv line and proposed mv line
 
 # Tasks
 
     Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
-
-    Write test to make sure blank entries in local override columns use global value
-    Write test to make sure local override for household consumption works
 
     Update output files
         Include essential properties in shapefile
@@ -84,7 +96,6 @@ Let's run the default example and check whether we have duplicate keys anywhere.
             /summary/lines-existing.shp
             /summary/lines-proposed.shp
             /summary/costs.csv
-        Rename to existing mv line and proposed mv line
 
     Update executive summary by technology
         Show initial
@@ -98,7 +109,6 @@ Let's run the default example and check whether we have duplicate keys anywhere.
     Update model
         Consider estimating population growth using projected population year
 
-    Check pull request for networker
     Submit pull request for sequencer
         git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
         diff --git a/.gitignore b/.gitignore
@@ -130,3 +140,6 @@ Let's run the default example and check whether we have duplicate keys anywhere.
         Consider how to send error messages regarding invalid numbers with commas
 
     Add instructions on how to set up the system on a new machine
+
+    Write test to make sure blank entries in local override columns use global value
+    Write test to make sure local override for household consumption works
