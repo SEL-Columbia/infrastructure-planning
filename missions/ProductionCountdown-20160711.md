@@ -72,9 +72,46 @@ The duplicates are appearing because the keys are appearing both in ls and g. Sp
 
     + Rename to existing mv line and proposed mv line
 
+Let's look at what is currently in the output folder and make a list of tasks.
+
+	.
+	├── edges.dbf
+	├── edges.prj
+	├── edges.shp
+	├── edges.shx
+	├── executive_summary.csv
+	├── grid_mv_line.csv
+	├── infrastructure_graph.pkl
+	├── infrastructure_map.csv
+	├── levelized_cost_by_technology.csv
+	├── nodes.dbf
+	├── nodes-networker.csv
+	├── nodes.prj
+	├── nodes-sequencer.csv
+	├── nodes.shp
+	├── nodes.shx
+	├── result.cfg
+	├── run.sh
+	└── summary
+		├── costs.csv
+		├── examples.csv
+		└── glossary.csv
+
 # Tasks
 
-    Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
+	Remove edges.* intermediate files
+	Rename executive_summary to infrastructure-summary
+	Remove grid_mv_line table
+	Rename levelized_cost_by_technology to infrastructure-details
+	Remove nodes* intermediate files
+	Rename standard_output.log to stdout.log
+	Rename standard_error.log to stderr.log
+	Generate parameters.json
+	Generate points.csv
+	Generate points.shp
+	Generate lines.csv
+	Generate lines-existing.shp
+	Generate lines-proposed.shp
 
     Update output files
         Include essential properties in shapefile
@@ -85,10 +122,10 @@ The duplicates are appearing because the keys are appearing both in ls and g. Sp
             /run.sh
             /stdout.log
             /stderr.log
-            /infrastructure_map.csv
-            /infrastructure_summary.csv
-            /infrastructure_details.csv
-            /infrastructure_graph.json
+            /infrastructure-map.csv
+            /infrastructure-summary.csv
+            /infrastructure-details.csv
+            /infrastructure-graph.json
             /summary/parameters.json
             /summary/points.csv
             /summary/points.shp
@@ -96,6 +133,8 @@ The duplicates are appearing because the keys are appearing both in ls and g. Sp
             /summary/lines-existing.shp
             /summary/lines-proposed.shp
             /summary/costs.csv
+            /summary/examples.csv
+            /summary/glossary.csv
 
     Update executive summary by technology
         Show initial
@@ -108,6 +147,7 @@ The duplicates are appearing because the keys are appearing both in ls and g. Sp
 
     Update model
         Consider estimating population growth using projected population year
+		Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
 
     Submit pull request for sequencer
         git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
