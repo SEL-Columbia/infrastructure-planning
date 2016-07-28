@@ -1,5 +1,7 @@
 import geometryIO
-import json
+import re
+import shutil
+import simplejson as json
 from argparse import ArgumentParser
 from collections import OrderedDict
 from geopy import GoogleV3
@@ -189,7 +191,7 @@ VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
 def run(g):
-    g = prepare_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+    g = normalize_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
 
     # Compute
     for f in MAIN_FUNCTIONS:
@@ -349,17 +351,17 @@ def run(g):
     return d
 
 
-def prepare_parameters(g, normalized_name_by_column_name):
+def normalize_parameters(g, normalized_name_by_column_name):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
         v.columns = normalize_column_names(
             v.columns, normalized_name_by_column_name)
-    for prepare_parameter in [
-            prepare_demand_point_table,
-            prepare_connection_type_table,
-            prepare_grid_mv_line_geotable]:
-        g.update(compute(prepare_parameter, g))
+    for normalize_parameter in [
+            normalize_demand_point_table,
+            normalize_connection_type_table,
+            normalize_grid_mv_line_geotable]:
+        g.update(compute(normalize_parameter, g))
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
     return g
 
@@ -377,7 +379,7 @@ def normalize_column_names(column_names, normalized_name_by_column_name):
     return normalized_names
 
 
-def prepare_demand_point_table(demand_point_table):
+def normalize_demand_point_table(demand_point_table):
     if 'year' in demand_point_table.columns:
         # Rename year to population_year
         demand_point_table = demand_point_table.rename(columns={
@@ -390,13 +392,13 @@ def prepare_demand_point_table(demand_point_table):
     return {'demand_point_table': demand_point_table}
 
 
-def prepare_connection_type_table(connection_type_table):
+def normalize_connection_type_table(connection_type_table):
     connection_type_table['connection_type'] = connection_type_table[
         'connection_type'].apply(lambda x: x.lower().replace(' ', '_'))
     return {'connection_type_table': connection_type_table}
 
 
-def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
+def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
     geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
     if geometries:
@@ -467,37 +469,63 @@ def save_shapefile(target_path, geotable):
     return target_path
 
 
-def render_json(d):
-    d = d.copy()
-    del d['configuration_path']
-    del d['source_folder']
-    del d['target_folder']
-    del d['json']
-    print(json.dumps(d, sort_keys=True, indent=2, separators=(',', ': ')))
-
-
-def load_global_parameters(d, script_path):
-    if d['json']:
-        render_json(d)
-        exit()
-    configuration_path = d['configuration_path']
-    source_folder = d['source_folder']
-    target_folder = d['target_folder']
+def load_parameters(value_by_key):
+    configuration_path = value_by_key.pop('configuration_path')
+    source_folder = value_by_key.pop('source_folder')
     g = json.load(open(configuration_path)) if configuration_path else {}
+    # Command-line arguments override configuration arguments
+    g = merge_dictionaries(g, value_by_key)
     # Resolve relative paths using source_folder
     if source_folder:
         for k, v in g.items():
-            if not k.endswith('_path') or k == 'configuration_path':
-                continue
-            if v and not isabs(v):
+            if k.endswith('_path') and v and not isabs(v):
                 g[k] = join(source_folder, v)
-    # Command-line arguments override configuration arguments
-    for k, v in d.items():
-        if v is not None:
-            g[k] = v
-    g['target_folder'] = target_folder or make_enumerated_folder_for(
-        script_path)
     return g
+
+
+def save_parameters(g, script_path):
+    d = g.copy()
+    target_folder = d.pop('target_folder')
+    if not target_folder:
+        target_folder = make_enumerated_folder_for(script_path)
+    arguments_folder = make_folder(join(target_folder, 'arguments'))
+    for k, v in d.items():
+        if not k.endswith('_path'):
+            continue
+        # Save a copy of each file
+        shutil.copy(v, arguments_folder)
+        # Make the reference point to the local copy
+        d[k] = basename(v)
+    # Save global parameters
+    json.dump(d, open(join(arguments_folder, 'parameters.json'), 'w'))
+    g['target_folder'] = target_folder
+
+
+def load_files(g):
+    file_key_pattern = re.compile(r'(.*)_(\w+)_path')
+    file_value_by_name = {}
+    for k, v in g.items():
+        try:
+            key_base, key_type = file_key_pattern.match(k).groups()
+        except AttributeError:
+            continue
+        if key_type == 'text':
+            value = open(v).read().split()
+            name = key_base
+        elif key_type == 'table':
+            value = read_csv(v)
+            name = key_base + '_table'
+        elif key_type == 'geotable':
+            if v.endswith('.csv'):
+                value = read_csv(v)
+            else:
+                raise InfrastructurePlanningError(
+                    '%s.error = load_files : unsupported format (%s)' % (k, v))
+            name = key_base + '_geotable'
+        else:
+            continue
+        file_value_by_name[name] = value
+    return merge_dictionaries(g, file_value_by_name)
 
 
 if __name__ == '__main__':
@@ -716,20 +744,10 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
-    g = load_global_parameters(args.__dict__, __file__)
-    g['selected_technologies'] = open(g.pop(
-        'selected_technologies_text_path')).read().split()
-    g['demand_point_table'] = read_csv(g.pop('demand_point_table_path'))
-    g['connection_type_table'] = read_csv(g.pop('connection_type_table_path'))
-    g['grid_mv_line_geotable'] = read_csv(g.pop('grid_mv_line_geotable_path'))
-    g['grid_mv_transformer_table'] = read_csv(g.pop(
-        'grid_mv_transformer_table_path'))
-    g['diesel_mini_grid_generator_table'] = read_csv(g.pop(
-        'diesel_mini_grid_generator_table_path'))
-    g['solar_home_panel_table'] = read_csv(g.pop(
-        'solar_home_panel_table_path'))
-    g['solar_mini_grid_panel_table'] = read_csv(g.pop(
-        'solar_mini_grid_panel_table_path'))
-
-    d = run(g)
-    print(format_summary(d))
+    g = load_parameters(args.__dict__)
+    if g.pop('json'):
+        print(json.dumps(g, indent=2, separators=(',', ': '), sort_keys=True))
+    else:
+        save_parameters(g, __file__)
+        g = load_files(g)
+        print(format_summary(run(g)))

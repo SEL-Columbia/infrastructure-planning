@@ -21,6 +21,14 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    setup_requires=['pytest-runner'],
-    install_requires=[],
-    tests_require=['pytest'])
+    setup_requires=[
+        'pytest-runner',
+    ],
+    install_requires=[
+        'geopy',
+        'invisibleroads-macros',
+        'simplejson',
+    ],
+    tests_require=[
+        'pytest',
+    ])

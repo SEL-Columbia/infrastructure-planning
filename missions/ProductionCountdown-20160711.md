@@ -105,18 +105,23 @@ I have about three hours. Let's aim to clean up the output files today.
 
 20160727-1815 - 20160727-1845: 30 minutes
 
-    g = save_parameters(args.__dict__, __file__)
-    g = load_parameters(g)
+    _ g = save_parameters(args.__dict__, __file__)
+    _ g = load_parameters(g)
 
-    g = load_parameters(args.__dict__, __file__)
-    save_parameters(g)
+    _ g = load_parameters(args.__dict__, __file__)
+    _ save_parameters(g)
 
     g = load_and_save_parameters(args.__dict__, __file__)
+    _ g = prepare_parameters
 
-	Generate arguments folder
-        /arguments/parameters.json
+20160728-1400 - 20160728-1430: 30 minutes
+
+    + Generate /arguments/parameters.json
+	+ Generate arguments folder
 
 # Tasks
+
+    Use a modification of the key name for argument file name
 
 	Generate points.csv
 	Generate points.shp
