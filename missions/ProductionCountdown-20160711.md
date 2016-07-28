@@ -97,44 +97,73 @@ Let's look at what is currently in the output folder and make a list of tasks.
 		├── examples.csv
 		└── glossary.csv
 
+20160726-1700 - 20160726-1730: 30 minutes
+
+I have about three hours. Let's aim to clean up the output files today.
+
+20160727-1715 - 20160727-1745: 30 minutes
+
+20160727-1815 - 20160727-1845: 30 minutes
+
+    g = save_parameters(args.__dict__, __file__)
+    g = load_parameters(g)
+
+    g = load_parameters(args.__dict__, __file__)
+    save_parameters(g)
+
+    g = load_and_save_parameters(args.__dict__, __file__)
+
+	Generate arguments folder
+        /arguments/parameters.json
+
 # Tasks
 
-	Remove edges.* intermediate files
-	Rename executive_summary to infrastructure-summary
-	Remove grid_mv_line table
-	Rename levelized_cost_by_technology to infrastructure-details
-	Remove nodes* intermediate files
-	Rename standard_output.log to stdout.log
-	Rename standard_error.log to stderr.log
-	Generate parameters.json
 	Generate points.csv
 	Generate points.shp
 	Generate lines.csv
 	Generate lines-existing.shp
 	Generate lines-proposed.shp
 
+	Remove edges.* intermediate files
+	Rename executive_summary to infrastructure-summary
+	Remove grid_mv_line table
+	Remove nodes* intermediate files
+	Rename standard_output.log to stdout.log
+	Rename standard_error.log to stderr.log
+	Rename levelized_cost_by_technology to infrastructure-details
+
     Update output files
         Include essential properties in shapefile
             https://github.com/SEL-Columbia/infrastructure-planning/issues/3
             Check shapefile column name length limit
         Clean up output folder
-            /result.cfg
-            /run.sh
+            + /result.cfg
+            + /run.sh
             /stdout.log
             /stderr.log
-            /infrastructure-map.csv
-            /infrastructure-summary.csv
-            /infrastructure-details.csv
             /infrastructure-graph.json
-            /summary/parameters.json
-            /summary/points.csv
-            /summary/points.shp
-            /summary/lines.csv
-            /summary/lines-existing.shp
-            /summary/lines-proposed.shp
-            /summary/costs.csv
-            /summary/examples.csv
-            /summary/glossary.csv
+
+            = /arguments/parameters.json
+            /arguments/selected-technologies.txt
+            /arguments/demand-points.csv
+            /arguments/connection-types.csv
+            /arguments/grid-mv-lines.csv
+            /arguments/grid-mv-transformers.csv
+            /arguments/diesel-mini-grid-generators.csv
+            /arguments/solar-home-panels.csv
+            /arguments/solar-mini-grid-panels.csv
+
+            /properties/points.csv
+            /properties/points.shp
+            /properties/lines.csv
+            /properties/lines-existing.shp
+            /properties/lines-proposed.shp
+            /properties/costs.csv
+            /properties/examples.csv
+            /properties/glossary.csv
+            /interface/map.csv
+            /interface/summary.csv
+            /interface/details.csv
 
     Update executive summary by technology
         Show initial
@@ -159,17 +188,16 @@ Let's look at what is currently in the output folder and make a list of tasks.
         diff --git a/sequencer/Sequencer.py b/sequencer/Sequencer.py
         diff --git a/sequencer/Utils.py b/sequencer/Utils.py
 
-    Prepare for production
-        Write positive test
-
     Separate calculator and aggregator
         Have calculator generate geojson file
+
+    Prepare for production
+        Write positive test
 
     Update interface
         Show overrided columns
         Let user download example table for each table
         Add acknowledgments to integrated tool
-
         Look into issues with live table override
         Show simple map in addition to satellite map
         Make existing grid a different color or stroke
@@ -177,9 +205,8 @@ Let's look at what is currently in the output folder and make a list of tasks.
 
     Update validation
         https://github.com/SEL-Columbia/infrastructure-planning/issues/5
-        Consider how to send error messages regarding invalid numbers with commas
+        Consider sending error messages on invalid numbers with commas
 
     Add instructions on how to set up the system on a new machine
-
-    Write test to make sure blank entries in local override columns use global value
-    Write test to make sure local override for household consumption works
+    Test that local override for household consumption works
+    Test that blank entries in local override columns use global value
