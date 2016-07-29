@@ -2,5 +2,9 @@ class InfrastructurePlanningError(Exception):
     pass
 
 
-class EmptyDataset(InfrastructurePlanningError):
+class MissingData(InfrastructurePlanningError):
+    pass
+
+
+class UnsupportedFormat(InfrastructurePlanningError):
     pass

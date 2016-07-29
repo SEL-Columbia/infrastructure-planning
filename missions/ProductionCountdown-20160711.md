@@ -117,11 +117,18 @@ I have about three hours. Let's aim to clean up the output files today.
 20160728-1400 - 20160728-1430: 30 minutes
 
     + Generate /arguments/parameters.json
-	+ Generate arguments folder
+	+ Generate /arguments folder
+
+20160729-1630 - 20160729-1700: 30 minutes
+
+    + Port load_geotable
+    + Improve controlled error handling and error messages
+
+20160729-1745 - 20160729-1800: 15 minutes
+
+    = Use a modification of the key name for argument file name
 
 # Tasks
-
-    Use a modification of the key name for argument file name
 
 	Generate points.csv
 	Generate points.shp
@@ -129,7 +136,7 @@ I have about three hours. Let's aim to clean up the output files today.
 	Generate lines-existing.shp
 	Generate lines-proposed.shp
 
-	Remove edges.* intermediate files
+	Remove edges* intermediate files
 	Rename executive_summary to infrastructure-summary
 	Remove grid_mv_line table
 	Remove nodes* intermediate files
@@ -148,7 +155,7 @@ I have about three hours. Let's aim to clean up the output files today.
             /stderr.log
             /infrastructure-graph.json
 
-            = /arguments/parameters.json
+            + /arguments/parameters.json
             /arguments/selected-technologies.txt
             /arguments/demand-points.csv
             /arguments/connection-types.csv
@@ -184,20 +191,8 @@ I have about three hours. Let's aim to clean up the output files today.
 		Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
 
     Submit pull request for sequencer
-        git diff 2115bb0aeecf5e6e0b15d2a37513294aa0874f8e | grep diff
-        diff --git a/.gitignore b/.gitignore
-        diff --git a/demo_sequencer.py b/demo_sequencer.py
-        diff --git a/requirements.txt b/requirements.txt
-        diff --git a/sequencer/Models.py b/sequencer/Models.py
-        diff --git a/sequencer/NetworkPlan.py b/sequencer/NetworkPlan.py
-        diff --git a/sequencer/Sequencer.py b/sequencer/Sequencer.py
-        diff --git a/sequencer/Utils.py b/sequencer/Utils.py
-
     Separate calculator and aggregator
-        Have calculator generate geojson file
-
-    Prepare for production
-        Write positive test
+    Write positive test
 
     Update interface
         Show overrided columns

@@ -12,11 +12,13 @@ from invisibleroads_macros.iterable import (
 from invisibleroads_macros.log import format_summary
 from networkx import write_gpickle
 from os.path import isabs, basename, join
-from pandas import DataFrame, Series, concat, read_csv
-from shapely.geometry import GeometryCollection, LineString, Point
+from pandas import DataFrame, Series, concat
 from shapely import wkt
+from shapely.geometry import GeometryCollection, LineString, Point
 
-from infrastructure_planning.exceptions import InfrastructurePlanningError
+from infrastructure_planning import parsers
+from infrastructure_planning.exceptions import (
+    InfrastructurePlanningError, UnsupportedFormat)
 from infrastructure_planning.macros import (
     compute, get_graph_from_table, get_table_from_graph,
     get_table_from_variables)
@@ -191,7 +193,11 @@ VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
 def run(g):
-    g = normalize_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+    try:
+        g = normalize_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+    except InfrastructurePlanningError as e:
+        raise e.__class__('%s.error = normalize_parameters : %s' % (
+            e[0], e[1]))
 
     # Compute
     for f in MAIN_FUNCTIONS:
@@ -199,7 +205,8 @@ def run(g):
             try:
                 g.update(compute(f, g))
             except InfrastructurePlanningError as e:
-                exit('%s.error = %s : %s' % (e[0], f.func_name, e[1]))
+                raise e.__class__('%s.error = %s : %s' % (
+                    e[0], f.func_name, e[1]))
             continue
         graph = g['infrastructure_graph']
         for node_id, node_d in graph.nodes_iter(data=True):
@@ -211,7 +218,7 @@ def run(g):
             try:
                 node_d.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
-                exit('%s.error = %s : %s : %s' % (
+                raise e.__class__('%s.error = %s : %s : %s' % (
                     e[0], l['name'].encode('utf-8'), f.func_name, e[1]))
     ls = [node_d for node_id, node_d in g[
         'infrastructure_graph'
@@ -409,7 +416,7 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
         if get_distance(reference, flipped) < get_distance(reference, regular):
             # Flip coordinates to get (latitude, longitude) coordinate order
             for line in geometries:
-                line.coords = [flip_xy(xyz) for xyz in line.coords]
+                line.coords = [parsers.flip_xy(xyz) for xyz in line.coords]
             # ISO 6709 specifies (latitude, longitude) coordinate order
             grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}
@@ -453,18 +460,12 @@ def format_technology(x):
     return x.replace('_', ' ').title()
 
 
-def flip_xy(xyz):
-    xyz = list(xyz)
-    xyz[0], xyz[1] = xyz[1], xyz[0]
-    return xyz
-
-
 def save_shapefile(target_path, geotable):
     # TODO: Save extra attributes
     geometries = [wkt.loads(x) for x in geotable['wkt']]
     # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
     for geometry in geometries:
-        geometry.coords = [flip_xy(xyz) for xyz in geometry.coords]
+        geometry.coords = [parsers.flip_xy(xyz) for xyz in geometry.coords]
     geometryIO.save(target_path, geometryIO.proj4LL, geometries)
     return target_path
 
@@ -509,21 +510,20 @@ def load_files(g):
             key_base, key_type = file_key_pattern.match(k).groups()
         except AttributeError:
             continue
-        if key_type == 'text':
-            value = open(v).read().split()
-            name = key_base
-        elif key_type == 'table':
-            value = read_csv(v)
-            name = key_base + '_table'
-        elif key_type == 'geotable':
-            if v.endswith('.csv'):
-                value = read_csv(v)
+        try:
+            if key_type == 'text':
+                name = key_base
+                value = parsers.load_text(v)
+            elif key_type == 'table':
+                name = key_base + '_table'
+                value = parsers.load_table(v)
+            elif key_type == 'geotable':
+                name = key_base + '_geotable'
+                value = parsers.load_geotable(v)
             else:
-                raise InfrastructurePlanningError(
-                    '%s.error = load_files : unsupported format (%s)' % (k, v))
-            name = key_base + '_geotable'
-        else:
-            continue
+                continue
+        except UnsupportedFormat as e:
+            raise e.__class__('%s.error = %s : load_files : %s' % (k, e[0]))
         file_value_by_name[name] = value
     return merge_dictionaries(g, file_value_by_name)
 
@@ -745,9 +745,15 @@ if __name__ == '__main__':
 
     args = argument_parser.parse_args()
     g = load_parameters(args.__dict__)
+
     if g.pop('json'):
         print(json.dumps(g, indent=2, separators=(',', ': '), sort_keys=True))
-    else:
-        save_parameters(g, __file__)
+        exit()
+
+    save_parameters(g, __file__)
+    try:
         g = load_files(g)
-        print(format_summary(run(g)))
+        d = run(g)
+    except InfrastructurePlanningError as e:
+        exit(e[0])
+    print(format_summary(d))

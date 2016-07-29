@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
-from infrastructure_planning.exceptions import EmptyDataset
+from infrastructure_planning.exceptions import MissingData
 from infrastructure_planning.growth.interpolated import (
     get_interpolated_spline_extrapolated_linear_function)
 from os.path import join
@@ -56,7 +56,7 @@ def get_population_electricity_consumption_table(target_year):
             electricity_consumption_per_capita = \
                 estimate_electricity_consumption_per_capita(
                     target_year, country_name)
-        except EmptyDataset as e:
+        except MissingData as e:
             print('Skipping %s: %s' % (country_name.encode('utf-8'), e))
             continue
         electricity_consumption = \
@@ -106,7 +106,7 @@ def estimate_population(target_year, country_name):
         earliest_estimated_year = min(country_t[
             country_t['Variant'] == 'Low variant']['Year(s)'])
     except ValueError:
-        raise EmptyDataset('Missing population')
+        raise MissingData('Missing population')
     # Get actual population for each year
     year_packs = country_t[country_t['Year(s)'] < earliest_estimated_year][[
         'Year(s)', 'Value']].values
@@ -120,7 +120,7 @@ def estimate_electricity_consumption_per_capita(target_year, country_name):
     t = ELECTRICITY_CONSUMPTION_PER_CAPITA_BY_YEAR_TABLE
     country_t = _get_country_table(t, 'Country Name', country_name)
     if not len(country_t):
-        raise EmptyDataset(
+        raise MissingData(
             'Missing electricity_consumption_per_capita country_name')
     year_packs = []
     for column_name in country_t.columns:
@@ -133,7 +133,7 @@ def estimate_electricity_consumption_per_capita(target_year, country_name):
             continue
         year_packs.append((year, value))
     if not year_packs:
-        raise EmptyDataset(
+        raise MissingData(
             'Missing electricity_consumption_per_capita year_value')
     estimate_electricity_consumption_per_capita = \
         get_interpolated_spline_extrapolated_linear_function(year_packs)
