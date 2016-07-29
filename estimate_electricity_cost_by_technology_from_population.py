@@ -493,13 +493,24 @@ def save_parameters(g, script_path):
     for k, v in d.items():
         if not k.endswith('_path'):
             continue
+        file_name = k.replace('_text_path', '').replace('_path', '') + splitext(v)[1]
         # Save a copy of each file
-        shutil.copy(v, arguments_folder)
+        shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
-        d[k] = basename(v)
+        d[k] = file_name
     # Save global parameters
     json.dump(d, open(join(arguments_folder, 'parameters.json'), 'w'))
     g['target_folder'] = target_folder
+
+
+"""
+def get_parameter_file_name(k, v):
+    file_base = k
+    file_base = file_base.replace('_text_path', '')
+    file_base = file_base.replace('_path', '')
+
+    file_name = k.replace('_text_path', '').replace('_path', '') + splitext(v)[1]
+"""
 
 
 def load_files(g):
