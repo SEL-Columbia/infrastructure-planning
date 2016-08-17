@@ -11,7 +11,7 @@ from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from networkx import write_gpickle
-from os.path import isabs, basename, join
+from os.path import isabs, basename, join, splitext
 from pandas import DataFrame, Series, concat
 from shapely import wkt
 from shapely.geometry import GeometryCollection, LineString, Point
@@ -49,7 +49,7 @@ def assemble_total_mv_line_network(
             lon, lat = location.longitude, location.latitude
         node_d.update(longitude=lon, latitude=lat)
     node_table = get_table_from_graph(infrastructure_graph, [
-        'longitude', 'latitude', 'grid_mv_line_adjusted_budget'])
+        'longitude', 'latitude', 'grid_mv_line_adjusted_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = {
@@ -57,7 +57,7 @@ def assemble_total_mv_line_network(
             'filename': node_table_path,
             'x_column': 'longitude',
             'y_column': 'latitude',
-            'budget_column': 'grid_mv_line_adjusted_budget',
+            'budget_column': 'grid_mv_line_adjusted_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {
@@ -493,7 +493,8 @@ def save_parameters(g, script_path):
     for k, v in d.items():
         if not k.endswith('_path'):
             continue
-        file_name = k.replace('_text_path', '').replace('_path', '') + splitext(v)[1]
+        file_name = k.replace('_text_path', '').replace(
+            '_path', '') + splitext(v)[1]
         # Save a copy of each file
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
@@ -509,7 +510,8 @@ def get_parameter_file_name(k, v):
     file_base = file_base.replace('_text_path', '')
     file_base = file_base.replace('_path', '')
 
-    file_name = k.replace('_text_path', '').replace('_path', '') + splitext(v)[1]
+    file_name = k.replace('_text_path', '').replace(
+        '_path', '') + splitext(v)[1]
 """
 
 

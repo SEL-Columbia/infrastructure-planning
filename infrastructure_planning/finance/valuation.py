@@ -1,5 +1,5 @@
 import numpy as np
-from invisibleroads_macros.date import parse_date_safely
+from invisibleroads_macros.timestamp import parse_date_safely
 from scipy.optimize import fsolve
 
 

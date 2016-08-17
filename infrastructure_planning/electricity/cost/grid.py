@@ -85,7 +85,7 @@ def estimate_grid_mv_line_budget(
     standalone_cost = min(
         v for k, v in internal_discounted_cost_by_technology.items()
         if k != 'grid')
-    mv_line_budget = \
+    mv_line_budget_in_money = \
         standalone_cost - internal_discounted_cost_by_technology['grid']
     d = prepare_component_cost_by_year([
         ('mv_line', estimate_grid_mv_line_cost_per_meter),
@@ -96,9 +96,10 @@ def estimate_grid_mv_line_budget(
         keywords['discount_rate_as_percent_of_cash_flow_per_year'])
     d['grid_mv_line_discounted_cost_per_meter'] = \
         grid_mv_line_discounted_cost_per_meter
-    d['grid_mv_line_adjusted_budget'] = mv_line_budget / float(
-        grid_mv_line_discounted_cost_per_meter) / float(
-        keywords['line_length_adjustment_factor'])
+    d['grid_mv_line_adjusted_budget_in_meters'] = \
+        mv_line_budget_in_money / float(
+            grid_mv_line_discounted_cost_per_meter) / float(
+                keywords['line_length_adjustment_factor'])
     return d
 
 
