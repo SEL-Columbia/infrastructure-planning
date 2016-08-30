@@ -124,7 +124,11 @@ I have about three hours. Let's aim to clean up the output files today.
     + Port load_geotable
     + Improve controlled error handling and error messages
 
-20160729-1745 - 20160729-1800: 15 minutes
+20160730-1745 - 20160729-1800: 15 minutes
+
+20160830-1630 - 20160830-1645: 15 minutes
+
+
 
     = Use a modification of the key name for argument file name
 
@@ -203,10 +207,4 @@ I have about three hours. Let's aim to clean up the output files today.
         Make existing grid a different color or stroke
         Consider letting user add row or column
 
-    Update validation
-        https://github.com/SEL-Columbia/infrastructure-planning/issues/5
-        Consider sending error messages on invalid numbers with commas
-
     Add instructions on how to set up the system on a new machine
-    Test that local override for household consumption works
-    Test that blank entries in local override columns use global value
