@@ -25,6 +25,7 @@ setup(
         'pytest-runner',
     ],
     install_requires=[
+        'dateutil',
         'geopy',
         'invisibleroads-macros',
         'simplejson',
