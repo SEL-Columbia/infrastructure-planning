@@ -128,58 +128,75 @@ I have about three hours. Let's aim to clean up the output files today.
 
 20160830-1630 - 20160830-1645: 15 minutes
 
+20160906-1515 - 20160906-1530: 15 minutes
 
+Let's try to remember what we were doing here.
 
-    = Use a modification of the key name for argument file name
+    _ selected_technologies.txt
+    selected_technologies_text.txt
+
+    + Use a modification of the key name for argument file name
+
+20160906-1630 - 20160906-1645: 15 minutes
+
+20160906-1700 - 20160906-1715: 15 minutes
+
+    + Change population_growth_as_percent_of_population_per_year to float
+    + Show standard error and standard output
 
 # Tasks
 
+    Check for required columns like name
+    Replace geopy geocoding with error message about expected longitude latitude
+    Generate intermediate and yearly value files for debugging
+
 	Generate points.csv
 	Generate points.shp
+
 	Generate lines.csv
 	Generate lines-existing.shp
 	Generate lines-proposed.shp
 
 	Remove edges* intermediate files
-	Rename executive_summary to infrastructure-summary
 	Remove grid_mv_line table
 	Remove nodes* intermediate files
 	Rename standard_output.log to stdout.log
 	Rename standard_error.log to stderr.log
-	Rename levelized_cost_by_technology to infrastructure-details
+	Rename executive_summary to interface/summary.csv
+	Rename levelized_cost_by_technology to interface/details.csv
 
-    Update output files
-        Include essential properties in shapefile
-            https://github.com/SEL-Columbia/infrastructure-planning/issues/3
-            Check shapefile column name length limit
-        Clean up output folder
-            + /result.cfg
-            + /run.sh
-            /stdout.log
-            /stderr.log
-            /infrastructure-graph.json
+    Clean up output folder
+        + /result.cfg
+        + /run.sh
+        /stdout.log
+        /stderr.log
+        /infrastructure-graph.json
 
-            + /arguments/parameters.json
-            /arguments/selected-technologies.txt
-            /arguments/demand-points.csv
-            /arguments/connection-types.csv
-            /arguments/grid-mv-lines.csv
-            /arguments/grid-mv-transformers.csv
-            /arguments/diesel-mini-grid-generators.csv
-            /arguments/solar-home-panels.csv
-            /arguments/solar-mini-grid-panels.csv
+        + /arguments/arguments.json
+        + /arguments/connection-types.csv
+        + /arguments/demand-points.csv
+        + /arguments/diesel-mini-grid-generators.csv
+        + /arguments/grid-mv-lines.csv
+        + /arguments/grid-mv-transformers.csv
+        + /arguments/selected-technologies.txt
+        + /arguments/solar-home-panels.csv
+        + /arguments/solar-mini-grid-panels.csv
 
-            /properties/points.csv
-            /properties/points.shp
-            /properties/lines.csv
-            /properties/lines-existing.shp
-            /properties/lines-proposed.shp
-            /properties/costs.csv
-            /properties/examples.csv
-            /properties/glossary.csv
-            /interface/map.csv
-            /interface/summary.csv
-            /interface/details.csv
+        /properties/points.csv
+        /properties/points.shp
+        /properties/lines.csv
+        /properties/lines-existing.shp
+        /properties/lines-proposed.shp
+        /properties/costs.csv
+        /properties/examples.csv
+        /properties/glossary.csv
+        /interface/map.csv
+        /interface/summary.csv
+        /interface/details.csv
+
+    Include essential properties in shapefile
+        https://github.com/SEL-Columbia/infrastructure-planning/issues/3
+        Check shapefile column name length limit
 
     Update executive summary by technology
         Show initial

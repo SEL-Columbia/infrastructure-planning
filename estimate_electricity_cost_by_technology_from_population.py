@@ -194,9 +194,9 @@ VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 def run(g):
     try:
-        g = normalize_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+        g = normalize_arguments(g, NORMALIZED_NAME_BY_COLUMN_NAME)
     except InfrastructurePlanningError as e:
-        raise e.__class__('%s.error = normalize_parameters : %s' % (
+        raise e.__class__('%s.error = normalize_arguments : %s' % (
             e[0], e[1]))
 
     # Compute
@@ -358,17 +358,17 @@ def run(g):
     return d
 
 
-def normalize_parameters(g, normalized_name_by_column_name):
+def normalize_arguments(g, normalized_name_by_column_name):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
         v.columns = normalize_column_names(
             v.columns, normalized_name_by_column_name)
-    for normalize_parameter in [
+    for normalize_argument in [
             normalize_demand_point_table,
             normalize_connection_type_table,
             normalize_grid_mv_line_geotable]:
-        g.update(compute(normalize_parameter, g))
+        g.update(compute(normalize_argument, g))
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
     return g
 
@@ -470,7 +470,7 @@ def save_shapefile(target_path, geotable):
     return target_path
 
 
-def load_parameters(value_by_key):
+def load_arguments(value_by_key):
     configuration_path = value_by_key.pop('configuration_path')
     source_folder = value_by_key.pop('source_folder')
     g = json.load(open(configuration_path)) if configuration_path else {}
@@ -484,7 +484,7 @@ def load_parameters(value_by_key):
     return g
 
 
-def save_parameters(g, script_path):
+def save_arguments(g, script_path):
     d = g.copy()
     target_folder = d.pop('target_folder')
     if not target_folder:
@@ -493,26 +493,14 @@ def save_parameters(g, script_path):
     for k, v in d.items():
         if not k.endswith('_path'):
             continue
-        file_name = k.replace('_text_path', '').replace(
-            '_path', '') + splitext(v)[1]
+        file_name = _get_argument_file_name(k, v)
         # Save a copy of each file
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
         d[k] = file_name
-    # Save global parameters
-    json.dump(d, open(join(arguments_folder, 'parameters.json'), 'w'))
+    # Save global arguments
+    json.dump(d, open(join(arguments_folder, 'arguments.json'), 'w'))
     g['target_folder'] = target_folder
-
-
-"""
-def get_parameter_file_name(k, v):
-    file_base = k
-    file_base = file_base.replace('_text_path', '')
-    file_base = file_base.replace('_path', '')
-
-    file_name = k.replace('_text_path', '').replace(
-        '_path', '') + splitext(v)[1]
-"""
 
 
 def load_files(g):
@@ -539,6 +527,16 @@ def load_files(g):
             raise e.__class__('%s.error = %s : load_files : %s' % (k, e[0]))
         file_value_by_name[name] = value
     return merge_dictionaries(g, file_value_by_name)
+
+
+def _get_argument_file_name(k, v):
+    file_base = k
+    file_base = file_base.replace('_geotable_path', 's')
+    file_base = file_base.replace('_table_path', 's')
+    file_base = file_base.replace('_text_path', '')
+    file_base = file_base.replace('_path', '')
+    file_extension = splitext(v)[1]
+    return file_base.replace('_', '-') + file_extension
 
 
 if __name__ == '__main__':
@@ -577,7 +575,7 @@ if __name__ == '__main__':
         metavar='YEAR', type=int)
     argument_parser.add_argument(
         '--population_growth_as_percent_of_population_per_year',
-        metavar='INTEGER', type=int)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--line_length_adjustment_factor',
@@ -757,13 +755,11 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
-    g = load_parameters(args.__dict__)
-
+    g = load_arguments(args.__dict__)
     if g.pop('json'):
         print(json.dumps(g, indent=2, separators=(',', ': '), sort_keys=True))
         exit()
-
-    save_parameters(g, __file__)
+    save_arguments(g, __file__)
     try:
         g = load_files(g)
         d = run(g)

@@ -1,3 +1,5 @@
+Consider having different transformer tables for different locations
+
 Split components into package and separate tools
     Separate estimate_local_population
     Separate estimate_local_consumption_in_kwh
