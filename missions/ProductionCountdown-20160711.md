@@ -225,3 +225,7 @@ Let's try to remember what we were doing here.
         Consider letting user add row or column
 
     Add instructions on how to set up the system on a new machine
+
+    Add warning if peak_demand_in_kw is nan or zero
+
+    Use global value if local value is nan
