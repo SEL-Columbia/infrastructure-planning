@@ -144,22 +144,23 @@ Let's try to remember what we were doing here.
     + Change population_growth_as_percent_of_population_per_year to float
     + Show standard error and standard output
 
+20160908-1200 - 20160908-1215: 15 minutes
+
+
 # Tasks
 
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
-    Generate intermediate and yearly value files for debugging
-
 	Generate points.csv
 	Generate points.shp
-
 	Generate lines.csv
 	Generate lines-existing.shp
 	Generate lines-proposed.shp
-
 	Remove edges* intermediate files
 	Remove grid_mv_line table
 	Remove nodes* intermediate files
+
+    Generate intermediate and yearly value files for debugging
 	Rename standard_output.log to stdout.log
 	Rename standard_error.log to stderr.log
 	Rename executive_summary to interface/summary.csv
@@ -225,7 +226,9 @@ Let's try to remember what we were doing here.
         Consider letting user add row or column
 
     Add instructions on how to set up the system on a new machine
-
     Add warning if peak_demand_in_kw is nan or zero
-
     Use global value if local value is nan
+
+    Support capacity and installation cost per kw override
+    Support multiple transformer subtables
+    Convert tool into notebook
