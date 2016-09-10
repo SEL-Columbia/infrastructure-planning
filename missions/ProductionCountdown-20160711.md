@@ -183,3 +183,7 @@ Let's look at what is currently in the output folder and make a list of tasks.
 
     Write test to make sure blank entries in local override columns use global value
     Write test to make sure local override for household consumption works
+
+    Expose consumption and production
+    Make zero population be unelectrified
+    Remove extra paths
