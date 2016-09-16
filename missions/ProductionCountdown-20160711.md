@@ -146,6 +146,11 @@ Let's try to remember what we were doing here.
 
 20160908-1200 - 20160908-1215: 15 minutes
 
+20160913-1630 - 20160913-1645: 15 minutes
+
+20160915-1600 - 20160915-1630: 30 minutes
+
+    Review goals
 
 # Tasks
 
@@ -232,3 +237,14 @@ Let's try to remember what we were doing here.
     Support capacity and installation cost per kw override
     Support multiple transformer subtables
     Convert tool into notebook
+
+    Update system size algorithm
+        Have user specify generator capacity
+        Have user specify generator purchase price
+        Have user specify generator installation cost per kw
+        Have user specify maintenance cost per year as fraction of purchase price
+        Get desired system capacity
+        Add system capacity safety factor
+        Compute purchase price per kw
+        Pick nearest generator capacity and use those prices per kw
+        Round actual capacity to integer
