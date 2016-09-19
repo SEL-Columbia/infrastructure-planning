@@ -150,26 +150,60 @@ Let's try to remember what we were doing here.
 
 20160915-1600 - 20160915-1630: 30 minutes
 
-    Review goals
+20160919-1015 - 20160919-1045: 30 minutes
+
+    + Look at Naichen's presentation
+    + Identify proposed cost per household (it is proposed cost per connection)
+    + Extract goals from GitHub
+
+20160919-1130 - 20160919-1200: 30 minutes
+
+I think that putting things into notebook format will be important for rapid development, both now and in the future.
+
+    Sort goals from TODO.goals
 
 # Tasks
 
+## Important and easy
+
     Check for required columns like name
+    Test when there are no demand points
+    Test when there are demand points but no consumption
+    Test that we only use most recent year if multiple years are given
     Replace geopy geocoding with error message about expected longitude latitude
-	Generate points.csv
-	Generate points.shp
-	Generate lines.csv
-	Generate lines-existing.shp
-	Generate lines-proposed.shp
-	Remove edges* intermediate files
-	Remove grid_mv_line table
-	Remove nodes* intermediate files
+    Add warning if peak_demand_in_kw is nan or zero
+    Use global value if local value is nan
+
+    Consider having different transformer tables for different locations
+    Add acknowledgments to separate tools
+
+    Fix oversizing system capacity
+        Update system size algorithm
+            Have user specify generator capacity
+            Have user specify generator purchase price
+            Have user specify generator installation cost per kw
+            Have user specify maintenance cost per year as fraction of purchase price
+            Get desired system capacity
+            Add system capacity safety factor
+            Compute purchase price per kw
+            Pick nearest generator capacity and use those prices per kw
+            Round actual capacity to integer
+
+    Generate points.csv
+    Generate points.shp
+    Generate lines.csv
+    Generate lines-existing.shp
+    Generate lines-proposed.shp
+
+    Remove edges* intermediate files
+    Remove grid_mv_line table
+    Remove nodes* intermediate files
 
     Generate intermediate and yearly value files for debugging
-	Rename standard_output.log to stdout.log
-	Rename standard_error.log to stderr.log
-	Rename executive_summary to interface/summary.csv
-	Rename levelized_cost_by_technology to interface/details.csv
+    Rename standard_output.log to stdout.log
+    Rename standard_error.log to stderr.log
+    Rename executive_summary to interface/summary.csv
+    Rename levelized_cost_by_technology to interface/details.csv
 
     Clean up output folder
         + /result.cfg
@@ -201,7 +235,6 @@ Let's try to remember what we were doing here.
         /interface/details.csv
 
     Include essential properties in shapefile
-        https://github.com/SEL-Columbia/infrastructure-planning/issues/3
         Check shapefile column name length limit
 
     Update executive summary by technology
@@ -215,36 +248,82 @@ Let's try to remember what we were doing here.
 
     Update model
         Consider estimating population growth using projected population year
-		Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
+        Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
+    Add instructions on how to set up the system on a new machine
+
+    Report consumption for each node
+    Add unelectrified option for zero consumption
+    Report projected population count
+    Report projected household count
+    Need total inital and total recurring costs
+    Need intermediate costs like diesel fuel cost per year
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
+    Change use of maximum to total (e.g. connection count)
+    Add household count and total and existing proposed grid length to summary
+    Make it easy to clone scenarios
+    Remove unnecessary files in output
+    Fix command line overriding JSON
+        Add test
+
+    Let user download table
+    Document ways that users can debug model
+    Replace peak_demand with household and population info when clicking on node
+    Explain that technologies chosen via networker not in coster #10
+    Handle empty null values for number of people per household
+    Update installation requirements
+
+## Important and hard
+
+    Consider separating line equipment cost vs installation cost
+    Consider letting user specify installation and maintenance costs as percentages
+    Convert tools into jupyter notebooks
+        Add specification for model
 
     Submit pull request for sequencer
-    Separate calculator and aggregator
+    Separate Coster from Networker and Sequencer
+    Separate Aggregator
     Write positive test
 
-    Update interface
-        Show overrided columns
-        Let user download example table for each table
-        Add acknowledgments to integrated tool
-        Look into issues with live table override
-        Show simple map in addition to satellite map
-        Make existing grid a different color or stroke
-        Consider letting user add row or column
+## Unimportant and easy
 
-    Add instructions on how to set up the system on a new machine
-    Add warning if peak_demand_in_kw is nan or zero
-    Use global value if local value is nan
+    Show overrided columns
+    Let user download example table for each table
+    Show simple map in addition to satellite map
+    Adjust map colors to match old system
+    Add legend to map
 
-    Support capacity and installation cost per kw override
-    Support multiple transformer subtables
-    Convert tool into notebook
+    Make notebook for each technology that only does modelling for that technology
+    Add meta tool to explore demand threshold by varying household demand to change mvMax
+    Consider tools that fill certain values based on administrative boundary
+    Consider tools that fill certain values based on urban vs rural
 
-    Update system size algorithm
-        Have user specify generator capacity
-        Have user specify generator purchase price
-        Have user specify generator installation cost per kw
-        Have user specify maintenance cost per year as fraction of purchase price
-        Get desired system capacity
-        Add system capacity safety factor
-        Compute purchase price per kw
-        Pick nearest generator capacity and use those prices per kw
-        Round actual capacity to integer
+    Cite "Total population, both sexes combined (thousands)" http://data.un.org/Data.aspx?d=PopDiv&f=variableID%3A12
+    Cite "City population by sex, city and city type" http://data.un.org/Data.aspx?d=POP&f=tableCode:240
+    Cite "Electric power consumption (kWh per capita)" http://data.worldbank.org/indicator/EG.USE.ELEC.KH.PC
+    Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
+    Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
+    Cite "Electric Sales, Revenue, and Average Price"
+        http://www.eia.gov/electricity/sales_revenue_price/index.cfm
+        http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
+
+    Update compute-discounted-cost
+        Define loan_year in compute discounted cost
+        Check whether different loan year affects breakeven time (whether we need to add loan year)
+
+## Unimportant and hard
+
+    Look through past np errors
+
+    Look into issues with live table override
+        Fix table values on fly
+    Show proposed network in different color or style from existing
+    Consider letting user add row or column
+
+    Clean up
+        Move grow_exponentially into growth
+        Make it possible to swap estimate_local_population
+        Make it possible to swap estimate_electricity_consumption
+
+    Consider accepting net present value vs consumption curve for energy source X
+        Explain that net present value is a special case of discounted cash flow when there is spending in the first few years

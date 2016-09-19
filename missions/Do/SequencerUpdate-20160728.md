@@ -19,7 +19,5 @@ We have the [official branch](https://github.com/sel-columbia/sequencer) and a [
 3. Merge changes.
 
 # Log
-Record progress toward objectives.
 
 # Tasks
-List remaining tasks.
