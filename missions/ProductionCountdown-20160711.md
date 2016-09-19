@@ -160,7 +160,18 @@ Let's try to remember what we were doing here.
 
 I think that putting things into notebook format will be important for rapid development, both now and in the future.
 
-    Sort goals from TODO.goals
+    + Sort goals from TODO.goals
+
+20160919-1500 - 20160919-1530: 30 minutes
+
+20160919-1600 - 20160919-1630: 30 minutes
+
+    + Write simple jupyter notebook
+    + Write bash script that Natali can use to run script using json from input folder to output folder
+
+20160919-1645 - 20160919-1700: 15 minutes
+
+    Get estimate_population to run on one node
 
 # Tasks
 
@@ -277,8 +288,10 @@ I think that putting things into notebook format will be important for rapid dev
 
     Consider separating line equipment cost vs installation cost
     Consider letting user specify installation and maintenance costs as percentages
+
+    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Convert tools into jupyter notebooks
-        Add specification for model
+    Add specification for model to jupyter notebooks
 
     Submit pull request for sequencer
     Separate Coster from Networker and Sequencer
@@ -313,17 +326,14 @@ I think that putting things into notebook format will be important for rapid dev
 
 ## Unimportant and hard
 
-    Look through past np errors
-
     Look into issues with live table override
         Fix table values on fly
     Show proposed network in different color or style from existing
     Consider letting user add row or column
-
     Clean up
         Move grow_exponentially into growth
-        Make it possible to swap estimate_local_population
-        Make it possible to swap estimate_electricity_consumption
+        Make similar functions consistent with each other
 
     Consider accepting net present value vs consumption curve for energy source X
         Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
+    Look through past np errors
