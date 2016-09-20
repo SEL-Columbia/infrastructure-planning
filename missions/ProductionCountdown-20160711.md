@@ -171,23 +171,27 @@ I think that putting things into notebook format will be important for rapid dev
 
 20160919-1645 - 20160919-1700: 15 minutes
 
-    Get estimate_population to run on one node
+    + Get estimate_population to run
+
+20160919-1915 - 20160919-1945: 30 minutes
+
+    + Make sure script runs with defaults
+    + Open costs.csv
+    + See whether we compute the equivalent of projected nodal discounted demand
+
+It looks like the reason that I do not compute projected nodal discounted demand is because we use the time series consumption_in_kwh_by_year instead. The best way to illustrate this is using a jupyter notebook traced along a single node.
+
+We could compute the discounted consumption for illustration purposes.
+
+    _ Report consumption for each node
 
 # Tasks
 
 ## Important and easy
 
-    Check for required columns like name
-    Test when there are no demand points
+    Draft jupyter notebook that starts from the population of a single node
     Test when there are demand points but no consumption
-    Test that we only use most recent year if multiple years are given
-    Replace geopy geocoding with error message about expected longitude latitude
-    Add warning if peak_demand_in_kw is nan or zero
-    Use global value if local value is nan
-
-    Consider having different transformer tables for different locations
-    Add acknowledgments to separate tools
-
+    Test when there are no demand points
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
@@ -199,6 +203,23 @@ I think that putting things into notebook format will be important for rapid dev
             Compute purchase price per kw
             Pick nearest generator capacity and use those prices per kw
             Round actual capacity to integer
+    Add unelectrified option for zero consumption
+    Report projected population count
+    Report projected household count
+    Need total initial and total recurring costs
+    Need intermediate costs like diesel fuel cost per year
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
+    Change use of maximum to total (e.g. connection count)
+
+    Check for required columns like name
+    Test that we only use most recent year if multiple years are given
+    Replace geopy geocoding with error message about expected longitude latitude
+    Add warning if peak_demand_in_kw is nan or zero
+    Use global value if local value is nan
+
+    Consider having different transformer tables for different locations
+    Add acknowledgments to separate tools
 
     Generate points.csv
     Generate points.shp
@@ -262,15 +283,6 @@ I think that putting things into notebook format will be important for rapid dev
         Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
     Add instructions on how to set up the system on a new machine
 
-    Report consumption for each node
-    Add unelectrified option for zero consumption
-    Report projected population count
-    Report projected household count
-    Need total inital and total recurring costs
-    Need intermediate costs like diesel fuel cost per year
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
-    Change use of maximum to total (e.g. connection count)
     Add household count and total and existing proposed grid length to summary
     Make it easy to clone scenarios
     Remove unnecessary files in output
