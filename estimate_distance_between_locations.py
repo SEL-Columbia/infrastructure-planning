@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.log import format_summary
+from invisibleroads_macros.math import divide_safely
 from networkx import Graph
 from networkx.algorithms import minimum_spanning_tree
 from pandas import read_csv
@@ -23,7 +24,7 @@ def run(location_geotable):
     total_distance = sum(edge_d[
         'weight'] for node1_id, node2_id, edge_d in tree.edges(data=True))
     location_count = len(graph)
-    average_distance = total_distance / float(location_count)
+    average_distance = divide_safely(total_distance, location_count, 0)
     return [
         ('total_distance_between_locations_in_meters', total_distance),
         ('location_count', location_count),

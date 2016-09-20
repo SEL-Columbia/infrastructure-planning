@@ -10,6 +10,7 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
+from invisibleroads_macros.math import divide_safely
 from networkx import write_gpickle
 from os.path import isabs, basename, join, splitext
 from pandas import DataFrame, Series, concat
@@ -24,6 +25,8 @@ from infrastructure_planning.macros import (
     get_table_from_variables)
 
 from infrastructure_planning.demography.exponential import estimate_population
+from infrastructure_planning.electricity.consumption import (
+    estimate_consumption_profile)
 from infrastructure_planning.electricity.consumption.linear import (
     estimate_consumption_from_connection_type)
 from infrastructure_planning.electricity.demand import estimate_peak_demand
@@ -114,19 +117,19 @@ def sequence_total_mv_line_network(target_folder, infrastructure_graph):
 
 
 def estimate_total_cost(selected_technologies, infrastructure_graph):
+    # Compute levelized costs for selected technology for each node
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
         best_standalone_cost = float('inf')
         best_standalone_technology = 'grid'
+        discounted_consumption = node_d['discounted_consumption_in_kwh']
         for technology in selected_technologies:
             discounted_cost = node_d[
                 technology + '_internal_discounted_cost'] + node_d[
                 technology + '_external_discounted_cost']
-            discounted_production = node_d[
-                technology + '_electricity_discounted_production_in_kwh']
-            levelized_cost = discounted_cost / float(
-                discounted_production) if discounted_production else 0
+            levelized_cost = divide_safely(
+                discounted_cost, discounted_consumption, 0)
             node_d[technology + '_total_discounted_cost'] = discounted_cost
             node_d[technology + '_total_levelized_cost'] = levelized_cost
             if technology != 'grid' and discounted_cost < best_standalone_cost:
@@ -139,13 +142,14 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             node_d['grid_total_discounted_cost'] = ''
             node_d['grid_total_levelized_cost'] = ''
         node_d['proposed_technology'] = proposed_technology
-        node_d['proposed_cost_per_connection'] = node_d[
-            proposed_technology + '_total_discounted_cost'] / float(node_d[
-                'final_connection_count'])
+        node_d['proposed_cost_per_connection'] = divide_safely(
+            node_d[proposed_technology + '_total_discounted_cost'],
+            node_d['final_connection_count'], 0)
+
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
-    discounted_production_by_technology = OrderedDefaultDict(int)
+    total_discounted_consumption = 0
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
@@ -153,16 +157,13 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
         count_by_technology[technology] += 1
         discounted_cost_by_technology[technology] += node_d[
             technology + '_total_discounted_cost']
-        discounted_production_by_technology[technology] += node_d[
-            technology + '_electricity_discounted_production_in_kwh']
+        total_discounted_consumption += node_d['discounted_consumption_in_kwh']
     levelized_cost_by_technology = OrderedDict()
     for technology in selected_technologies:
         discounted_cost = discounted_cost_by_technology[
             technology]
-        discounted_production = discounted_production_by_technology[
-            technology]
-        levelized_cost_by_technology[technology] = discounted_cost / float(
-            discounted_production) if discounted_cost else 0
+        levelized_cost_by_technology[technology] = divide_safely(
+            discounted_cost, total_discounted_consumption, 0)
     return {
         'count_by_technology': count_by_technology,
         'discounted_cost_by_technology': discounted_cost_by_technology,
@@ -173,6 +174,7 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
 MAIN_FUNCTIONS = [
     estimate_population,
     estimate_consumption_from_connection_type,
+    estimate_consumption_profile,
     estimate_peak_demand,
     estimate_internal_cost_by_technology,
     estimate_grid_mv_line_budget,
@@ -188,7 +190,7 @@ NORMALIZED_NAME_BY_COLUMN_NAME = {
         'maintenance_lm_cost_per_year',
 }
 VARIABLE_NAMES_PATH = join('templates', basename(
-    __file__).replace('.py', '').replace('_', '-'), 'summary-columns.txt')
+    __file__).replace('.py', '').replace('_', '-'), 'columns.txt')
 VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 

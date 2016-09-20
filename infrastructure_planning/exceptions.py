@@ -2,7 +2,7 @@ class InfrastructurePlanningError(Exception):
     pass
 
 
-class MissingData(InfrastructurePlanningError):
+class InvalidData(InfrastructurePlanningError):
     pass
 
 

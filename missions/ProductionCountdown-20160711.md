@@ -261,13 +261,77 @@ I think the decisions are to use final_connection_count and consumption_during_p
 
 Actually, consumption_during_peak_hours_as_percent_of_total_consumption is clearer than consumption_during_peak_hours_as_percent_of_consumption, which seems recursive and is confusing. We'll keep the nomenclature for the percentage parameters.
 
+20160920-1400 - 20160920-1430: 30 minutes
+
+    grid_internal_discounted_cost
+    grid_external_discounted_cost
+    = grid_local_discounted_cost
+    _ grid_nodal_discounted_cost
+    _ grid_system_discounted_cost
+    _ grid_allocated_discounted_cost
+    _ grid_total_discounted_cost
+
+    grid_local_levelized_cost_per_kwh_produced
+    grid_local_levelized_cost_per_kwh_consumed
+
+    _ grid_local_cost_per_kwh_produced
+    _ grid_local_cost_per_kwh_consumed
+    _ grid_local_cost_per_produced_kwh
+    _ grid_local_cost_per_consumed_kwh
+
+20160920-1430 - 20160920-1500: 30 minutes
+
+The code is in infrastructure_planning/electricity/cost/__init__.py on line 93. I would need to compute discounted_consumption_in_kwh.
+
+    + Pinpoint where levelized cost is being computed
+
+    _ Option 1: Compute discounted_consumption_in_kwh in consumption module
+    Option 2: Add second function to MAIN_FUNCTIONS that computes discounted consumption
+    _ Option 3: Compute discounted_consumption_in_kwh in prepare_internal_cost
+
+The issue with option 3 is that the computation will duplicate for each technology, not a big deal, but not optimal.
+
+The issue with option 1 is that we are introducing financial parameters that are not stricly necessary to estimate consumption.
+
+However, we're also going to need discounted consumption again in the global computation, so that eliminates option 3.
+
+Then we choose between option 1 and option 2. We choose option 2.
+
+    _ estimate_summarized_consumption
+    _ estimate_discounted_consumption
+    _ estimate_consumption_statistics
+    _ estimate_consumption_features
+    estimate_consumption_profile
+    _ estimate_consumption_portrait
+    _ estimate_consumption_sketch
+    _ condense_consumption_profile
+    _ discount_consumption
+    _ discount_future_consumption
+
+    + Define estimate_consumption_profile
+    + Update computation for levelized_cost in internal cost
+    + Update computation for levelized_cost in total cost
+
+20160920-1815 - 20160920-1845: 30 minutes
+
+    Replace division by float(x) with divide_safely
+
+    Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
+    Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
+    Rename solar_home_total_levelized_cost to solar_home_local_levelized_cost_per_kwh_consumed
+    Rename solar_mini_grid_total_levelized_cost to solar_mini_grid_local_levelized_cost_per_kwh_consumed
+
+    Rename grid_total_discounted_cost to grid_local_discounted_cost
+    Rename diesel_mini_grid_total_discounted_cost to diesel_mini_grid_local_discounted_cost
+    Rename solar_home_total_discounted_cost to solar_home_local_discounted_cost
+    Rename solar_mini_grid_total_discounted_cost to solar_mini_grid_local_discounted_cost
+
+    Compute cost per kwh delivered to consumer instead of cost per kwh produced
+
 # Tasks
 
 ## Important and easy
 
-    Compute cost per kwh delivered to consumer instead of cost per kwh produced
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
@@ -279,6 +343,8 @@ Actually, consumption_during_peak_hours_as_percent_of_total_consumption is clear
             Compute purchase price per kw
             Pick nearest generator capacity and use those prices per kw
             Round actual capacity to integer
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
 
     Test when there are demand points but no consumption
     Test when there are no demand points

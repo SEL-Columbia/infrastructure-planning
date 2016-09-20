@@ -33,8 +33,6 @@ def estimate_consumption_from_connection_type(
     return dict(d, **{
         'connection_count_by_year': connection_count_by_year,
         'consumption_in_kwh_by_year': consumption_by_year,
-        'final_connection_count': connection_count_by_year.max(),
-        'final_consumption_in_kwh_per_year': consumption_by_year.max(),
     })
 
 
@@ -49,8 +47,6 @@ def estimate_consumption_from_connection_count(
     return {
         'connection_count_by_year': connection_count_by_year,
         'consumption_in_kwh_by_year': consumption_by_year,
-        'final_connection_count': connection_count_by_year.max(),
-        'final_consumption_in_kwh_per_year': consumption_by_year.max(),
     }
 
 

@@ -67,13 +67,13 @@ def prepare_component_cost_by_year(component_packs, keywords, prefix):
 def prepare_internal_cost(functions, keywords):
     """
     Each function must return a dictionary with these keys:
-        electricity_production_in_kwh_by_year
         electricity_production_cost_by_year
         electricity_internal_distribution_cost_by_year
 
     The keywords dictionary must contain these keys:
         financing_year
         discount_rate_as_percent_of_cash_flow_per_year
+        discounted_consumption_in_kwh
     """
     d = {}
     # Compute
@@ -83,16 +83,11 @@ def prepare_internal_cost(functions, keywords):
         d['electricity_production_cost_by_year'],
         d['electricity_internal_distribution_cost_by_year'],
     ])
-    financing_year = keywords['financing_year']
-    discount_rate = keywords['discount_rate_as_percent_of_cash_flow_per_year']
-    discounted_production_in_kwh = compute_discounted_cash_flow(
-        d['electricity_production_in_kwh_by_year'],
-        financing_year, discount_rate)
     discounted_cost = compute_discounted_cash_flow(
-        cost_by_year, financing_year, discount_rate)
-    levelized_cost = discounted_cost / float(discounted_production_in_kwh)
-    d['electricity_discounted_production_in_kwh'] = \
-        discounted_production_in_kwh
+        cost_by_year, keywords['financing_year'],
+        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
+    levelized_cost = discounted_cost / float(keywords[
+        'discounted_consumption_in_kwh'])
     # Summarize
     d['internal_discounted_cost'] = discounted_cost
     d['internal_levelized_cost'] = levelized_cost

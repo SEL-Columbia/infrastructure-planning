@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from infrastructure_planning.demography.linear import (
     forecast_demographic_using_recent_records)
-from infrastructure_planning.exceptions import MissingData
+from infrastructure_planning.exceptions import InvalidData
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.log import format_summary
 from os.path import join
@@ -25,7 +25,7 @@ def run(
             demographic_by_year_table_year_column,
             demographic_by_year_table_population_column,
             default_yearly_population_growth_percent)
-    except MissingData as e:
+    except InvalidData as e:
         exit('demographic_by_year_table.error = %s' % e)
     demographic_by_year_table_path = join(
         target_folder, 'demographic-by-year.csv')
