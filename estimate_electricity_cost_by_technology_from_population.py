@@ -141,7 +141,7 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
         node_d['proposed_technology'] = proposed_technology
         node_d['proposed_cost_per_connection'] = node_d[
             proposed_technology + '_total_discounted_cost'] / float(node_d[
-                'maximum_connection_count'])
+                'final_connection_count'])
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)

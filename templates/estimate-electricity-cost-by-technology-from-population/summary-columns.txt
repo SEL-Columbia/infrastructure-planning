@@ -1,8 +1,8 @@
 latitude
 longitude
 population
-maximum_connection_count
-maximum_consumption_in_kwh_per_year
+final_connection_count
+final_consumption_in_kwh_per_year
 peak_demand_in_kw
 proposed_technology
 proposed_cost_per_connection

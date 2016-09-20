@@ -42,12 +42,12 @@ def estimate_electricity_internal_distribution_cost(
 
 
 def estimate_solar_mini_grid_panel_cost(
-        maximum_consumption_in_kwh_per_year,
+        final_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         solar_mini_grid_system_loss_as_percent_of_total_production,
         solar_mini_grid_panel_table):
     return estimate_panel_cost(
-        maximum_consumption_in_kwh_per_year,
+        final_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         solar_mini_grid_system_loss_as_percent_of_total_production,
         solar_mini_grid_panel_table)
@@ -80,14 +80,14 @@ def estimate_solar_mini_grid_balance_cost(
 
 
 def estimate_solar_mini_grid_lv_line_cost(
-        maximum_connection_count,
+        final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         solar_mini_grid_lv_line_installation_lm_cost_per_meter,
         solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
         solar_mini_grid_lv_line_lifetime_in_years):
     return estimate_lv_line_cost(
-        maximum_connection_count,
+        final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
         solar_mini_grid_lv_line_installation_lm_cost_per_meter,
@@ -96,12 +96,12 @@ def estimate_solar_mini_grid_lv_line_cost(
 
 
 def estimate_solar_mini_grid_lv_connection_cost(
-        maximum_connection_count,
+        final_connection_count,
         solar_mini_grid_lv_connection_installation_lm_cost_per_connection,
         solar_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
         solar_mini_grid_lv_connection_lifetime_in_years):
     return estimate_lv_connection_cost(
-        maximum_connection_count,
+        final_connection_count,
         solar_mini_grid_lv_connection_installation_lm_cost_per_connection,
         solar_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
         solar_mini_grid_lv_connection_lifetime_in_years)

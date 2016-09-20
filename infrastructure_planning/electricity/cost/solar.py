@@ -2,15 +2,15 @@ from ...production import adjust_for_losses, prepare_actual_system_capacity
 
 
 def estimate_panel_cost(
-        maximum_consumption_in_kwh_per_year,
+        final_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         system_loss_as_percent_of_total_production,
         panel_table):
     # Estimate desired capacity
-    maximum_production_in_kwh_per_year = adjust_for_losses(
-        maximum_consumption_in_kwh_per_year,
+    final_production_in_kwh_per_year = adjust_for_losses(
+        final_consumption_in_kwh_per_year,
         system_loss_as_percent_of_total_production / 100.)
-    desired_system_capacity_in_kw = maximum_production_in_kwh_per_year / float(
+    desired_system_capacity_in_kw = final_production_in_kwh_per_year / float(
         peak_hours_of_sun_per_year)
     # Choose panel type
     return prepare_actual_system_capacity(

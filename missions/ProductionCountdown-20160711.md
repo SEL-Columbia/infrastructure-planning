@@ -185,13 +185,89 @@ We could compute the discounted consumption for illustration purposes.
 
     _ Report consumption for each node
 
+20160920-1045 - 20160920-1100: 15 minutes
+
+After looking at the different uses of maximum and total, it is important to distinguish maximum when we are taking the maximum of a time series.
+
+    _ Change use of maximum to total (e.g. connection count)
+
+An alternative is to use final instead of maximum. This will still capture the concept that the production per year reported is one of many.
+
+    maximum_connection_count
+    maximum_consumption_in_kwh_per_year
+    maximum_consumption_during_peak_hours_in_kwh_per_year
+    maximum_production_in_kwh_per_year
+
+Currently we are using the prefix maximum.
+
+    total_connection_count
+    total_consumption_in_kwh_per_year
+    total_consumption_during_peak_hours_in_kwh_per_year
+    total_production_in_kwh_per_year
+
+If we change the prefix to total, it gives the mistaken connotation that the value is constant each year.
+
+    final_connection_count
+    final_consumption_in_kwh_per_year
+    final_consumption_during_peak_hours_in_kwh_per_year
+    final_production_in_kwh_per_year
+
+If we use final, that opens the possibility of using something other than the maximum and it also captures the sense that the value can change over many years. Let's use final. The only thing is that it is inconsistent with how total is used in the relative values.
+
+    _ consumption_during_peak_hours_as_percent_of_total_consumption
+    _ grid_system_loss_as_percent_of_total_production
+    _ diesel_mini_grid_system_loss_as_percent_of_total_production
+    _ solar_home_system_loss_as_percent_of_total_production
+    _ solar_mini_grid_system_loss_as_percent_of_total_production
+
+Above is how it is currently. It makes sense, but using total is inconsistent with maximum_connection_count or final_connection_count.
+
+    _ consumption_during_peak_hours_as_percent_of_maximum_consumption
+    _ grid_system_loss_as_percent_of_maximum_production
+    _ diesel_mini_grid_system_loss_as_percent_of_maximum_production
+    _ solar_home_system_loss_as_percent_of_maximum_production
+    _ solar_mini_grid_system_loss_as_percent_of_maximum_production
+
+The above gives the false impression that the percent is only relative to the maximum, which it is not.
+
+    consumption_during_peak_hours_as_percent_of_consumption
+    grid_system_loss_as_percent_of_production
+    diesel_mini_grid_system_loss_as_percent_of_production
+    solar_home_system_loss_as_percent_of_production
+    solar_mini_grid_system_loss_as_percent_of_production
+
+Not having any qualifier can be confusing, but not really.
+
+    _ consumption_during_peak_hours_as_percent_of_final_consumption
+    _ grid_system_loss_as_percent_of_final_production
+    _ diesel_mini_grid_system_loss_as_percent_of_final_production
+    _ solar_home_system_loss_as_percent_of_final_production
+    _ solar_mini_grid_system_loss_as_percent_of_final_production
+
+20160921-1315 - 20160920-1345: 30 minutes
+
+I think the decisions are to use final_connection_count and consumption_during_peak_hours_as_percent_of_consumption.
+
+    + Rename maximum_connection_count to final_connection_count
+    + Rename maximum_consumption_in_kwh_per_year to final_consumption_in_kwh_per_year
+    + Rename maximum_consumption_during_peak_hours_in_kwh_per_year to final_consumption_during_peak_hours_in_kwh_per_year
+    + Rename maximum_production_in_kwh_per_year to final_production_in_kwh_per_year
+
+    _ Rename consumption_during_peak_hours_as_percent_of_total_consumption to consumption_during_peak_hours_as_percent_of_consumption
+    _ Rename grid_system_loss_as_percent_of_total_production to grid_system_loss_as_percent_of_production
+    _ Rename diesel_mini_grid_system_loss_as_percent_of_total_production to diesel_mini_grid_system_loss_as_percent_of_production
+    _ Rename solar_home_system_loss_as_percent_of_total_production to solar_home_system_loss_as_percent_of_production
+    _ Rename solar_mini_grid_system_loss_as_percent_of_total_production to solar_mini_grid_system_loss_as_percent_of_production
+
+Actually, consumption_during_peak_hours_as_percent_of_total_consumption is clearer than consumption_during_peak_hours_as_percent_of_consumption, which seems recursive and is confusing. We'll keep the nomenclature for the percentage parameters.
+
 # Tasks
 
 ## Important and easy
 
-    Draft jupyter notebook that starts from the population of a single node
-    Test when there are demand points but no consumption
-    Test when there are no demand points
+    Compute cost per kwh delivered to consumer instead of cost per kwh produced
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
@@ -203,20 +279,23 @@ We could compute the discounted consumption for illustration purposes.
             Compute purchase price per kw
             Pick nearest generator capacity and use those prices per kw
             Round actual capacity to integer
+
+    Test when there are demand points but no consumption
+    Test when there are no demand points
     Add unelectrified option for zero consumption
+
     Report projected population count
-    Report projected household count
+    Report projected connection count
     Need total initial and total recurring costs
     Need intermediate costs like diesel fuel cost per year
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
-    Change use of maximum to total (e.g. connection count)
+
+    Draft jupyter notebook that starts from the population of a single node
 
     Check for required columns like name
-    Test that we only use most recent year if multiple years are given
     Replace geopy geocoding with error message about expected longitude latitude
     Add warning if peak_demand_in_kw is nan or zero
     Use global value if local value is nan
+    Test that we only use most recent year if multiple years are given
 
     Consider having different transformer tables for different locations
     Add acknowledgments to separate tools
@@ -308,6 +387,7 @@ We could compute the discounted consumption for illustration purposes.
     Submit pull request for sequencer
     Separate Coster from Networker and Sequencer
     Separate Aggregator
+        Look at label for node and compute metrics by cluster
     Write positive test
 
 ## Unimportant and easy
@@ -345,7 +425,6 @@ We could compute the discounted consumption for illustration purposes.
     Clean up
         Move grow_exponentially into growth
         Make similar functions consistent with each other
-
     Consider accepting net present value vs consumption curve for energy source X
         Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
     Look through past np errors

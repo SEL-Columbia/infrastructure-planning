@@ -40,12 +40,12 @@ def estimate_electricity_internal_distribution_cost(**keywords):
 
 
 def estimate_solar_home_panel_cost(
-        maximum_consumption_in_kwh_per_year,
+        final_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         solar_home_system_loss_as_percent_of_total_production,
         solar_home_panel_table):
     return estimate_panel_cost(
-        maximum_consumption_in_kwh_per_year,
+        final_consumption_in_kwh_per_year,
         peak_hours_of_sun_per_year,
         solar_home_system_loss_as_percent_of_total_production,
         solar_home_panel_table)
