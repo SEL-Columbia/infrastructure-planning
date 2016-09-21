@@ -1,3 +1,4 @@
+from invisibleroads_macros.math import divide_safely
 from pandas import DataFrame, Series
 
 from ...macros import compute
@@ -62,8 +63,9 @@ def estimate_fuel_cost(
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production / 100.)
-    desired_hours_of_production_by_year = production_in_kwh_by_year / float(
-        diesel_mini_grid_generator_actual_system_capacity_in_kw)
+    desired_hours_of_production_by_year = divide_safely(
+        production_in_kwh_by_year,
+        diesel_mini_grid_generator_actual_system_capacity_in_kw, float('inf'))
     years = production_in_kwh_by_year.index
     minimum_hours_of_production_by_year = Series([
         diesel_mini_grid_generator_minimum_hours_of_production_per_year,

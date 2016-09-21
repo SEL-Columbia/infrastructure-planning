@@ -1,3 +1,6 @@
+from invisibleroads_macros.math import divide_safely
+
+from ...exceptions import ExpectedPositive
 
 
 def estimate_lv_line_cost(
@@ -14,8 +17,9 @@ def estimate_lv_line_cost(
         lv_line_installation_lm_cost_per_meter
     maintenance_lm_cost_per_year = line_length_in_meters * \
         lv_line_maintenance_lm_cost_per_meter_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_line_lifetime_in_years)
+    replacement_lm_cost_per_year = divide_safely(
+        installation_lm_cost, lv_line_lifetime_in_years,
+        ExpectedPositive('lv_line_lifetime_in_years'))
     return {
         'installation_lm_cost': installation_lm_cost,
         'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
@@ -33,8 +37,9 @@ def estimate_lv_connection_cost(
         lv_connection_installation_lm_cost_per_connection
     maintenance_lm_cost_per_year = final_connection_count * \
         lv_connection_maintenance_lm_cost_per_connection_per_year
-    replacement_lm_cost_per_year = \
-        installation_lm_cost / float(lv_connection_lifetime_in_years)
+    replacement_lm_cost_per_year = divide_safely(
+        installation_lm_cost, lv_connection_lifetime_in_years,
+        ExpectedPositive('lv_connection_lifetime_in_years'))
     return {
         'installation_lm_cost': installation_lm_cost,
         'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,

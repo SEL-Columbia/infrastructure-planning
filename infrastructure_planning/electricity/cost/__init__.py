@@ -1,6 +1,7 @@
 import numpy as np
 from collections import defaultdict
 from importlib import import_module
+from invisibleroads_macros.math import divide_safely
 from itertools import product
 from pandas import Series
 
@@ -86,8 +87,8 @@ def prepare_internal_cost(functions, keywords):
     discounted_cost = compute_discounted_cash_flow(
         cost_by_year, keywords['financing_year'],
         keywords['discount_rate_as_percent_of_cash_flow_per_year'])
-    levelized_cost = discounted_cost / float(keywords[
-        'discounted_consumption_in_kwh'])
+    levelized_cost = divide_safely(discounted_cost, keywords[
+        'discounted_consumption_in_kwh'], 0)
     # Summarize
     d['internal_discounted_cost'] = discounted_cost
     d['internal_levelized_cost'] = levelized_cost

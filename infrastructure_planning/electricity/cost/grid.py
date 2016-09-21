@@ -1,6 +1,7 @@
 from geopy.distance import vincenty as get_distance
+from invisibleroads_macros.math import divide_safely
 
-from ...exceptions import InfrastructurePlanningError
+from ...exceptions import ExpectedPositive, InfrastructurePlanningError
 from ...finance.valuation import compute_discounted_cash_flow
 from ...production import adjust_for_losses, prepare_actual_system_capacity
 from .mini_grid import estimate_lv_line_cost, estimate_lv_connection_cost
@@ -81,25 +82,33 @@ def estimate_electricity_internal_distribution_cost(**keywords):
 
 
 def estimate_grid_mv_line_budget(
-        internal_discounted_cost_by_technology, **keywords):
+        internal_discounted_cost_by_technology, line_length_adjustment_factor,
+        financing_year, discount_rate_as_percent_of_cash_flow_per_year,
+        **keywords):
     standalone_cost = min(
         v for k, v in internal_discounted_cost_by_technology.items()
         if k != 'grid')
-    mv_line_budget_in_money = \
+    grid_mv_line_budget_in_money = \
         standalone_cost - internal_discounted_cost_by_technology['grid']
     d = prepare_component_cost_by_year([
         ('mv_line', estimate_grid_mv_line_cost_per_meter),
     ], keywords, prefix='grid_')
     grid_mv_line_discounted_cost_per_meter = compute_discounted_cash_flow(
-        d.pop('cost_by_year'),
-        keywords['financing_year'],
-        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
+        d.pop('cost_by_year'), financing_year,
+        discount_rate_as_percent_of_cash_flow_per_year)
+    grid_mv_line_raw_budget_in_meters = divide_safely(
+        grid_mv_line_budget_in_money,
+        grid_mv_line_discounted_cost_per_meter,
+        ExpectedPositive('grid_mv_line_discounted_cost_per_meter'))
     d['grid_mv_line_discounted_cost_per_meter'] = \
         grid_mv_line_discounted_cost_per_meter
-    d['grid_mv_line_adjusted_budget_in_meters'] = \
-        mv_line_budget_in_money / float(
-            grid_mv_line_discounted_cost_per_meter) / float(
-                keywords['line_length_adjustment_factor'])
+    # TODO: Update networker to accept line_length_adjustment_factor
+    # Divide line distance by factor here, which should be equivalent to
+    # multiplying line distance by factor when computing the network
+    d['grid_mv_line_adjusted_budget_in_meters'] = divide_safely(
+        grid_mv_line_raw_budget_in_meters,
+        line_length_adjustment_factor,
+        ExpectedPositive('line_length_adjustment_factor'))
     return d
 
 
@@ -107,9 +116,10 @@ def estimate_grid_mv_line_cost_per_meter(
         grid_mv_line_installation_lm_cost_per_meter,
         grid_mv_line_maintenance_lm_cost_per_meter_per_year,
         grid_mv_line_lifetime_in_years):
-    grid_mv_line_replacement_lm_cost_per_year_per_meter = \
-        grid_mv_line_installation_lm_cost_per_meter / float(
-            grid_mv_line_lifetime_in_years)
+    grid_mv_line_replacement_lm_cost_per_year_per_meter = divide_safely(
+        grid_mv_line_installation_lm_cost_per_meter,
+        grid_mv_line_lifetime_in_years,
+        ExpectedPositive('grid_mv_line_lifetime_in_years'))
     return {
         'installation_lm_cost_per_meter':
             grid_mv_line_installation_lm_cost_per_meter,

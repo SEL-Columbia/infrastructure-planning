@@ -1,3 +1,4 @@
+from invisibleroads_macros.math import divide_safely
 from pandas import DataFrame, Series, concat, isnull, merge
 
 from ...growth import get_default_slope, get_future_years
@@ -15,8 +16,8 @@ def estimate_consumption_from_connection_type(
     d = {}
     connection_count_by_year = Series(0, index=population_by_year.index)
     consumption_by_year = Series(0, index=population_by_year.index)
-    estimated_household_count = population_by_year / float(
-        number_of_people_per_household)
+    estimated_household_count = divide_safely(
+        population_by_year, number_of_people_per_household, 0)
     for row_index, row in connection_type_table.iterrows():
         connection_type = row['connection_type']
         connection_count = _get_connection_count(
@@ -40,8 +41,8 @@ def estimate_consumption_from_connection_count(
         population_by_year,
         number_of_people_per_connection,
         consumption_in_kwh_per_year_per_connection):
-    connection_count_by_year = population_by_year / float(
-        number_of_people_per_connection)
+    connection_count_by_year = divide_safely(
+        population_by_year, number_of_people_per_connection, 0)
     consumption_by_year = consumption_in_kwh_per_year_per_connection * \
         connection_count_by_year
     return {

@@ -3,20 +3,6 @@ from dateutil.parser import parse as parse_date
 from scipy.optimize import fsolve
 
 
-def compute_levelized_cost(time_production_cost_packs, discount_rate_percent):
-    # TODO: Rename time to period
-    time_production_cost_array = np.array(time_production_cost_packs)
-    time_production_packs = time_production_cost_array[:, [0, 1]]
-    time_cost_packs = time_production_cost_array[:, [0, 2]]
-
-    discounted_cost = compute_discounted_cash_flow_xxx(
-        time_cost_packs, discount_rate_percent)
-    discounted_production = compute_discounted_cash_flow_xxx(
-        time_production_packs, discount_rate_percent)
-
-    return discounted_cost / discounted_production
-
-
 def compute_discounted_cash_flow(
         cash_flow_by_year, financing_year, discount_rate_as_percent):
     'Discount cash flow starting from the year of financing'

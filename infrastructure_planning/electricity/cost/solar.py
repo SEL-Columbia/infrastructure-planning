@@ -1,6 +1,6 @@
 from invisibleroads_macros.math import divide_safely
 
-from ...exceptions import InvalidData
+from ...exceptions import ExpectedPositive
 from ...production import adjust_for_losses, prepare_actual_system_capacity
 
 
@@ -36,8 +36,8 @@ def estimate_battery_cost(
     d['maintenance_lm_cost_per_year'] = battery_storage_in_kwh * \
         battery_maintenance_lm_cost_per_kwh_per_year
     d['replacement_lm_cost_per_year'] = divide_safely(
-        installation_lm_cost, battery_lifetime_in_years, InvalidData(
-            'battery_lifetime_in_years must be greater than zero'))
+        installation_lm_cost, battery_lifetime_in_years,
+        ExpectedPositive('battery_lifetime_in_years'))
     return d
 
 
@@ -54,6 +54,6 @@ def estimate_balance_cost(
         panel_actual_system_capacity_in_kw * \
         balance_maintenance_lm_cost_per_panel_kw_per_year
     d['replacement_lm_cost_per_year'] = divide_safely(
-        installation_lm_cost, balance_lifetime_in_years, InvalidData(
-            'balance_lifetime_in_years must be greater than zero'))
+        installation_lm_cost, balance_lifetime_in_years,
+        ExpectedPositive('balance_lifetime_in_years'))
     return d

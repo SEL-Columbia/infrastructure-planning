@@ -314,7 +314,21 @@ Then we choose between option 1 and option 2. We choose option 2.
 
 20160920-1815 - 20160920-1845: 30 minutes
 
-    Replace division by float(x) with divide_safely
+20160921-1800 - 20160921-1830: 30 minutes
+
+    class ExpectedPositive
+    _ class ExpectedNonZero
+    _ class ExpectedGreaterThanZero
+    _ class MustBeGreaterThanZero
+    _ class NeedGreaterThanZero
+    _ class BeGreaterThanZero
+    _ class NotGreaterThanZero
+
+    + Replace division by float(x) with divide_safely
+    + Check divide_safely uses to make sure that we are not requiring parameters that could legitimately be blank
+    + Raise ExpectedPositive instead of InvalidData
+
+    Convert compute-levelized-cost-per-kwh-consumed into notebook
 
     Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
     Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
@@ -332,6 +346,7 @@ Then we choose between option 1 and option 2. We choose option 2.
 
 ## Important and easy
 
+    Consider having fuel efficiency vary by generator
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
@@ -458,6 +473,9 @@ Then we choose between option 1 and option 2. We choose option 2.
 
 ## Unimportant and easy
 
+    Make sure that capacities in tables are greater than zero
+    Make sure that lifetimes in tables are greater than zero
+
     Show overrided columns
     Let user download example table for each table
     Show simple map in addition to satellite map
@@ -494,3 +512,5 @@ Then we choose between option 1 and option 2. We choose option 2.
     Consider accepting net present value vs consumption curve for energy source X
         Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
     Look through past np errors
+
+    Modify networker to accept line_length_adjustment_factor
