@@ -325,10 +325,8 @@ Then we choose between option 1 and option 2. We choose option 2.
     _ class NotGreaterThanZero
 
     + Replace division by float(x) with divide_safely
-    + Check divide_safely uses to make sure that we are not requiring parameters that could legitimately be blank
+    + Check divide_safely calls to accept cases where denominator could legitimately be blank
     + Raise ExpectedPositive instead of InvalidData
-
-    Convert compute-levelized-cost-per-kwh-consumed into notebook
 
     Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
     Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
@@ -346,7 +344,6 @@ Then we choose between option 1 and option 2. We choose option 2.
 
 ## Important and easy
 
-    Consider having fuel efficiency vary by generator
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
@@ -472,6 +469,9 @@ Then we choose between option 1 and option 2. We choose option 2.
     Write positive test
 
 ## Unimportant and easy
+
+    Convert compute-levelized-cost-per-kwh-consumed into notebook
+    Consider having fuel efficiency vary by generator
 
     Make sure that capacities in tables are greater than zero
     Make sure that lifetimes in tables are greater than zero
