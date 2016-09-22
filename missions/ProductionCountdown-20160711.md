@@ -431,10 +431,8 @@ It looks like we need to aggregate consumption grouped by technology. Okay we fi
         /properties/lines-existing.shp
         /properties/lines-proposed.shp
         /properties/costs.csv
-        /properties/examples.csv
-        /properties/glossary.csv
+        /properties/summary.csv
         /interface/map.csv
-        /interface/summary.csv
         /interface/details.csv
 
     Include essential properties in shapefile
