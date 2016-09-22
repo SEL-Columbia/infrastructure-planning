@@ -20,7 +20,7 @@ def estimate_internal_cost_by_technology(selected_technologies, **keywords):
     # Summarize
     keys = [
         'internal_discounted_cost',
-        'internal_levelized_cost',
+        'internal_levelized_cost_per_kwh_consumed',
     ]
     for technology, k in product(selected_technologies, keys):
         d['%s_by_technology' % k][technology] = d['%s_%s' % (technology, k)]
@@ -91,5 +91,5 @@ def prepare_internal_cost(functions, keywords):
         'discounted_consumption_in_kwh'], 0)
     # Summarize
     d['internal_discounted_cost'] = discounted_cost
-    d['internal_levelized_cost'] = levelized_cost
+    d['internal_levelized_cost_per_kwh_consumed'] = levelized_cost
     return d

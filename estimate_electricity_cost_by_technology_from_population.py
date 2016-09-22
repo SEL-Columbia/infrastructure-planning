@@ -128,10 +128,9 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             discounted_cost = node_d[
                 technology + '_internal_discounted_cost'] + node_d[
                 technology + '_external_discounted_cost']
-            levelized_cost = divide_safely(
-                discounted_cost, discounted_consumption, 0)
-            node_d[technology + '_total_discounted_cost'] = discounted_cost
-            node_d[technology + '_total_levelized_cost'] = levelized_cost
+            node_d[technology + '_local_discounted_cost'] = discounted_cost
+            node_d[technology + '_local_levelized_cost_per_kwh_consumed'] = \
+                divide_safely(discounted_cost, discounted_consumption, 0)
             if technology != 'grid' and discounted_cost < best_standalone_cost:
                 best_standalone_cost = discounted_cost
                 best_standalone_technology = technology
@@ -139,31 +138,34 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             proposed_technology = 'grid'
         else:
             proposed_technology = best_standalone_technology
-            node_d['grid_total_discounted_cost'] = ''
-            node_d['grid_total_levelized_cost'] = ''
+            node_d['grid_local_discounted_cost'] = ''
+            node_d['grid_local_levelized_cost_per_kwh_consumed'] = ''
         node_d['proposed_technology'] = proposed_technology
         node_d['proposed_cost_per_connection'] = divide_safely(
-            node_d[proposed_technology + '_total_discounted_cost'],
+            node_d[proposed_technology + '_local_discounted_cost'],
             node_d['final_connection_count'], 0)
 
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
-    total_discounted_consumption = 0
+    discounted_consumption_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
         technology = node_d['proposed_technology']
         count_by_technology[technology] += 1
         discounted_cost_by_technology[technology] += node_d[
-            technology + '_total_discounted_cost']
-        total_discounted_consumption += node_d['discounted_consumption_in_kwh']
+            technology + '_local_discounted_cost']
+        discounted_consumption_by_technology[technology] += node_d[
+            'discounted_consumption_in_kwh']
     levelized_cost_by_technology = OrderedDict()
     for technology in selected_technologies:
         discounted_cost = discounted_cost_by_technology[
             technology]
+        discounted_consumption = discounted_consumption_by_technology[
+            technology]
         levelized_cost_by_technology[technology] = divide_safely(
-            discounted_cost, total_discounted_consumption, 0)
+            discounted_cost, discounted_consumption, 0)
     return {
         'count_by_technology': count_by_technology,
         'discounted_cost_by_technology': discounted_cost_by_technology,
@@ -248,7 +250,7 @@ def run(g):
         'Peak Demand (kW)',
         'Proposed MV Line Length (m)',
         'Proposed Technology',
-        'Levelized Cost',
+        'Levelized Cost Per kWh Consumed',
         'Connection Order',
         'WKT',
         'FillColor',
@@ -266,7 +268,8 @@ def run(g):
             'Proposed MV Line Length (m)': node_d[
                 'grid_mv_line_adjusted_length_in_meters'],
             'Proposed Technology': format_technology(technology),
-            'Levelized Cost': node_d[technology + '_total_levelized_cost'],
+            'Levelized Cost Per kWh Consumed': node_d[
+                technology + '_local_levelized_cost_per_kwh_consumed'],
             'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
@@ -316,7 +319,8 @@ def run(g):
     table = concat((Series(g[key]) for key in keys), axis=1)
     table.index.name = 'Technology'
     table.index = [format_technology(x) for x in table.index]
-    table.columns = ['Discounted Cost', 'Levelized Cost', 'Count']
+    table.columns = [
+        'Discounted Cost', 'Levelized Cost Per kWh Consumed', 'Count']
     table_path = join(target_folder, 'executive_summary.csv')
     table.to_csv(table_path)
     d['executive_summary_table_path'] = table_path
@@ -344,7 +348,8 @@ def run(g):
             continue  # We have a fake node
         columns = [node_d['name'], node_d.get('order', '')]
         columns.extend(node_d[
-            x + '_total_levelized_cost'] for x in technologies)
+            x + '_local_levelized_cost_per_kwh_consumed'
+        ] for x in technologies)
         columns.append(format_technology(node_d['proposed_technology']))
         rows.append(columns)
     table_path = join(target_folder, 'levelized_cost_by_technology.csv')

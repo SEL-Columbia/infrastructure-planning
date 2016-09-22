@@ -334,17 +334,25 @@ Then we choose between option 1 and option 2. We choose option 2.
     _ grid_total_levelized_cost
     _ grid_local_cost_per_kwh_consumed
 
-    Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
-    Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
-    Rename solar_home_total_levelized_cost to solar_home_local_levelized_cost_per_kwh_consumed
-    Rename solar_mini_grid_total_levelized_cost to solar_mini_grid_local_levelized_cost_per_kwh_consumed
+20160922-1730 - 20160922-1800: 30 minutes
 
-    Rename grid_total_discounted_cost to grid_local_discounted_cost
-    Rename diesel_mini_grid_total_discounted_cost to diesel_mini_grid_local_discounted_cost
-    Rename solar_home_total_discounted_cost to solar_home_local_discounted_cost
-    Rename solar_mini_grid_total_discounted_cost to solar_mini_grid_local_discounted_cost
+    + Convert compute-levelized-cost-per-kwh-consumed into notebook
 
-    Compute cost per kwh delivered to consumer instead of cost per kwh produced
+    + Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
+    + Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
+    + Rename solar_home_total_levelized_cost to solar_home_local_levelized_cost_per_kwh_consumed
+    + Rename solar_mini_grid_total_levelized_cost to solar_mini_grid_local_levelized_cost_per_kwh_consumed
+
+    + Rename grid_total_discounted_cost to grid_local_discounted_cost
+    + Rename diesel_mini_grid_total_discounted_cost to diesel_mini_grid_local_discounted_cost
+    + Rename solar_home_total_discounted_cost to solar_home_local_discounted_cost
+    + Rename solar_mini_grid_total_discounted_cost to solar_mini_grid_local_discounted_cost
+
+20160922-1930 - 20160922-1945: 15 minutes
+
+It looks like we need to aggregate consumption grouped by technology. Okay we fixed that. We should really add some numeric spot checks.
+
+    + Compute cost per kwh delivered to consumer instead of cost per kwh produced
 
 # Tasks
 
@@ -476,7 +484,6 @@ Then we choose between option 1 and option 2. We choose option 2.
 
 ## Unimportant and easy
 
-    Convert compute-levelized-cost-per-kwh-consumed into notebook
     Consider having fuel efficiency vary by generator
 
     Make sure that capacities in tables are greater than zero
