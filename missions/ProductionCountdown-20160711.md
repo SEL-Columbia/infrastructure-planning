@@ -328,6 +328,12 @@ Then we choose between option 1 and option 2. We choose option 2.
     + Check divide_safely calls to accept cases where denominator could legitimately be blank
     + Raise ExpectedPositive instead of InvalidData
 
+20160922-1115 - 20160922-1145: 30 minutes
+
+    grid_local_levelized_cost_per_kwh_consumed
+    _ grid_total_levelized_cost
+    _ grid_local_cost_per_kwh_consumed
+
     Rename grid_total_levelized_cost to grid_local_levelized_cost_per_kwh_consumed
     Rename diesel_mini_grid_total_levelized_cost to diesel_mini_grid_local_levelized_cost_per_kwh_consumed
     Rename solar_home_total_levelized_cost to solar_home_local_levelized_cost_per_kwh_consumed
@@ -348,7 +354,7 @@ Then we choose between option 1 and option 2. We choose option 2.
         Update system size algorithm
             Have user specify generator capacity
             Have user specify generator purchase price
-            Have user specify generator installation cost per kw
+            Have user specify generator installation cost as fraction of purchase price
             Have user specify maintenance cost per year as fraction of purchase price
             Get desired system capacity
             Add system capacity safety factor
