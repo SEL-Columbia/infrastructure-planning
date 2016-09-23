@@ -20,9 +20,9 @@ def estimate_external_cost():
 
 def estimate_electricity_production_cost(**keywords):
     d = prepare_component_cost_by_year([
-        ('generator', estimate_generator_cost),
+        ('generator', estimate_diesel_mini_grid_generator_cost),
     ], keywords, prefix='diesel_mini_grid_')
-    d.update(compute(estimate_fuel_cost, keywords, d))
+    d.update(compute(estimate_diesel_mini_grid_fuel_cost, keywords, d))
     d['electricity_production_cost_by_year'] = d.pop('cost_by_year') + d[
         'diesel_mini_grid_fuel_cost_by_year']
     return d
@@ -38,7 +38,7 @@ def estimate_electricity_internal_distribution_cost(
     return d
 
 
-def estimate_generator_cost(
+def estimate_diesel_mini_grid_generator_cost(
         peak_demand_in_kw,
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_generator_table):
@@ -52,7 +52,7 @@ def estimate_generator_cost(
         diesel_mini_grid_generator_table, 'capacity_in_kw')
 
 
-def estimate_fuel_cost(
+def estimate_diesel_mini_grid_fuel_cost(
         consumption_in_kwh_by_year,
         diesel_mini_grid_system_loss_as_percent_of_total_production,
         diesel_mini_grid_generator_actual_system_capacity_in_kw,

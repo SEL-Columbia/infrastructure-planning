@@ -354,9 +354,104 @@ It looks like we need to aggregate consumption grouped by technology. Okay we fi
 
     + Compute cost per kwh delivered to consumer instead of cost per kwh produced
 
-# Tasks
+20160923-1130 - 20160923-1200: 30 minutes
 
-## Important and easy
+    + Look at where exactly we are sizing system capacity
+    + Review how prepare_component_cost_by_year works
+    + Review the need for get_by_prefix
+
+The issue is that there will be material costs during maintenance and replacement.
+
+    purchase price
+    _ purchase cost
+    _ raw cost
+    _ machine cost
+    _ material cost (there could be material costs during maintenance and replacement)
+    _ sale cost
+    _ initial material cost
+    _ installation price
+    installation cost
+    maintenance cost
+    replacement cost
+
+The expression "purchase price" seems to be standard, but it is inconsistent with the use of the word cost. Perhaps we can use a synonym to purchase.
+
+I think what is instructive is [this article](http://www.investopedia.com/ask/answers/101314/what-difference-between-cost-and-price.asp) that says that price is the amount a business pays for the raw product and costs are the expenses incurred in bringing the product to market. In that case, our use of purchase price and installation cost is correct from the perspective of the utility, which is purchasing a generator and incurring the cost of installing and maintaining it.
+
+    + Decide nomenclature
+
+20160923-1230 - 20160923-1300: 30 minutes
+
+Here are the anticipated changes:
+
+    _ estimate_system_cost
+    _ estimate_system_costs
+    _ prepare_system_costs
+    purchase price
+    installation cost
+    maintenance cost
+    replacement cost
+
+    + Think through anticipated changes
+    + Decide columns in table
+
+        capacity in kw or kva
+        purchase price
+        installation cost as percent of purchase price
+        maintenance cost per year as percent of purchase price
+        lifetime in years
+
+    + Decide return values of prepare_system_cost
+
+        system_capacity_in_kw or kva
+        purchase price
+        installation cost
+        maintenance cost per year
+        replacement cost per year
+
+    + Record anticipated changes
+
+20160923-1500 - 20160923-1530: 30 minutes
+
+    Draft system capacity algorithm
+
+
+
+        Add purchase price to initial costs in prepare_component_cost_by_year
+        Rename prepare_actual_system_capacity to prepare_system_cost
+        Update estimate_lv_line_cost to include purchase price
+        Update estimate_lv_connection_cost to include purchase price
+        Update estimate_grid_mv_line_cost_per_meter
+        Update estimate_diesel_mini_grid_fuel_cost
+        Update estimate_battery_cost
+        Update estimate_balance_cost
+        Update every use of prepare_component_cost_by_year for consistency
+            purchase price
+            installation cost
+            maintenance cost per year
+            replacement cost per year
+
+            estimate_grid_mv_transformer_cost (fixed by prepare_system_cost)
+            estimate_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+            estimate_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+            estimate_grid_mv_line_cost_per_meter
+            estimate_generator_cost (fixed by prepare_system_cost)
+            estimate_diesel_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+            estimate_diesel_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+            estimate_solar_mini_grid_panel_cost (fixed by estimate_system_cost)
+            estimate_solar_mini_grid_battery_cost (fixed by estimate_battery_cost)
+            estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
+            estimate_solar_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+            estimate_solar_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+            estimate_solar_home_panel_cost (fixed by prepare_system_cost)
+            estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
+            estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
+        Update columns.txt with new names
+        Update parameter names in cc.ini
+
+    Name initial variables
+    Draft table
+    Specify final variables
 
     Fix oversizing system capacity
         Update system size algorithm
@@ -365,10 +460,15 @@ It looks like we need to aggregate consumption grouped by technology. Okay we fi
             Have user specify generator installation cost as fraction of purchase price
             Have user specify maintenance cost per year as fraction of purchase price
             Get desired system capacity
-            Add system capacity safety factor
+            _ Add system capacity safety factor
             Compute purchase price per kw
             Pick nearest generator capacity and use those prices per kw
             Round actual capacity to integer
+
+# Tasks
+
+## Important and easy
+
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
 
