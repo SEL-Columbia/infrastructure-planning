@@ -482,7 +482,10 @@ def load_arguments(value_by_key):
     source_folder = value_by_key.pop('source_folder')
     g = json.load(open(configuration_path)) if configuration_path else {}
     # Command-line arguments override configuration arguments
-    g = merge_dictionaries(g, value_by_key)
+    for k, v in value_by_key.items():
+        if v is None:
+            continue
+        g[k] = v
     # Resolve relative paths using source_folder
     if source_folder:
         for k, v in g.items():
@@ -557,8 +560,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '-o', '--target_folder',
         metavar='FOLDER', type=make_folder)
-    argument_parser.add_argument(
-        '--json', action='store_true')
 
     argument_parser.add_argument(
         '--selected_technologies_text_path',
@@ -763,9 +764,6 @@ if __name__ == '__main__':
 
     args = argument_parser.parse_args()
     g = load_arguments(args.__dict__)
-    if g.pop('json'):
-        print(json.dumps(g, indent=2, separators=(',', ': '), sort_keys=True))
-        exit()
     save_arguments(g, __file__)
     try:
         g = load_files(g)
