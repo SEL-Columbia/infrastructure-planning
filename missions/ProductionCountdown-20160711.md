@@ -420,7 +420,8 @@ Here are the anticipated changes:
 
 I think this is too complicated.
 
-    Send sequencer pull request
+    + Send sequencer pull request
+    + Submit pull request for sequencer
 
 
 
@@ -585,7 +586,6 @@ I think this is too complicated.
     Convert tools into jupyter notebooks
     Add specification for model to jupyter notebooks
 
-    Submit pull request for sequencer
     Separate Coster from Networker and Sequencer
     Separate Aggregator
         Look at label for node and compute metrics by cluster
