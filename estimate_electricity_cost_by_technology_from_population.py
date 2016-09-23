@@ -105,8 +105,9 @@ def sequence_total_mv_line_network(target_folder, infrastructure_graph):
     node_table_path = join(target_folder, 'nodes-sequencer.csv')
     node_table.to_csv(node_table_path)
     edge_shapefile_path = join(target_folder, 'edges.shp')
-    nwp = NetworkPlan(
-        edge_shapefile_path, node_table_path, prioritize='population')
+    nwp = NetworkPlan.from_files(
+        edge_shapefile_path, node_table_path, prioritize='population',
+        proj='+proj=longlat +datum=WGS84 +no_defs')
     model = EnergyMaximizeReturn(nwp)
     model.sequence()
     order_series = model.output_frame['Sequence..Far.sighted.sequence']

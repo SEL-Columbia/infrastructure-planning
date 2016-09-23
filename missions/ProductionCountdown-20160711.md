@@ -413,6 +413,17 @@ Here are the anticipated changes:
 
 20160923-1500 - 20160923-1530: 30 minutes
 
+20160923-1600 - 20160923-1630: 30 minutes
+
+    _ Get complete diff between the two versions
+    _ Select which things we need to include
+
+I think this is too complicated.
+
+    Send sequencer pull request
+
+
+
     Draft system capacity algorithm
 
 
