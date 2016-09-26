@@ -152,11 +152,14 @@ Low voltage lines distribute electricity over small distances.
 * Recurring Replacement Cost
     * Divide the installation cost by the lifetime of LV line.
 
-#### Grid Low Voltage Line Installation Labor and Material Cost per Meter
-{grid_lv_line_installation_lm_cost_per_meter}
+#### Grid Low Voltage Line Raw Cost per Meter
+{grid_lv_line_raw_cost_per_meter}
 
-#### Grid Low Voltage Line Maintenance Labor and Material Cost per Meter per Year
-{grid_lv_line_maintenance_lm_cost_per_meter_per_year}
+#### Grid Low Voltage Line Installation Cost as Percent of Raw Cost
+{grid_lv_line_installation_cost_as_percent_of_raw_cost}
+
+#### Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
+{grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Grid Low Voltage Line Lifetime in Years
 {grid_lv_line_lifetime_in_years}
@@ -218,11 +221,14 @@ Generators consume fuel to produce electricity.
 ### Diesel Mini Grid Low Voltage Line
 The cost model is identical to grid low voltage line.
 
-#### Diesel Mini Grid Low Voltage Line Installation Labor and Material Cost per Meter
-{diesel_mini_grid_lv_line_installation_lm_cost_per_meter}
+#### Diesel Mini Grid Low Voltage Line Raw Cost per Meter
+{diesel_mini_grid_lv_line_raw_cost_per_meter}
 
-#### Diesel Mini Grid Low Voltage Line Maintenance Labor and Material Cost per Meter per Year
-{diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year}
+#### Diesel Mini Grid Low Voltage Line Installation Cost as Percent of Raw Cost
+{diesel_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost}
+
+#### Diesel Mini Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
+{diesel_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Diesel Mini Grid Low Voltage Line Lifetime in Years
 {diesel_mini_grid_lv_line_lifetime_in_years}
@@ -341,11 +347,14 @@ Balance costs are proportional to panel costs.
 ### Solar Mini Grid Low Voltage Line
 The cost model is identical to grid low voltage line.
 
-#### Solar Mini Grid Low Voltage Line Installation Labor and Material Cost per Meter
-{solar_mini_grid_lv_line_installation_lm_cost_per_meter}
+#### Solar Mini Grid Low Voltage Line Raw Cost per Meter
+{solar_mini_grid_lv_line_raw_cost_per_meter}
 
-#### Solar Mini Grid Low Voltage Line Maintenance Labor and Material Cost per Meter per Year
-{solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year}
+#### Solar Mini Grid Low Voltage Line Installation Cost as Percent of Raw Cost
+{solar_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Mini Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
+{solar_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Mini Grid Low Voltage Line Lifetime in Years
 {solar_mini_grid_lv_line_lifetime_in_years}

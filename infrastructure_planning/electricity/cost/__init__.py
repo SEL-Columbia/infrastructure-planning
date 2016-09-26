@@ -53,6 +53,7 @@ def prepare_component_cost_by_year(component_packs, keywords, prefix):
             estimate_component_cost, keywords, d, prefix=component_prefix)
         # Add initial costs
         cost_by_year_index[0] += \
+            get_by_prefix(v_by_k, component_prefix + 'raw') + \
             get_by_prefix(v_by_k, component_prefix + 'installation')
         # Add recurring costs
         cost_by_year_index[1:] += \

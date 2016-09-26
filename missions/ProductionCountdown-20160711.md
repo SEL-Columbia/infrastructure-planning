@@ -396,15 +396,15 @@ Here are the anticipated changes:
     + Decide columns in table
 
         capacity in kw or kva
-        purchase price
-        installation cost as percent of purchase price
-        maintenance cost per year as percent of purchase price
+        raw cost
+        installation cost as percent of raw cost
+        maintenance cost per year as percent of raw cost
         lifetime in years
 
     + Decide return values of prepare_system_cost
 
         system_capacity_in_kw or kva
-        purchase price
+        raw cost
         installation cost
         maintenance cost per year
         replacement cost per year
@@ -423,22 +423,40 @@ I think this is too complicated.
     + Send sequencer pull request
     + Submit pull request for sequencer
 
+20160926-1600 - 20160926-1630: 30 minutes
 
+20160926-1700 - 20160926-1730: 30 minutes
+
+20160926-1745 - 20160926-1815: 30 minutes
+
+    + Rename prepare_actual_system_capacity to prepare_system_cost
+    + Add raw cost to initial costs in prepare_component_cost_by_year
+
+    _ lv_line_item_cost_per_meter
+    _ lv_line_purchase_price_per_meter
+    _ lv_line_purchase_cost_per_meter
+    _ lv_line_product_cost_per_meter
+    _ lv_line_material_cost_per_meter
+    lv_line_raw_cost_per_meter
+    _ lv_line_base_cost_per_meter
+    _ lv_line_raw_material_cost_per_meter
+
+    + Update estimate_lv_line_cost to include raw cost and percents
+    + Add lv_line_raw_cost_per_meter to parameters
+    + Use lv_line_installation_cost_as_percent_of_raw_cost
+        + Replace lv_line_installation_lm_cost_per_meter
+    + Use lv_line_maintenance_cost_per_year_as_percent_of_raw_cost
+        + Replace lv_line_maintenance_lm_cost_per_meter_per_year
 
     Draft system capacity algorithm
 
-
-
-        Add purchase price to initial costs in prepare_component_cost_by_year
-        Rename prepare_actual_system_capacity to prepare_system_cost
-        Update estimate_lv_line_cost to include purchase price
-        Update estimate_lv_connection_cost to include purchase price
+        Update estimate_lv_connection_cost to include raw cost
         Update estimate_grid_mv_line_cost_per_meter
         Update estimate_diesel_mini_grid_fuel_cost
         Update estimate_battery_cost
         Update estimate_balance_cost
         Update every use of prepare_component_cost_by_year for consistency
-            purchase price
+            raw cost
             installation cost
             maintenance cost per year
             replacement cost per year
@@ -460,6 +478,7 @@ I think this is too complicated.
             estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
         Update columns.txt with new names
         Update parameter names in cc.ini
+        Update explanation text in tool.md
 
     Name initial variables
     Draft table
@@ -468,14 +487,16 @@ I think this is too complicated.
     Fix oversizing system capacity
         Update system size algorithm
             Have user specify generator capacity
-            Have user specify generator purchase price
-            Have user specify generator installation cost as fraction of purchase price
-            Have user specify maintenance cost per year as fraction of purchase price
+            Have user specify generator raw cost
+            Have user specify generator installation cost as fraction of raw cost
+            Have user specify maintenance cost per year as fraction of raw cost
             Get desired system capacity
             _ Add system capacity safety factor
-            Compute purchase price per kw
-            Pick nearest generator capacity and use those prices per kw
+            Compute raw cost per kw
+            Pick nearest generator capacity and use those costs per kw
             Round actual capacity to integer
+
+    Update dummy.json
 
 # Tasks
 
@@ -618,8 +639,8 @@ I think this is too complicated.
     Cite "CIA World Factbook" https://www.cia.gov/library/publications/the-world-factbook/fields/2002.html
     Cite "GDP growth (annual %)" http://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG
     Cite "Electric Sales, Revenue, and Average Price"
-        http://www.eia.gov/electricity/sales_revenue_price/index.cfm
-        http://www.eia.gov/electricity/sales_revenue_price/xls/table10.xls
+        http://www.eia.gov/electricity/sales_revenue_cost/index.cfm
+        http://www.eia.gov/electricity/sales_revenue_cost/xls/table10.xls
 
     Update compute-discounted-cost
         Define loan_year in compute discounted cost
@@ -639,4 +660,3 @@ I think this is too complicated.
     Look through past np errors
 
     Modify networker to accept line_length_adjustment_factor
->>>>>>> 2.1.0

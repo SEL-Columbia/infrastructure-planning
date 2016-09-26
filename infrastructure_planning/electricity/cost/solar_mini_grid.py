@@ -83,15 +83,17 @@ def estimate_solar_mini_grid_lv_line_cost(
         final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
-        solar_mini_grid_lv_line_installation_lm_cost_per_meter,
-        solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        solar_mini_grid_lv_line_raw_cost_per_meter,
+        solar_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost,
+        solar_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost,  # noqa
         solar_mini_grid_lv_line_lifetime_in_years):
     return estimate_lv_line_cost(
         final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
-        solar_mini_grid_lv_line_installation_lm_cost_per_meter,
-        solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        solar_mini_grid_lv_line_raw_cost_per_meter,
+        solar_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost,
+        solar_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost,  # noqa
         solar_mini_grid_lv_line_lifetime_in_years)
 
 

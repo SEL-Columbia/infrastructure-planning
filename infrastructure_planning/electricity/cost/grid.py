@@ -3,7 +3,7 @@ from invisibleroads_macros.math import divide_safely
 
 from ...exceptions import ExpectedPositive, InfrastructurePlanningError
 from ...finance.valuation import compute_discounted_cash_flow
-from ...production import adjust_for_losses, prepare_actual_system_capacity
+from ...production import adjust_for_losses, prepare_system_cost
 from .mini_grid import estimate_lv_line_cost, estimate_lv_connection_cost
 from . import prepare_component_cost_by_year, prepare_internal_cost
 
@@ -141,7 +141,7 @@ def estimate_grid_mv_transformer_cost(
         grid_system_loss_as_percent_of_total_production / 100.,
         1 - grid_mv_transformer_load_power_factor)
     # Choose transformer type
-    return prepare_actual_system_capacity(
+    return prepare_system_cost(
         desired_system_capacity_in_kva,
         grid_mv_transformer_table, 'capacity_in_kva')
 
@@ -150,15 +150,17 @@ def estimate_grid_lv_line_cost(
         final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
-        grid_lv_line_installation_lm_cost_per_meter,
-        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_lv_line_raw_cost_per_meter,
+        grid_lv_line_installation_cost_as_percent_of_raw_cost,
+        grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
         grid_lv_line_lifetime_in_years):
     return estimate_lv_line_cost(
         final_connection_count,
         line_length_adjustment_factor,
         average_distance_between_buildings_in_meters,
-        grid_lv_line_installation_lm_cost_per_meter,
-        grid_lv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_lv_line_raw_cost_per_meter,
+        grid_lv_line_installation_cost_as_percent_of_raw_cost,
+        grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
         grid_lv_line_lifetime_in_years)
 
 

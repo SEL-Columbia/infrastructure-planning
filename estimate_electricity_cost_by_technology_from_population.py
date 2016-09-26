@@ -637,10 +637,13 @@ if __name__ == '__main__':
         '--grid_mv_transformer_table_path',
         metavar='PATH')
     argument_parser.add_argument(
-        '--grid_lv_line_installation_lm_cost_per_meter',
+        '--grid_lv_line_raw_cost_per_meter',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        '--grid_lv_line_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_lv_line_lifetime_in_years',
@@ -671,10 +674,13 @@ if __name__ == '__main__':
         '--diesel_mini_grid_fuel_cost_per_liter',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--diesel_mini_grid_lv_line_installation_lm_cost_per_meter',
+        '--diesel_mini_grid_lv_line_raw_cost_per_meter',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--diesel_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        '--diesel_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--diesel_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--diesel_mini_grid_lv_line_lifetime_in_years',
@@ -745,10 +751,13 @@ if __name__ == '__main__':
         '--solar_mini_grid_balance_lifetime_in_years',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_lv_line_installation_lm_cost_per_meter',
+        '--solar_mini_grid_lv_line_raw_cost_per_meter',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_lv_line_maintenance_lm_cost_per_meter_per_year',
+        '--solar_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_mini_grid_lv_line_lifetime_in_years',

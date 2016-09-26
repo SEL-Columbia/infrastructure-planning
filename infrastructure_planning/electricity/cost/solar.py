@@ -1,7 +1,7 @@
 from invisibleroads_macros.math import divide_safely
 
 from ...exceptions import ExpectedPositive
-from ...production import adjust_for_losses, prepare_actual_system_capacity
+from ...production import adjust_for_losses, prepare_system_cost
 
 
 def estimate_panel_cost(
@@ -17,7 +17,7 @@ def estimate_panel_cost(
         final_production_in_kwh_per_year, peak_hours_of_sun_per_year,
         float('inf'))
     # Choose panel type
-    return prepare_actual_system_capacity(
+    return prepare_system_cost(
         desired_system_capacity_in_kw, panel_table, 'capacity_in_kw')
 
 

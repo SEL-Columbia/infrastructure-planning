@@ -11,7 +11,7 @@ def adjust_for_losses(x, *fractional_losses):
     return y
 
 
-def prepare_actual_system_capacity(
+def prepare_system_cost(
         desired_system_capacity, option_table, capacity_column):
     t = option_table
     # Select option

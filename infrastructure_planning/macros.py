@@ -39,9 +39,9 @@ def compute_raw(f, l, g=None):
 
 
 def get_by_prefix(value_by_key, prefix):
-    for key, value in value_by_key.items():
+    for key in value_by_key:
         if key.startswith(prefix):
-            return value
+            return value_by_key[key]
 
 
 def get_graph_from_table(table):
