@@ -1,5 +1,7 @@
 import geometryIO
-import json
+import re
+import shutil
+import simplejson as json
 from argparse import ArgumentParser
 from collections import OrderedDict
 from geopy import GoogleV3
@@ -8,18 +10,23 @@ from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
+from invisibleroads_macros.math import divide_safely
 from networkx import write_gpickle
-from os.path import isabs, basename, join
-from pandas import DataFrame, Series, concat, read_csv
-from shapely.geometry import GeometryCollection, LineString, Point
+from os.path import isabs, basename, join, splitext
+from pandas import DataFrame, Series, concat
 from shapely import wkt
+from shapely.geometry import GeometryCollection, LineString, Point
 
-from infrastructure_planning.exceptions import InfrastructurePlanningError
+from infrastructure_planning import parsers
+from infrastructure_planning.exceptions import (
+    InfrastructurePlanningError, UnsupportedFormat)
 from infrastructure_planning.macros import (
     compute, get_graph_from_table, get_table_from_graph,
     get_table_from_variables)
 
 from infrastructure_planning.demography.exponential import estimate_population
+from infrastructure_planning.electricity.consumption import (
+    estimate_consumption_profile)
 from infrastructure_planning.electricity.consumption.linear import (
     estimate_consumption_from_connection_type)
 from infrastructure_planning.electricity.demand import estimate_peak_demand
@@ -45,7 +52,7 @@ def assemble_total_mv_line_network(
             lon, lat = location.longitude, location.latitude
         node_d.update(longitude=lon, latitude=lat)
     node_table = get_table_from_graph(infrastructure_graph, [
-        'longitude', 'latitude', 'grid_mv_line_adjusted_budget'])
+        'longitude', 'latitude', 'grid_mv_line_adjusted_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = {
@@ -53,7 +60,7 @@ def assemble_total_mv_line_network(
             'filename': node_table_path,
             'x_column': 'longitude',
             'y_column': 'latitude',
-            'budget_column': 'grid_mv_line_adjusted_budget',
+            'budget_column': 'grid_mv_line_adjusted_budget_in_meters',
         },
         'network_algorithm': 'mod_boruvka',
         'network_parameters': {
@@ -98,8 +105,9 @@ def sequence_total_mv_line_network(target_folder, infrastructure_graph):
     node_table_path = join(target_folder, 'nodes-sequencer.csv')
     node_table.to_csv(node_table_path)
     edge_shapefile_path = join(target_folder, 'edges.shp')
-    nwp = NetworkPlan(
-        edge_shapefile_path, node_table_path, prioritize='population')
+    nwp = NetworkPlan.from_files(
+        edge_shapefile_path, node_table_path, prioritize='population',
+        proj='+proj=longlat +datum=WGS84 +no_defs')
     model = EnergyMaximizeReturn(nwp)
     model.sequence()
     order_series = model.output_frame['Sequence..Far.sighted.sequence']
@@ -110,21 +118,20 @@ def sequence_total_mv_line_network(target_folder, infrastructure_graph):
 
 
 def estimate_total_cost(selected_technologies, infrastructure_graph):
+    # Compute levelized costs for selected technology for each node
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
         best_standalone_cost = float('inf')
         best_standalone_technology = 'grid'
+        discounted_consumption = node_d['discounted_consumption_in_kwh']
         for technology in selected_technologies:
             discounted_cost = node_d[
                 technology + '_internal_discounted_cost'] + node_d[
                 technology + '_external_discounted_cost']
-            discounted_production = node_d[
-                technology + '_electricity_discounted_production_in_kwh']
-            levelized_cost = discounted_cost / float(
-                discounted_production) if discounted_production else 0
-            node_d[technology + '_total_discounted_cost'] = discounted_cost
-            node_d[technology + '_total_levelized_cost'] = levelized_cost
+            node_d[technology + '_local_discounted_cost'] = discounted_cost
+            node_d[technology + '_local_levelized_cost_per_kwh_consumed'] = \
+                divide_safely(discounted_cost, discounted_consumption, 0)
             if technology != 'grid' and discounted_cost < best_standalone_cost:
                 best_standalone_cost = discounted_cost
                 best_standalone_technology = technology
@@ -132,33 +139,34 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
             proposed_technology = 'grid'
         else:
             proposed_technology = best_standalone_technology
-            node_d['grid_total_discounted_cost'] = ''
-            node_d['grid_total_levelized_cost'] = ''
+            node_d['grid_local_discounted_cost'] = ''
+            node_d['grid_local_levelized_cost_per_kwh_consumed'] = ''
         node_d['proposed_technology'] = proposed_technology
-        node_d['proposed_cost_per_connection'] = node_d[
-            proposed_technology + '_total_discounted_cost'] / float(node_d[
-                'maximum_connection_count'])
+        node_d['proposed_cost_per_connection'] = divide_safely(
+            node_d[proposed_technology + '_local_discounted_cost'],
+            node_d['final_connection_count'], 0)
+
     # Compute levelized costs for selected technology across all nodes
     count_by_technology = {x: 0 for x in selected_technologies}
     discounted_cost_by_technology = OrderedDefaultDict(int)
-    discounted_production_by_technology = OrderedDefaultDict(int)
+    discounted_consumption_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
         if 'name' not in node_d:
             continue  # We have a fake node
         technology = node_d['proposed_technology']
         count_by_technology[technology] += 1
         discounted_cost_by_technology[technology] += node_d[
-            technology + '_total_discounted_cost']
-        discounted_production_by_technology[technology] += node_d[
-            technology + '_electricity_discounted_production_in_kwh']
+            technology + '_local_discounted_cost']
+        discounted_consumption_by_technology[technology] += node_d[
+            'discounted_consumption_in_kwh']
     levelized_cost_by_technology = OrderedDict()
     for technology in selected_technologies:
         discounted_cost = discounted_cost_by_technology[
             technology]
-        discounted_production = discounted_production_by_technology[
+        discounted_consumption = discounted_consumption_by_technology[
             technology]
-        levelized_cost_by_technology[technology] = discounted_cost / float(
-            discounted_production) if discounted_cost else 0
+        levelized_cost_by_technology[technology] = divide_safely(
+            discounted_cost, discounted_consumption, 0)
     return {
         'count_by_technology': count_by_technology,
         'discounted_cost_by_technology': discounted_cost_by_technology,
@@ -169,6 +177,7 @@ def estimate_total_cost(selected_technologies, infrastructure_graph):
 MAIN_FUNCTIONS = [
     estimate_population,
     estimate_consumption_from_connection_type,
+    estimate_consumption_profile,
     estimate_peak_demand,
     estimate_internal_cost_by_technology,
     estimate_grid_mv_line_budget,
@@ -184,12 +193,16 @@ NORMALIZED_NAME_BY_COLUMN_NAME = {
         'maintenance_lm_cost_per_year',
 }
 VARIABLE_NAMES_PATH = join('templates', basename(
-    __file__).replace('.py', '').replace('_', '-'), 'summary-columns.txt')
+    __file__).replace('.py', '').replace('_', '-'), 'columns.txt')
 VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 
 def run(g):
-    g = prepare_parameters(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+    try:
+        g = normalize_arguments(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+    except InfrastructurePlanningError as e:
+        raise e.__class__('%s.error = normalize_arguments : %s' % (
+            e[0], e[1]))
 
     # Compute
     for f in MAIN_FUNCTIONS:
@@ -197,7 +210,8 @@ def run(g):
             try:
                 g.update(compute(f, g))
             except InfrastructurePlanningError as e:
-                exit('%s.error = %s : %s' % (e[0], f.func_name, e[1]))
+                raise e.__class__('%s.error = %s : %s' % (
+                    e[0], f.func_name, e[1]))
             continue
         graph = g['infrastructure_graph']
         for node_id, node_d in graph.nodes_iter(data=True):
@@ -209,7 +223,7 @@ def run(g):
             try:
                 node_d.update(compute(f, l, g))
             except InfrastructurePlanningError as e:
-                exit('%s.error = %s : %s : %s' % (
+                raise e.__class__('%s.error = %s : %s : %s' % (
                     e[0], l['name'].encode('utf-8'), f.func_name, e[1]))
     ls = [node_d for node_id, node_d in g[
         'infrastructure_graph'
@@ -237,7 +251,7 @@ def run(g):
         'Peak Demand (kW)',
         'Proposed MV Line Length (m)',
         'Proposed Technology',
-        'Levelized Cost',
+        'Levelized Cost Per kWh Consumed',
         'Connection Order',
         'WKT',
         'FillColor',
@@ -255,7 +269,8 @@ def run(g):
             'Proposed MV Line Length (m)': node_d[
                 'grid_mv_line_adjusted_length_in_meters'],
             'Proposed Technology': format_technology(technology),
-            'Levelized Cost': node_d[technology + '_total_levelized_cost'],
+            'Levelized Cost Per kWh Consumed': node_d[
+                technology + '_local_levelized_cost_per_kwh_consumed'],
             'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
@@ -305,7 +320,8 @@ def run(g):
     table = concat((Series(g[key]) for key in keys), axis=1)
     table.index.name = 'Technology'
     table.index = [format_technology(x) for x in table.index]
-    table.columns = ['Discounted Cost', 'Levelized Cost', 'Count']
+    table.columns = [
+        'Discounted Cost', 'Levelized Cost Per kWh Consumed', 'Count']
     table_path = join(target_folder, 'executive_summary.csv')
     table.to_csv(table_path)
     d['executive_summary_table_path'] = table_path
@@ -333,7 +349,8 @@ def run(g):
             continue  # We have a fake node
         columns = [node_d['name'], node_d.get('order', '')]
         columns.extend(node_d[
-            x + '_total_levelized_cost'] for x in technologies)
+            x + '_local_levelized_cost_per_kwh_consumed'
+        ] for x in technologies)
         columns.append(format_technology(node_d['proposed_technology']))
         rows.append(columns)
     table_path = join(target_folder, 'levelized_cost_by_technology.csv')
@@ -349,17 +366,17 @@ def run(g):
     return d
 
 
-def prepare_parameters(g, normalized_name_by_column_name):
+def normalize_arguments(g, normalized_name_by_column_name):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
         v.columns = normalize_column_names(
             v.columns, normalized_name_by_column_name)
-    for prepare_parameter in [
-            prepare_demand_point_table,
-            prepare_connection_type_table,
-            prepare_grid_mv_line_geotable]:
-        g.update(compute(prepare_parameter, g))
+    for normalize_argument in [
+            normalize_demand_point_table,
+            normalize_connection_type_table,
+            normalize_grid_mv_line_geotable]:
+        g.update(compute(normalize_argument, g))
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
     return g
 
@@ -377,7 +394,7 @@ def normalize_column_names(column_names, normalized_name_by_column_name):
     return normalized_names
 
 
-def prepare_demand_point_table(demand_point_table):
+def normalize_demand_point_table(demand_point_table):
     if 'year' in demand_point_table.columns:
         # Rename year to population_year
         demand_point_table = demand_point_table.rename(columns={
@@ -390,13 +407,13 @@ def prepare_demand_point_table(demand_point_table):
     return {'demand_point_table': demand_point_table}
 
 
-def prepare_connection_type_table(connection_type_table):
+def normalize_connection_type_table(connection_type_table):
     connection_type_table['connection_type'] = connection_type_table[
         'connection_type'].apply(lambda x: x.lower().replace(' ', '_'))
     return {'connection_type_table': connection_type_table}
 
 
-def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
+def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
     geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
     if geometries:
@@ -407,7 +424,7 @@ def prepare_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
         if get_distance(reference, flipped) < get_distance(reference, regular):
             # Flip coordinates to get (latitude, longitude) coordinate order
             for line in geometries:
-                line.coords = [flip_xy(xyz) for xyz in line.coords]
+                line.coords = [parsers.flip_xy(xyz) for xyz in line.coords]
             # ISO 6709 specifies (latitude, longitude) coordinate order
             grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}
@@ -451,53 +468,86 @@ def format_technology(x):
     return x.replace('_', ' ').title()
 
 
-def flip_xy(xyz):
-    xyz = list(xyz)
-    xyz[0], xyz[1] = xyz[1], xyz[0]
-    return xyz
-
-
 def save_shapefile(target_path, geotable):
     # TODO: Save extra attributes
     geometries = [wkt.loads(x) for x in geotable['wkt']]
     # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
     for geometry in geometries:
-        geometry.coords = [flip_xy(xyz) for xyz in geometry.coords]
+        geometry.coords = [parsers.flip_xy(xyz) for xyz in geometry.coords]
     geometryIO.save(target_path, geometryIO.proj4LL, geometries)
     return target_path
 
 
-def render_json(d):
-    d = d.copy()
-    del d['configuration_path']
-    del d['source_folder']
-    del d['target_folder']
-    del d['json']
-    print(json.dumps(d, sort_keys=True, indent=2, separators=(',', ': ')))
-
-
-def load_global_parameters(d, script_path):
-    if d['json']:
-        render_json(d)
-        exit()
-    configuration_path = d['configuration_path']
-    source_folder = d['source_folder']
-    target_folder = d['target_folder']
+def load_arguments(value_by_key):
+    configuration_path = value_by_key.pop('configuration_path')
+    source_folder = value_by_key.pop('source_folder')
     g = json.load(open(configuration_path)) if configuration_path else {}
+    # Command-line arguments override configuration arguments
+    for k, v in value_by_key.items():
+        if v is None:
+            continue
+        g[k] = v
     # Resolve relative paths using source_folder
     if source_folder:
         for k, v in g.items():
-            if not k.endswith('_path') or k == 'configuration_path':
-                continue
-            if v and not isabs(v):
+            if k.endswith('_path') and v and not isabs(v):
                 g[k] = join(source_folder, v)
-    # Command-line arguments override configuration arguments
-    for k, v in d.items():
-        if v is not None:
-            g[k] = v
-    g['target_folder'] = target_folder or make_enumerated_folder_for(
-        script_path)
     return g
+
+
+def save_arguments(g, script_path):
+    d = g.copy()
+    target_folder = d.pop('target_folder')
+    if not target_folder:
+        target_folder = make_enumerated_folder_for(script_path)
+    arguments_folder = make_folder(join(target_folder, 'arguments'))
+    for k, v in d.items():
+        if not k.endswith('_path'):
+            continue
+        file_name = _get_argument_file_name(k, v)
+        # Save a copy of each file
+        shutil.copy(v, join(arguments_folder, file_name))
+        # Make the reference point to the local copy
+        d[k] = file_name
+    # Save global arguments
+    json.dump(d, open(join(arguments_folder, 'arguments.json'), 'w'))
+    g['target_folder'] = target_folder
+
+
+def load_files(g):
+    file_key_pattern = re.compile(r'(.*)_(\w+)_path')
+    file_value_by_name = {}
+    for k, v in g.items():
+        try:
+            key_base, key_type = file_key_pattern.match(k).groups()
+        except AttributeError:
+            continue
+        try:
+            if key_type == 'text':
+                name = key_base
+                value = parsers.load_text(v)
+            elif key_type == 'table':
+                name = key_base + '_table'
+                value = parsers.load_table(v)
+            elif key_type == 'geotable':
+                name = key_base + '_geotable'
+                value = parsers.load_geotable(v)
+            else:
+                continue
+        except UnsupportedFormat as e:
+            raise e.__class__('%s.error = %s : load_files : %s' % (k, e[0]))
+        file_value_by_name[name] = value
+    return merge_dictionaries(g, file_value_by_name)
+
+
+def _get_argument_file_name(k, v):
+    file_base = k
+    file_base = file_base.replace('_geotable_path', 's')
+    file_base = file_base.replace('_table_path', 's')
+    file_base = file_base.replace('_text_path', '')
+    file_base = file_base.replace('_path', '')
+    file_extension = splitext(v)[1]
+    return file_base.replace('_', '-') + file_extension
 
 
 if __name__ == '__main__':
@@ -511,8 +561,6 @@ if __name__ == '__main__':
     argument_parser.add_argument(
         '-o', '--target_folder',
         metavar='FOLDER', type=make_folder)
-    argument_parser.add_argument(
-        '--json', action='store_true')
 
     argument_parser.add_argument(
         '--selected_technologies_text_path',
@@ -536,7 +584,7 @@ if __name__ == '__main__':
         metavar='YEAR', type=int)
     argument_parser.add_argument(
         '--population_growth_as_percent_of_population_per_year',
-        metavar='INTEGER', type=int)
+        metavar='FLOAT', type=float)
 
     argument_parser.add_argument(
         '--line_length_adjustment_factor',
@@ -716,20 +764,11 @@ if __name__ == '__main__':
         metavar='FLOAT', type=float)
 
     args = argument_parser.parse_args()
-    g = load_global_parameters(args.__dict__, __file__)
-    g['selected_technologies'] = open(g.pop(
-        'selected_technologies_text_path')).read().split()
-    g['demand_point_table'] = read_csv(g.pop('demand_point_table_path'))
-    g['connection_type_table'] = read_csv(g.pop('connection_type_table_path'))
-    g['grid_mv_line_geotable'] = read_csv(g.pop('grid_mv_line_geotable_path'))
-    g['grid_mv_transformer_table'] = read_csv(g.pop(
-        'grid_mv_transformer_table_path'))
-    g['diesel_mini_grid_generator_table'] = read_csv(g.pop(
-        'diesel_mini_grid_generator_table_path'))
-    g['solar_home_panel_table'] = read_csv(g.pop(
-        'solar_home_panel_table_path'))
-    g['solar_mini_grid_panel_table'] = read_csv(g.pop(
-        'solar_mini_grid_panel_table_path'))
-
-    d = run(g)
+    g = load_arguments(args.__dict__)
+    save_arguments(g, __file__)
+    try:
+        g = load_files(g)
+        d = run(g)
+    except InfrastructurePlanningError as e:
+        exit(e[0])
     print(format_summary(d))

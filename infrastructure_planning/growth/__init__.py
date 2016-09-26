@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..exceptions import EmptyDataset
+from ..exceptions import InvalidData
 
 
 def get_default_slope(growth_percent, year_packs):
@@ -21,7 +21,7 @@ def split_xys(xys, default_slope=0):
     try:
         xs, ys = zip(*xys)
     except ValueError:
-        raise EmptyDataset('must have at least one row')
+        raise InvalidData('must have at least one row')
     if len(set(xs)) == 1:
         xs = list(xs) + [xs[0] + 1]
         ys = list(ys) + [np.mean(ys) + default_slope]

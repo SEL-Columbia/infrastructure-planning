@@ -1,17 +1,13 @@
+from invisibleroads_macros.math import divide_safely
 from math import ceil
+
+from ..exceptions import ExpectedPositive
 
 
 def adjust_for_losses(x, *fractional_losses):
-
-    def adjust_for_loss(x, fractional_loss):
-        divisor = 1 - fractional_loss
-        if not divisor:
-            return x
-        return x / float(divisor)
-
     y = x
     for fractional_loss in fractional_losses:
-        y = adjust_for_loss(y, fractional_loss)
+        y = divide_safely(y, 1 - fractional_loss, 0)
     return y
 
 
@@ -30,15 +26,17 @@ def prepare_actual_system_capacity(
     selected = selected_t.ix[selected_t.index[0]]
     # Get capacity and count
     selected_capacity = selected[capacity_column]
-    selected_count = int(ceil(desired_system_capacity / float(
-        selected_capacity)))
+    selected_count = int(ceil(divide_safely(
+        desired_system_capacity, selected_capacity,
+        ExpectedPositive('selected_capacity'))))
     actual_system_capacity = selected_capacity * selected_count
     # Get costs
     installation_lm_cost = selected_count * selected['installation_lm_cost']
     maintenance_lm_cost_per_year = selected_count * selected[
         'maintenance_lm_cost_per_year']
-    replacement_lm_cost_per_year = installation_lm_cost / float(selected[
-        'lifetime_in_years'])
+    replacement_lm_cost_per_year = divide_safely(
+        installation_lm_cost, selected['lifetime_in_years'],
+        ExpectedPositive('lifetime_in_years'))
     return {
         'desired_system_' + capacity_column: desired_system_capacity,
         'selected_' + capacity_column: selected_capacity,

@@ -2,5 +2,13 @@ class InfrastructurePlanningError(Exception):
     pass
 
 
-class EmptyDataset(InfrastructurePlanningError):
+class InvalidData(InfrastructurePlanningError):
+    pass
+
+
+class ExpectedPositive(InvalidData):
+    pass
+
+
+class UnsupportedFormat(InfrastructurePlanningError):
     pass

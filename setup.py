@@ -7,7 +7,7 @@ DESCRIPTION = '\n\n'.join(open(join(FOLDER, x)).read().strip() for x in [
     'README.rst', 'CHANGES.rst'])
 setup(
     name='infrastructure-planning',
-    version='2.0.8',
+    version='2.0.9',
     description='Infrastructure planning tools',
     long_description=DESCRIPTION,
     classifiers=[
@@ -21,6 +21,16 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    setup_requires=['pytest-runner'],
-    install_requires=[],
-    tests_require=['pytest'])
+    setup_requires=[
+        'pytest-runner',
+    ],
+    install_requires=[
+        'python-dateutil',
+        'geopy',
+        'invisibleroads-macros',
+        'simplejson',
+    ],
+    tests_require=[
+        'pytest',
+        'pytest-cov',
+    ])
