@@ -441,41 +441,44 @@ I think this is too complicated.
     _ lv_line_base_cost_per_meter
     _ lv_line_raw_material_cost_per_meter
 
+    raw cost
+    installation cost
+    maintenance cost per year
+    replacement cost per year
+
     + Update estimate_lv_line_cost to include raw cost and percents
     + Add lv_line_raw_cost_per_meter to parameters
     + Use lv_line_installation_cost_as_percent_of_raw_cost
         + Replace lv_line_installation_lm_cost_per_meter
     + Use lv_line_maintenance_cost_per_year_as_percent_of_raw_cost
         + Replace lv_line_maintenance_lm_cost_per_meter_per_year
+    + Fix estimate_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+    + Fix estimate_diesel_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+    + Fix estimate_solar_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
+
+20160927-1900 - 20160927-2000: 60 minutes
+
+    + Update estimate_lv_connection_cost to include raw cost
+    + Fix estimate_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+    + Fix estimate_diesel_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+    + Fix estimate_solar_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
+
+20160927-2000 - 20160927-2100: 60 minutes
 
     Draft system capacity algorithm
-
-        Update estimate_lv_connection_cost to include raw cost
+        Update estimate_battery_cost
+            Fix estimate_solar_mini_grid_battery_cost (fixed by estimate_battery_cost)
+            Fix estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
+        Update estimate_balance_cost
+            Fix estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
+            Fix estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
         Update estimate_grid_mv_line_cost_per_meter
         Update estimate_diesel_mini_grid_fuel_cost
-        Update estimate_battery_cost
-        Update estimate_balance_cost
         Update every use of prepare_component_cost_by_year for consistency
-            raw cost
-            installation cost
-            maintenance cost per year
-            replacement cost per year
-
             estimate_grid_mv_transformer_cost (fixed by prepare_system_cost)
-            estimate_grid_lv_line_cost (fixed by estimate_lv_line_cost)
-            estimate_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
-            estimate_grid_mv_line_cost_per_meter
             estimate_generator_cost (fixed by prepare_system_cost)
-            estimate_diesel_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
-            estimate_diesel_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
             estimate_solar_mini_grid_panel_cost (fixed by estimate_system_cost)
-            estimate_solar_mini_grid_battery_cost (fixed by estimate_battery_cost)
-            estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
-            estimate_solar_mini_grid_lv_line_cost (fixed by estimate_lv_line_cost)
-            estimate_solar_mini_grid_lv_connection_cost (fixed by estimate_lv_connection_cost)
             estimate_solar_home_panel_cost (fixed by prepare_system_cost)
-            estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
-            estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
         Update columns.txt with new names
         Update parameter names in cc.ini
         Update explanation text in tool.md

@@ -174,11 +174,14 @@ The low voltage connection connects a building to low voltage line.
 * Recurring Replacement Cost
     * Divide the installation cost by the lifetime of the connection to estimate the replacement cost per year.
 
-#### Grid Low Voltage Connection Installation Labor and Material Cost per Connection
-{grid_lv_connection_installation_lm_cost_per_connection}
+#### Grid Low Voltage Connection Raw Cost
+{grid_lv_connection_raw_cost}
 
-#### Grid Low Voltage Connection Maintenance Labor and Material Cost per Connection per Year
-{grid_lv_connection_maintenance_lm_cost_per_connection_per_year}
+#### Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
+{grid_lv_connection_installation_cost_as_percent_of_raw_cost}
+
+#### Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
+{grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Grid Low Voltage Connection Lifetime in Years
 {grid_lv_connection_lifetime_in_years}
@@ -235,11 +238,14 @@ The cost model is identical to grid low voltage line.
 
 ### Diesel Mini Grid Low Voltage Connection
 
-#### Diesel Mini Grid Low Voltage Connection Installation Labor and Material Cost per Connection
-{diesel_mini_grid_lv_connection_installation_lm_cost_per_connection}
+#### Diesel Mini Grid Low Voltage Connection Raw Cost
+{diesel_mini_grid_lv_connection_raw_cost}
 
-#### Diesel Mini Grid Low Voltage Connection Maintenance Labor and Material Cost per Connection per Year
-{diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year}
+#### Diesel Mini Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
+{diesel_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost}
+
+#### Diesel Mini Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
+{diesel_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Diesel Mini Grid Low Voltage Connection Lifetime in Years
 {diesel_mini_grid_lv_connection_lifetime_in_years}
@@ -361,11 +367,14 @@ The cost model is identical to grid low voltage line.
 
 ### Solar Mini Grid Low Voltage Connection
 
-#### Solar Mini Grid Low Voltage Connection Installation Labor and Material Cost per Connection
-{solar_mini_grid_lv_connection_installation_lm_cost_per_connection}
+#### Solar Mini Grid Low Voltage Connection Raw Cost
+{solar_mini_grid_lv_connection_raw_cost}
 
-#### Solar Mini Grid Low Voltage Connection Maintenance Labor and Material Cost per Connection per Year
-{solar_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year}
+#### Solar Mini Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
+{solar_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Mini Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
+{solar_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Mini Grid Low Voltage Connection Lifetime in Years
 {solar_mini_grid_lv_connection_lifetime_in_years}

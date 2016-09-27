@@ -105,11 +105,13 @@ def estimate_diesel_mini_grid_lv_line_cost(
 
 def estimate_diesel_mini_grid_lv_connection_cost(
         final_connection_count,
-        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
-        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
+        diesel_mini_grid_lv_connection_raw_cost,
+        diesel_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost,  # noqa
+        diesel_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost,  # noqa
         diesel_mini_grid_lv_connection_lifetime_in_years):
     return estimate_lv_connection_cost(
         final_connection_count,
-        diesel_mini_grid_lv_connection_installation_lm_cost_per_connection,
-        diesel_mini_grid_lv_connection_maintenance_lm_cost_per_connection_per_year,  # noqa
+        diesel_mini_grid_lv_connection_raw_cost,
+        diesel_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost,  # noqa
+        diesel_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost,  # noqa
         diesel_mini_grid_lv_connection_lifetime_in_years)

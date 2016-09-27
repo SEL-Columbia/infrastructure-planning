@@ -21,7 +21,7 @@ def estimate_lv_line_cost(
     maintenance_cost_per_year = raw_cost * \
         lv_line_maintenance_cost_per_year_as_percent_of_raw_cost / float(100)
     replacement_cost_per_year = divide_safely(
-        raw_cost, lv_line_lifetime_in_years,
+        raw_cost + installation_cost, lv_line_lifetime_in_years,
         ExpectedPositive('lv_line_lifetime_in_years'))
     return {
         'raw_cost': raw_cost,
@@ -33,19 +33,23 @@ def estimate_lv_line_cost(
 
 def estimate_lv_connection_cost(
         final_connection_count,
-        lv_connection_installation_lm_cost_per_connection,
-        lv_connection_maintenance_lm_cost_per_connection_per_year,
+        lv_connection_raw_cost,
+        lv_connection_installation_cost_as_percent_of_raw_cost,
+        lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost,
         lv_connection_lifetime_in_years):
     # TODO: Compute lv connection cost by year as connections come online
-    installation_lm_cost = final_connection_count * \
-        lv_connection_installation_lm_cost_per_connection
-    maintenance_lm_cost_per_year = final_connection_count * \
-        lv_connection_maintenance_lm_cost_per_connection_per_year
-    replacement_lm_cost_per_year = divide_safely(
-        installation_lm_cost, lv_connection_lifetime_in_years,
+    raw_cost = final_connection_count * \
+        lv_connection_raw_cost
+    installation_cost = raw_cost * \
+        lv_connection_installation_cost_as_percent_of_raw_cost / float(100)
+    maintenance_cost_per_year = raw_cost * \
+        lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost / float(100)  # noqa
+    replacement_cost_per_year = divide_safely(
+        raw_cost + installation_cost, lv_connection_lifetime_in_years,
         ExpectedPositive('lv_connection_lifetime_in_years'))
     return {
-        'installation_lm_cost': installation_lm_cost,
-        'maintenance_lm_cost_per_year': maintenance_lm_cost_per_year,
-        'replacement_lm_cost_per_year': replacement_lm_cost_per_year,
+        'raw_cost': raw_cost,
+        'installation_cost': installation_cost,
+        'maintenance_cost_per_year': maintenance_cost_per_year,
+        'replacement_cost_per_year': replacement_cost_per_year,
     }

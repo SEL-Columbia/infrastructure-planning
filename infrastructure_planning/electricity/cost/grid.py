@@ -4,7 +4,7 @@ from invisibleroads_macros.math import divide_safely
 from ...exceptions import ExpectedPositive, InfrastructurePlanningError
 from ...finance.valuation import compute_discounted_cash_flow
 from ...production import adjust_for_losses, prepare_system_cost
-from .mini_grid import estimate_lv_line_cost, estimate_lv_connection_cost
+from .mini_grid import estimate_lv_connection_cost, estimate_lv_line_cost
 from . import prepare_component_cost_by_year, prepare_internal_cost
 
 
@@ -166,11 +166,13 @@ def estimate_grid_lv_line_cost(
 
 def estimate_grid_lv_connection_cost(
         final_connection_count,
-        grid_lv_connection_installation_lm_cost_per_connection,
-        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
+        grid_lv_connection_raw_cost,
+        grid_lv_connection_installation_cost_as_percent_of_raw_cost,
+        grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost,
         grid_lv_connection_lifetime_in_years):
     return estimate_lv_connection_cost(
         final_connection_count,
-        grid_lv_connection_installation_lm_cost_per_connection,
-        grid_lv_connection_maintenance_lm_cost_per_connection_per_year,
+        grid_lv_connection_raw_cost,
+        grid_lv_connection_installation_cost_as_percent_of_raw_cost,
+        grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost,
         grid_lv_connection_lifetime_in_years)
