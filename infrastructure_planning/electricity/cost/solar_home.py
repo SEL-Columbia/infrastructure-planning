@@ -54,14 +54,16 @@ def estimate_solar_home_panel_cost(
 def estimate_solar_home_battery_cost(
         solar_home_panel_actual_system_capacity_in_kw,
         solar_home_battery_kwh_per_panel_kw,
-        solar_home_battery_installation_lm_cost_per_battery_kwh,
-        solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
+        solar_home_battery_raw_cost_per_kwh,
+        solar_home_battery_installation_cost_as_percent_of_raw_cost,
+        solar_home_battery_maintenance_cost_per_year_as_percent_of_raw_cost,
         solar_home_battery_lifetime_in_years):
     return estimate_battery_cost(
         solar_home_panel_actual_system_capacity_in_kw,
         solar_home_battery_kwh_per_panel_kw,
-        solar_home_battery_installation_lm_cost_per_battery_kwh,
-        solar_home_battery_maintenance_lm_cost_per_kwh_per_year,
+        solar_home_battery_raw_cost_per_kwh,
+        solar_home_battery_installation_cost_as_percent_of_raw_cost,
+        solar_home_battery_maintenance_cost_per_year_as_percent_of_raw_cost,
         solar_home_battery_lifetime_in_years)
 
 

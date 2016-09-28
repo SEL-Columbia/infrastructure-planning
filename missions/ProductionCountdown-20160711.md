@@ -465,13 +465,17 @@ I think this is too complicated.
 
 20160927-2000 - 20160927-2100: 60 minutes
 
+20160928-1400 - 20160928-1430: 30 minutes
+
+    + Fix estimate_solar_mini_grid_battery_cost (fixed by estimate_battery_cost)
+    + Fix estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
+    + Update estimate_battery_cost
+
+    Fix estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
+    Fix estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
+    Update estimate_balance_cost
+
     Draft system capacity algorithm
-        Update estimate_battery_cost
-            Fix estimate_solar_mini_grid_battery_cost (fixed by estimate_battery_cost)
-            Fix estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
-        Update estimate_balance_cost
-            Fix estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
-            Fix estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
         Update estimate_grid_mv_line_cost_per_meter
         Update estimate_diesel_mini_grid_fuel_cost
         Update every use of prepare_component_cost_by_year for consistency
@@ -661,5 +665,5 @@ I think this is too complicated.
     Consider accepting net present value vs consumption curve for energy source X
         Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
     Look through past np errors
-
     Modify networker to accept line_length_adjustment_factor
+    Consider using classes for individual part computations for inheritance
