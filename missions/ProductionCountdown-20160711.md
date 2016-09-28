@@ -482,18 +482,20 @@ I think this is too complicated.
 
     _ Rename _actual_system_capacty_in_kw to system_capacity_in_kw
     _ Rename _desired_system_capacty_in_kw to system_capacity_in_kw
+    + Update estimate_grid_mv_line_cost_per_meter
+
+20160928-1830 - 20160928-1900: 30 minutes
+
+    + Fix estimate_grid_mv_transformer_cost (fixed by prepare_system_cost)
 
     Draft system capacity algorithm
-        Update estimate_grid_mv_line_cost_per_meter
-        Update estimate_diesel_mini_grid_fuel_cost
         Update every use of prepare_component_cost_by_year for consistency
-            estimate_grid_mv_transformer_cost (fixed by prepare_system_cost)
             estimate_generator_cost (fixed by prepare_system_cost)
             estimate_solar_mini_grid_panel_cost (fixed by estimate_system_cost)
             estimate_solar_home_panel_cost (fixed by prepare_system_cost)
         Update columns.txt with new names
         Update parameter names in cc.ini
-        Update explanation text in tool.md
+    Replace instances of _lm_
 
     Name initial variables
     Draft table
@@ -512,6 +514,8 @@ I think this is too complicated.
             Round actual capacity to integer
 
     Update dummy.json
+    Update explanation text in tool.md
+    Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
 
 # Tasks
 

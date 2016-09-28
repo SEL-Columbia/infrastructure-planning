@@ -112,11 +112,14 @@ Medium voltage lines carry electricity over large distances.
 #### Grid Medium Voltage Line (Existing)
 {grid_mv_line_geotable}
 
-#### Grid Medium Voltage Line Installation Labor and Material Cost per Meter
-{grid_mv_line_installation_lm_cost_per_meter}
+#### Grid Medium Voltage Line Raw Cost per Meter
+{grid_mv_line_raw_cost_per_meter}
 
-#### Grid Medium Voltage Line Maintenance Labor and Material Cost per Meter per Year
-{grid_mv_line_maintenance_lm_cost_per_meter_per_year}
+#### Grid Medium Voltage Line Installation Cost as Percent of Raw Cost
+{grid_mv_line_installation_cost_as_percent_of_raw_cost}
+
+#### Grid Medium Voltage Line Maintenance Cost per Year as Percent of Raw Cost
+{grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Grid Medium Voltage Line Lifetime in Years
 {grid_mv_line_lifetime_in_years}

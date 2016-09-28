@@ -187,11 +187,6 @@ MAIN_FUNCTIONS = [
     estimate_total_cost,
 ]
 COLORS = 'bgrcmykw'
-NORMALIZED_NAME_BY_COLUMN_NAME = {
-    'installation labor and material cost': 'installation_lm_cost',
-    'maintenance labor and material cost per year':
-        'maintenance_lm_cost_per_year',
-}
 VARIABLE_NAMES_PATH = join('templates', basename(
     __file__).replace('.py', '').replace('_', '-'), 'columns.txt')
 VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
@@ -199,7 +194,7 @@ VARIABLE_NAMES = open(VARIABLE_NAMES_PATH).read().splitlines()
 
 def run(g):
     try:
-        g = normalize_arguments(g, NORMALIZED_NAME_BY_COLUMN_NAME)
+        g = normalize_arguments(g)
     except InfrastructurePlanningError as e:
         raise e.__class__('%s.error = normalize_arguments : %s' % (
             e[0], e[1]))
@@ -366,12 +361,11 @@ def run(g):
     return d
 
 
-def normalize_arguments(g, normalized_name_by_column_name):
+def normalize_arguments(g):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
-        v.columns = normalize_column_names(
-            v.columns, normalized_name_by_column_name)
+        v.columns = normalize_column_names(v.columns)
     for normalize_argument in [
             normalize_demand_point_table,
             normalize_connection_type_table,
@@ -381,17 +375,9 @@ def normalize_arguments(g, normalized_name_by_column_name):
     return g
 
 
-def normalize_column_names(column_names, normalized_name_by_column_name):
+def normalize_column_names(column_names):
     'Translate each column name into lowercase_english_with_underscores'
-    normalized_names = []
-    for column_name in column_names:
-        column_name = column_name.lower()
-        try:
-            column_name = normalized_name_by_column_name[column_name]
-        except KeyError:
-            column_name = column_name.replace(' ', '_')
-        normalized_names.append(column_name)
-    return normalized_names
+    return [x.lower().replace(' ', '_') for x in column_names]
 
 
 def normalize_demand_point_table(demand_point_table):
@@ -622,10 +608,13 @@ if __name__ == '__main__':
         '--grid_mv_line_geotable_path',
         metavar='PATH')
     argument_parser.add_argument(
-        '--grid_mv_line_installation_lm_cost_per_meter',
+        '--grid_mv_line_raw_cost_per_meter',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--grid_mv_line_maintenance_lm_cost_per_meter_per_year',
+        '--grid_mv_line_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--grid_mv_line_lifetime_in_years',

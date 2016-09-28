@@ -113,20 +113,22 @@ def estimate_grid_mv_line_budget(
 
 
 def estimate_grid_mv_line_cost_per_meter(
-        grid_mv_line_installation_lm_cost_per_meter,
-        grid_mv_line_maintenance_lm_cost_per_meter_per_year,
+        grid_mv_line_raw_cost_per_meter,
+        grid_mv_line_installation_cost_as_percent_of_raw_cost,
+        grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
         grid_mv_line_lifetime_in_years):
-    grid_mv_line_replacement_lm_cost_per_year_per_meter = divide_safely(
-        grid_mv_line_installation_lm_cost_per_meter,
-        grid_mv_line_lifetime_in_years,
-        ExpectedPositive('grid_mv_line_lifetime_in_years'))
+    raw_cost_per_meter = grid_mv_line_raw_cost_per_meter
+    installation_cost_per_meter = raw_cost_per_meter * \
+        grid_mv_line_installation_cost_as_percent_of_raw_cost
     return {
-        'installation_lm_cost_per_meter':
-            grid_mv_line_installation_lm_cost_per_meter,
-        'maintenance_lm_cost_per_meter_per_year':
-            grid_mv_line_maintenance_lm_cost_per_meter_per_year,
-        'replacement_lm_cost_per_meter_per_year':
-            grid_mv_line_replacement_lm_cost_per_year_per_meter,
+        'raw_cost_per_meter': raw_cost_per_meter,
+        'installation_cost_per_meter': installation_cost_per_meter,
+        'maintenance_cost_per_meter_per_year': raw_cost_per_meter * \
+            grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
+        'replacement_cost_per_meter_per_year': divide_safely(
+            raw_cost_per_meter + installation_cost_per_meter,
+            grid_mv_line_lifetime_in_years,
+            ExpectedPositive('grid_mv_line_lifetime_in_years')),
     }
 
 
