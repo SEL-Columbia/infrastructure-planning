@@ -480,9 +480,8 @@ I think this is too complicated.
 
 20160928-1730 - 20160928-1830: 60 minutes
 
-
-    Rename _actual_system_capacty_in_kw to system_capacity_in_kw
-    Rename _desired_system_capacty_in_kw to system_capacity_in_kw
+    _ Rename _actual_system_capacty_in_kw to system_capacity_in_kw
+    _ Rename _desired_system_capacty_in_kw to system_capacity_in_kw
 
     Draft system capacity algorithm
         Update estimate_grid_mv_line_cost_per_meter
