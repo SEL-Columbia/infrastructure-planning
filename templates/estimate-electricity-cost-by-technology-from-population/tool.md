@@ -279,11 +279,14 @@ Battery costs are proportional to panel costs.
 #### Solar Home System Battery Storage Size in Kilowatt-Hours per Panel Kilowatt
 {solar_home_battery_kwh_per_panel_kw}
 
-#### Solar Home System Battery Installation Labor and Material Cost per Battery Kilowatt-Hour
-{solar_home_battery_installation_lm_cost_per_battery_kwh}
+#### Solar Home System Battery Raw Cost per Battery Kilowatt-Hour
+{solar_home_battery_raw_cost_per_battery_kwh}
 
-#### Solar Home System Battery Maintenance Labor and Material Cost per Kilowatt-Hour per Year
-{solar_home_battery_maintenance_lm_cost_per_kwh_per_year}
+#### Solar Home System Battery Installation Cost as Percent of Raw Cost
+{solar_home_battery_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Home System Battery Maintenance Cost per Year as Percent of Raw Cost
+{solar_home_battery_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Home System Battery Lifetime in Years
 {solar_home_battery_lifetime_in_years}
@@ -291,11 +294,14 @@ Battery costs are proportional to panel costs.
 ### Balance
 Balance costs are proportional to panel costs.
 
-#### Solar Home System Balance Installation Labor and Material Cost per Panel Kilowatt
-{solar_home_balance_installation_lm_cost_per_panel_kw}
+#### Solar Home System Balance Raw Cost per Panel Kilowatt
+{solar_home_balance_raw_cost_per_panel_kw}
 
-#### Solar Home System Balance Maintenance Labor and Material Cost per Panel Kilowatt per Year
-{solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year}
+#### Solar Home System Balance Installation Cost as Percent of Raw Cost
+{solar_home_balance_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Home System Balance Maintenance Cost per Year as Percent of Raw Cost
+{solar_home_balance_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Home System Balance Lifetime in Years
 {solar_home_balance_lifetime_in_years}
@@ -329,11 +335,14 @@ Battery costs are proportional to panel costs.
 #### Solar Mini Grid System Battery Storage Size in Kilowatt-Hours per Panel Kilowatt
 {solar_mini_grid_battery_kwh_per_panel_kw}
 
-#### Solar Mini Grid System Battery Installation Labor and Material Cost per Battery Kilowatt-Hour
-{solar_mini_grid_battery_installation_lm_cost_per_battery_kwh}
+#### Solar Mini Grid System Battery Raw Cost per Battery Kilowatt-Hour
+{solar_mini_grid_battery_raw_cost_per_battery_kwh}
 
-#### Solar Mini Grid System Battery Maintenance Labor and Material Cost per Kilowatt-Hour per Year
-{solar_mini_grid_battery_maintenance_lm_cost_per_kwh_per_year}
+#### Solar Mini Grid System Battery Installation Cost as Percent of Raw Cost
+{solar_mini_grid_battery_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Mini Grid System Battery Maintenance Cost per Year as Percent of Raw Cost
+{solar_mini_grid_battery_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Mini Grid System Battery Lifetime in Years
 {solar_mini_grid_battery_lifetime_in_years}
@@ -341,11 +350,14 @@ Battery costs are proportional to panel costs.
 ### Balance
 Balance costs are proportional to panel costs.
 
-#### Solar Mini Grid System Balance Installation Labor and Material Cost per Panel Kilowatt
-{solar_mini_grid_balance_installation_lm_cost_per_panel_kw}
+#### Solar Mini Grid System Balance Raw Cost per Panel Kilowatt
+{solar_mini_grid_balance_raw_cost_per_panel_kw}
 
-#### Solar Mini Grid System Balance Maintenance Labor and Material Cost per Panel Kilowatt per Year
-{solar_mini_grid_balance_maintenance_lm_cost_per_panel_kw_per_year}
+#### Solar Mini Grid System Balance Installation Cost as Percent of Raw Cost
+{solar_mini_grid_balance_installation_cost_as_percent_of_raw_cost}
+
+#### Solar Mini Grid System Balance Maintenance Cost per Year as Percent of Raw Cost
+{solar_mini_grid_balance_maintenance_cost_per_year_as_percent_of_raw_cost}
 
 #### Solar Mini Grid System Balance Lifetime in Years
 {solar_mini_grid_balance_lifetime_in_years}

@@ -711,19 +711,25 @@ if __name__ == '__main__':
         '--solar_home_battery_kwh_per_panel_kw',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_home_battery_installation_lm_cost_per_battery_kwh',
+        '--solar_home_battery_raw_cost_per_battery_kwh',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_home_battery_maintenance_lm_cost_per_kwh_per_year',
+        '--solar_home_battery_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_home_battery_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_battery_lifetime_in_years',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_home_balance_installation_lm_cost_per_panel_kw',
+        '--solar_home_balance_raw_cost_per_panel_kw',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_home_balance_maintenance_lm_cost_per_panel_kw_per_year',
+        '--solar_home_balance_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_home_balance_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_home_balance_lifetime_in_years',
@@ -739,19 +745,25 @@ if __name__ == '__main__':
         '--solar_mini_grid_battery_kwh_per_panel_kw',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_battery_installation_lm_cost_per_battery_kwh',
+        '--solar_mini_grid_battery_raw_cost_per_battery_kwh',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_battery_maintenance_lm_cost_per_kwh_per_year',
+        '--solar_mini_grid_battery_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_battery_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_mini_grid_battery_lifetime_in_years',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_balance_installation_lm_cost_per_panel_kw',
+        '--solar_mini_grid_balance_raw_cost_per_panel_kw',
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
-        '--solar_mini_grid_balance_maintenance_lm_cost_per_panel_kw_per_year',
+        '--solar_mini_grid_balance_installation_cost_as_percent_of_raw_cost',
+        metavar='FLOAT', type=float)
+    argument_parser.add_argument(
+        '--solar_mini_grid_balance_maintenance_cost_per_year_as_percent_of_raw_cost',  # noqa
         metavar='FLOAT', type=float)
     argument_parser.add_argument(
         '--solar_mini_grid_balance_lifetime_in_years',

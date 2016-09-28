@@ -471,9 +471,18 @@ I think this is too complicated.
     + Fix estimate_solar_home_battery_cost (fixed by estimate_battery_cost)
     + Update estimate_battery_cost
 
-    Fix estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
-    Fix estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
-    Update estimate_balance_cost
+20160928-1600 - 20160928-1630: 30 minutes
+
+    + Update estimate_balance_cost
+    + Fix estimate_solar_mini_grid_balance_cost (fixed by estimate_balance_cost)
+    + Fix estimate_solar_home_balance_cost (fixed by estimate_balance_cost)
+    + Make order of raw_cost calculations consistent
+
+20160928-1730 - 20160928-1830: 60 minutes
+
+
+    Rename _actual_system_capacty_in_kw to system_capacity_in_kw
+    Rename _desired_system_capacty_in_kw to system_capacity_in_kw
 
     Draft system capacity algorithm
         Update estimate_grid_mv_line_cost_per_meter
