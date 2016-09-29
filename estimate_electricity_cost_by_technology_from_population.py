@@ -11,6 +11,7 @@ from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
 from invisibleroads_macros.math import divide_safely
+from invisibleroads_macros.table import normalize_column_name
 from networkx import write_gpickle
 from os.path import isabs, basename, join, splitext
 from pandas import DataFrame, Series, concat
@@ -365,7 +366,7 @@ def normalize_arguments(g):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
-        v.columns = normalize_column_names(v.columns)
+        v.columns = [normalize_column_name(x, '_') for x in v.columns]
     for normalize_argument in [
             normalize_demand_point_table,
             normalize_connection_type_table,
@@ -373,11 +374,6 @@ def normalize_arguments(g):
         g.update(compute(normalize_argument, g))
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
     return g
-
-
-def normalize_column_names(column_names):
-    'Translate each column name into lowercase_english_with_underscores'
-    return [x.lower().replace(' ', '_') for x in column_names]
 
 
 def normalize_demand_point_table(demand_point_table):

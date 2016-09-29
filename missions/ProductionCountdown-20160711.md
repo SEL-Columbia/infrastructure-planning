@@ -488,21 +488,19 @@ I think this is too complicated.
 
     + Fix estimate_grid_mv_transformer_cost (fixed by prepare_system_cost)
 
-    Draft system capacity algorithm
-        Update every use of prepare_component_cost_by_year for consistency
-            estimate_generator_cost (fixed by prepare_system_cost)
-            estimate_solar_mini_grid_panel_cost (fixed by estimate_system_cost)
-            estimate_solar_home_panel_cost (fixed by prepare_system_cost)
-        Update columns.txt with new names
-        Update parameter names in cc.ini
-    Replace instances of _lm_
+20160929-1030 - 20160929-1100: 30 minutes
+
+    + Fix estimate_generator_cost (fixed by prepare_system_cost)
+    + Fix estimate_solar_mini_grid_panel_cost (fixed by estimate_system_cost)
+    + Fix estimate_solar_home_panel_cost (fixed by prepare_system_cost)
+    + Update every use of prepare_component_cost_by_year for consistency
 
     Name initial variables
     Draft table
     Specify final variables
 
     Fix oversizing system capacity
-        Update system size algorithm
+        Draft system capacity algorithm
             Have user specify generator capacity
             Have user specify generator raw cost
             Have user specify generator installation cost as fraction of raw cost
@@ -513,6 +511,9 @@ I think this is too complicated.
             Pick nearest generator capacity and use those costs per kw
             Round actual capacity to integer
 
+    Update columns.txt with new names
+    Update parameter names in cc.ini
+    Replace instances of _lm_
     Update dummy.json
     Update explanation text in tool.md
     Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity

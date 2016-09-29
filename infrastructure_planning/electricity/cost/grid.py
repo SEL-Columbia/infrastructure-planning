@@ -123,7 +123,8 @@ def estimate_grid_mv_line_cost_per_meter(
     return {
         'raw_cost_per_meter': raw_cost_per_meter,
         'installation_cost_per_meter': installation_cost_per_meter,
-        'maintenance_cost_per_meter_per_year': raw_cost_per_meter * \
+        'maintenance_cost_per_meter_per_year':
+            raw_cost_per_meter *
             grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
         'replacement_cost_per_meter_per_year': divide_safely(
             raw_cost_per_meter + installation_cost_per_meter,
