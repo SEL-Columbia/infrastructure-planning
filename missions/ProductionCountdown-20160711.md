@@ -495,6 +495,12 @@ I think this is too complicated.
     + Fix estimate_solar_home_panel_cost (fixed by prepare_system_cost)
     + Update every use of prepare_component_cost_by_year for consistency
 
+20160929-1630 - 20160929-1700: 30 minutes
+
+We can round up by checking whether the first two differences are equal and if they are, then choosing the second one. This only works if the return order is consistent. Another alternative is to sort first by the difference and then sort by the capacity. Actually, I don't think we should round up. If the smaller generators are less efficient, then we should use the less efficient numbers in order to be conservative in our estimates.
+
+    Check that capacity values are unique for each table (there should be no duplicates)
+
     Name initial variables
     Draft table
     Specify final variables
@@ -510,6 +516,7 @@ I think this is too complicated.
             Compute raw cost per kw
             Pick nearest generator capacity and use those costs per kw
             Round actual capacity to integer
+        Check that algorithm rounds up if it is equidistant
 
     Update columns.txt with new names
     Update parameter names in cc.ini
