@@ -367,6 +367,13 @@ def normalize_arguments(g):
         if not hasattr(v, 'columns'):
             continue
         v.columns = [normalize_column_name(x, '_') for x in v.columns]
+        for column_name in v.columns:
+            if column_name.startswith('capacity'):
+                # Check that we do not have duplicate capacity values
+                # !!!
+                # Sort table by capacity
+                v.sort_values(column_name, inplace=True)
+                break
     for normalize_argument in [
             normalize_demand_point_table,
             normalize_connection_type_table,
