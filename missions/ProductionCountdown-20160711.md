@@ -536,6 +536,12 @@ We finished the new system sizing algorithm with a slight modification. Now we i
     + Replace instances of _lm_
     + Update dummy.json
     + Update explanation text in tool.md
+    + Consider separating line equipment cost vs installation cost
+    + Consider letting user specify installation and maintenance costs as percentages
+
+20160930-1800 - 20160930-1830: 30 minutes
+
+It appears that the shapefile contains a MultiLineString.
 
 # Tasks
 
@@ -641,9 +647,6 @@ We finished the new system sizing algorithm with a slight modification. Now we i
     Update installation requirements
 
 ## Important and hard
-
-    Consider separating line equipment cost vs installation cost
-    Consider letting user specify installation and maintenance costs as percentages
 
     Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Convert tools into jupyter notebooks
