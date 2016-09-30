@@ -1,9 +1,10 @@
 import inspect
 from invisibleroads_macros.iterable import merge_dictionaries
+from invisibleroads_macros.math import divide_safely
 from networkx import Graph
 from pandas import DataFrame, isnull
 
-from .exceptions import InfrastructurePlanningError
+from .exceptions import ExpectedPositive, InfrastructurePlanningError
 
 
 def compute(f, l, g=None, prefix=''):
@@ -63,6 +64,24 @@ def get_table_from_variables(ls, g, keys):
     # Encourage spreadsheet programs to include empty columns when sorting rows
     columns = [x.replace('_', ' ') or '-' for x in keys]
     return DataFrame(rows, columns=columns).set_index('name')
+
+
+def interpolate_values(source_table, target_column, target_value):
+    t = source_table
+    assert len(t) > 0
+    assert len(t) == len(set(t[target_column]))
+    # Get indices of two rows nearest to target value
+    difference = t[target_column] - target_value
+    sorted_indices = difference.abs().argsort()
+    index0 = sorted_indices[0]
+    index1 = sorted_indices[1] if len(sorted_indices) > 1 else index0
+    # Compute fraction of difference in target column
+    fraction = divide_safely(
+        t[target_column].ix[index0],
+        t[target_column].ix[index1],
+        ExpectedPositive(target_column))
+    # Interpolate
+    return t.ix[index0] + (t.ix[index1] - t.ix[index0]) * fraction
 
 
 def rename_keys(value_by_key, prefix='', suffix=''):

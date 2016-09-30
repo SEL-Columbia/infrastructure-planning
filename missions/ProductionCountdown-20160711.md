@@ -499,35 +499,50 @@ I think this is too complicated.
 
 We can round up by checking whether the first two differences are equal and if they are, then choosing the second one. This only works if the return order is consistent. Another alternative is to sort first by the difference and then sort by the capacity. Actually, I don't think we should round up. If the smaller generators are less efficient, then we should use the less efficient numbers in order to be conservative in our estimates.
 
-    Check that capacity values are unique for each table (there should be no duplicates)
+20160930-1100 - 20160930-1130: 30 minutes
 
-    Name initial variables
-    Draft table
-    Specify final variables
+For each table where we have to do system sizing, we need to sort the table by capacity and make sure there are no duplicate capacity values.  We can either do this once at the beginning or do it when we have to size the system. However, we may need to use these tables again for other capacity dependent values. So it is safer to do it at the beginning.
 
-    Fix oversizing system capacity
-        Draft system capacity algorithm
-            Have user specify generator capacity
-            Have user specify generator raw cost
-            Have user specify generator installation cost as fraction of raw cost
-            Have user specify maintenance cost per year as fraction of raw cost
-            Get desired system capacity
-            _ Add system capacity safety factor
-            Compute raw cost per kw
-            Pick nearest generator capacity and use those costs per kw
-            Round actual capacity to integer
-        Check that algorithm rounds up if it is equidistant
+Having all these normalizations and initializations scattered all over the place is too messy.  We'll look into how to consolidate and simplify this once we finish the most highly requested changes for this version.
 
-    Update columns.txt with new names
-    Update parameter names in cc.ini
-    Replace instances of _lm_
-    Update dummy.json
-    Update explanation text in tool.md
-    Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
+    + Check that capacity values are unique for each table (there should be no duplicates)
+    + Name initial variables
+    + Draft table
+    + Specify final variables
+    + Draft system capacity algorithm
+        + Have user specify generator capacity
+        + Have user specify generator raw cost
+        + Have user specify generator installation cost as fraction of raw cost
+        + Have user specify maintenance cost per year as fraction of raw cost
+        + Get desired system capacity
+        _ Add system capacity safety factor
+        + Compute raw cost per kw
+        + Pick nearest generator capacity and use those costs per kw
+        + Round actual capacity to integer
+    _ Check that algorithm rounds up if it is equidistant
+
+20160930-1600 - 20160930-1630: 30 minutes
+
+We finished the new system sizing algorithm with a slight modification. Now we interpolate the values of raw_cost_per_unit_capacity and the other percents as well.
+
+    + Fix oversizing system capacity
+    + Update columns.txt with new names
+    + Update parameter names in cc.ini
+    + Update tables
+        + Update example-diesel-generator-by-capacity.csv
+        + Update example-grid-mv-transformer-by-capacity.csv
+        + Update example-production-cost-by-year.csv
+        + Update example-solar-panel-by-capacity.csv
+    + Replace instances of _lm_
+    + Update dummy.json
+    + Update explanation text in tool.md
 
 # Tasks
 
 ## Important and easy
+
+    Get model working on Tanzania dataset
+    Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge

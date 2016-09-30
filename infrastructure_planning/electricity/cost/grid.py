@@ -145,8 +145,8 @@ def estimate_grid_mv_transformer_cost(
         1 - grid_mv_transformer_load_power_factor)
     # Choose transformer type
     return prepare_system_cost(
-        desired_system_capacity_in_kva,
-        grid_mv_transformer_table, 'capacity_in_kva')
+        grid_mv_transformer_table, 'capacity_in_kva',
+        desired_system_capacity_in_kva)
 
 
 def estimate_grid_lv_line_cost(

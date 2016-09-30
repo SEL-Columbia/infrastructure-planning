@@ -20,7 +20,7 @@ from shapely.geometry import GeometryCollection, LineString, Point
 
 from infrastructure_planning import parsers
 from infrastructure_planning.exceptions import (
-    InfrastructurePlanningError, UnsupportedFormat)
+    InfrastructurePlanningError, InvalidData, UnsupportedFormat)
 from infrastructure_planning.macros import (
     compute, get_graph_from_table, get_table_from_graph,
     get_table_from_variables)
@@ -369,8 +369,14 @@ def normalize_arguments(g):
         v.columns = [normalize_column_name(x, '_') for x in v.columns]
         for column_name in v.columns:
             if column_name.startswith('capacity'):
+                values = v[column_name].values
+                # Check that we have at least one row
+                if not len(values):
+                    raise InvalidData('need at least one row in %s' % k)
                 # Check that we do not have duplicate capacity values
-                # !!!
+                if len(values) != len(set(values)):
+                    raise InvalidData('remove duplicate %s in %s (%s)' % (
+                        column_name, k, ' '.join(str(x) for x in values)))
                 # Sort table by capacity
                 v.sort_values(column_name, inplace=True)
                 break

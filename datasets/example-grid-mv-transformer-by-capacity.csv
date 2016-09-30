@@ -1,3 +1,3 @@
-Capacity in kVA,Installation Labor and Material Cost,Maintenance Labor and Material Cost per Year,Lifetime in Years
-1,1000,30,10
-10,15000,450,12
+Capacity in kVA,Raw Cost,Installation Cost as Percent of Raw Cost,Maintenance Cost per Year as Percent of Raw Cost,Lifetime in Years
+1,1000,10,3,10
+10,7000,10,3,12

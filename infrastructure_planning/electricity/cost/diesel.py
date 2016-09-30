@@ -7,13 +7,11 @@ from ...production import adjust_for_losses, prepare_system_cost
 def estimate_generator_cost(
         peak_demand_in_kw, system_loss_as_percent_of_total_production,
         generator_table):
-    # Estimate desired capacity
     desired_system_capacity_in_kw = adjust_for_losses(
         peak_demand_in_kw,
         system_loss_as_percent_of_total_production / float(100))
-    # Choose generator type
     return prepare_system_cost(
-        desired_system_capacity_in_kw, generator_table, 'capacity_in_kw')
+        generator_table, 'capacity_in_kw', desired_system_capacity_in_kw)
 
 
 def estimate_fuel_cost(

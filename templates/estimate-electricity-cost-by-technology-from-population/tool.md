@@ -99,12 +99,10 @@ A remote source produces electricity that is distributed to consumers.
 ### Grid Medium Voltage Line
 Medium voltage lines carry electricity over large distances.
 
-* Initial Installation Cost
-    * Multiply the installation cost of MV line per meter by the number of meters of MV line in the network.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost of MV line per meter by the number of meters of MV line in the network.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of MV line.
+* Initial Raw Cost is proportional to the number of meters of medium voltage line in the network.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Grid Medium Voltage Network Minimum Point Count
 {grid_mv_network_minimum_point_count}
@@ -127,16 +125,16 @@ Medium voltage lines carry electricity over large distances.
 ### Grid Medium Voltage Transformer
 Medium voltage transformers convert medium voltage to low voltage.
 
-* Initial Installation Cost
+* Initial Raw Cost
     * The cost of a transformer depends on its capacity, which is how much electricity it can deliver. Transformer capacity is listed in kVA. If the power factor of the load is 0.85, then the number of kWh delivered is kVA * 0.85.
     * Size transformer capacity based on estimated peak demand. Estimate the amount of loss-adjusted consumption that is happening during peak hours. Divide the loss-adjusted consumption by the number of peak hours per year to estimate peak demand.
-    * Select the largest transformer capacity that will satisfy the estimated peak demand.
-    * Estimate the number of those transformers that will satisfy the estimated peak demand.
-    * Estimate the installation cost by multiplying the installation cost of the selected transformer by the number of transformers.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost per year of the selected transformer by the number of transformers.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of the selected transformer.
+    * Find the two transformers that are closest to the desired capacity.
+    * Compute the raw cost per unit capacity for each of the two selected transformers.
+    * Interpolate the raw cost per unit capacity relative to the desired capacity.
+    * Multiply the raw cost per unit capacity by the desired capacity.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Grid Medium Voltage Transformer Load Power Factor
 {grid_mv_transformer_load_power_factor}
@@ -147,13 +145,12 @@ Medium voltage transformers convert medium voltage to low voltage.
 ### Grid Low Voltage Line
 Low voltage lines distribute electricity over small distances.
 
-* Initial Installation Cost
-    * Multiply the installation cost of LV line per meter by the estimated number of meters of LV line.
+* Initial Raw Cost
+    * Multiply the raw cost of low voltage line per meter by the estimated number of meters of low voltage line.
     * The number of meters of LV line is the number of connections multiplied by the average distance between buildings.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost of LV line per meter by the number of meters of LV line.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of LV line.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Grid Low Voltage Line Raw Cost per Meter
 {grid_lv_line_raw_cost_per_meter}
@@ -170,12 +167,10 @@ Low voltage lines distribute electricity over small distances.
 ### Grid Low Voltage Connection
 The low voltage connection connects a building to low voltage line.
 
-* Initial Installation Cost
-    * Multiply the installation cost per connection by the estimated number of connections.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost per connection by the estimated number of connections.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of the connection to estimate the replacement cost per year.
+* Initial Raw Cost is proportional to the estimated number of connections.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Grid Low Voltage Connection Raw Cost
 {grid_lv_connection_raw_cost}
@@ -205,15 +200,15 @@ A local diesel generator produces electricity that is distributed to consumers.
 ### Generator
 Generators consume fuel to produce electricity.
 
-* Initial Installation Cost
+* Initial Raw Cost
     * Size generator capacity based on estimated peak demand. Estimate the amount of loss-adjusted consumption that is happening during peak hours. Divide the loss-adjusted consumption by the number of peak hours per year to estimate peak demand.
-    * Select the largest generator capacity that will satisfy the estimated peak demand.
-    * Estimate the number of those generators that will satisfy the estimated peak demand.
-    * Estimate the installation cost by multiplying the installation cost of the selected generator by the number of generators.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost per year of the selected generator by the number of generators.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of the selected generator.
+    * Find the two generators that are closest to the desired capacity.
+    * Compute the raw cost per unit capacity for each of the two selected generators.
+    * Interpolate the raw cost per unit capacity relative to the desired capacity.
+    * Multiply the raw cost per unit capacity by the desired capacity.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Diesel Mini Grid Generator
 {diesel_mini_grid_generator_table}
@@ -263,15 +258,16 @@ A photovoltaic system produces electricity from sunlight for each [building](htt
 ### Panel
 The photovoltaic panel converts sunlight into electricity.
 
-* Initial Installation Cost
+* Initial Raw Cost
     * Size panel capacity based on consumption. Since we have a battery, we do not need to consider peak demand and can use consumption directly.
     * Adjust consumption to account for system efficiency loss. Divide the loss adjusted consumption by the number of peak hours of sun per year to get desired panel capacity.
-    * Select the largest panel capacity that will satisfy the desired panel capacity.
-    * Estimate the number of those panels that will satisfy the desired panel capacity.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost per year of the selected panel by the number of panels.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of the selected panel.
+    * Find the two panels that are closest to the desired capacity.
+    * Compute the raw cost per unit capacity for each of the two selected panels.
+    * Interpolate the raw cost per unit capacity relative to the desired capacity.
+    * Multiply the raw cost per unit capacity by the desired capacity.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Solar Home System Panel Table
 {solar_home_panel_table}
@@ -319,15 +315,16 @@ A photovoltaic system produces electricity that is distributed to consumers.
 ### Panel
 The photovoltaic panel converts sunlight into electricity.
 
-* Initial Installation Cost
+* Initial Raw Cost
     * Size panel capacity based on consumption. Since we have a battery, we do not need to consider peak demand and can use consumption directly.
     * Adjust consumption to account for system efficiency loss. Divide the loss adjusted consumption by the number of peak hours of sun per year to get desired panel capacity.
-    * Select the largest panel capacity that will satisfy the desired panel capacity.
-    * Estimate the number of those panels that will satisfy the desired panel capacity.
-* Recurring Maintenance Cost
-    * Multiply the maintenance cost per year of the selected panel by the number of panels.
-* Recurring Replacement Cost
-    * Divide the installation cost by the lifetime of the selected panel.
+    * Find the two panels that are closest to the desired capacity.
+    * Compute the raw cost per unit capacity for each of the two selected panels.
+    * Interpolate the raw cost per unit capacity relative to the desired capacity.
+    * Multiply the raw cost per unit capacity by the desired capacity.
+* Initial Installation Cost is proportional to the Raw Cost.
+* Recurring Maintenance Cost is proportional to the Raw Cost.
+* Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
 #### Solar Mini Grid System Panel Table
 {solar_mini_grid_panel_table}

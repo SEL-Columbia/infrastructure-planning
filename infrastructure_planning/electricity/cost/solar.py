@@ -9,16 +9,14 @@ def estimate_panel_cost(
         peak_hours_of_sun_per_year,
         system_loss_as_percent_of_total_production,
         panel_table):
-    # Estimate desired capacity
     final_production_in_kwh_per_year = adjust_for_losses(
         final_consumption_in_kwh_per_year,
         system_loss_as_percent_of_total_production / 100.)
     desired_system_capacity_in_kw = divide_safely(
         final_production_in_kwh_per_year, peak_hours_of_sun_per_year,
         float('inf'))
-    # Choose panel type
     return prepare_system_cost(
-        desired_system_capacity_in_kw, panel_table, 'capacity_in_kw')
+        panel_table, 'capacity_in_kw', desired_system_capacity_in_kw)
 
 
 def estimate_battery_cost(
