@@ -38,8 +38,7 @@ from infrastructure_planning.electricity.cost.grid import (
     estimate_grid_mv_line_budget)
 
 from networker.networker_runner import NetworkerRunner
-from sequencer import NetworkPlan
-from sequencer.Models import EnergyMaximizeReturn
+from sequencer import NetworkPlan, Sequencer
 
 
 def assemble_total_mv_line_network(
@@ -110,7 +109,7 @@ def sequence_total_mv_line_network(target_folder, infrastructure_graph):
     nwp = NetworkPlan.from_files(
         edge_shapefile_path, node_table_path, prioritize='population',
         proj='+proj=longlat +datum=WGS84 +no_defs')
-    model = EnergyMaximizeReturn(nwp)
+    model = Sequencer(nwp, 'peak.demand.in.kw')
     model.sequence()
     order_series = model.output_frame['Sequence..Far.sighted.sequence']
     for index, order in order_series.iteritems():
