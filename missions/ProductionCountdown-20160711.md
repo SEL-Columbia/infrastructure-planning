@@ -552,11 +552,14 @@ It appears that the shapefile contains a MultiLineString.
         Line 358
     + Draft code that will successfully flip the coordinates for the tanzania dataset
 
+20161003-1700 - 20161003-1730: 30 minutes
+
+    + Get model working on Tanzania dataset
+
 # Tasks
 
 ## Important and easy
 
-    Get model working on Tanzania dataset
     Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
 
     Add sequence order in proposed network shapefiles for edge
