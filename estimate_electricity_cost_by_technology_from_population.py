@@ -7,6 +7,7 @@ from collections import OrderedDict
 from geopy import GoogleV3
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from invisibleroads_macros.geometry import flip_geometry_coordinates
 from invisibleroads_macros.iterable import (
     OrderedDefaultDict, merge_dictionaries)
 from invisibleroads_macros.log import format_summary
@@ -418,10 +419,9 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
         # If the flipped coordinates are closer,
         if get_distance(reference, flipped) < get_distance(reference, regular):
             # Flip coordinates to get (latitude, longitude) coordinate order
-            for line in geometries:
-                line.coords = [parsers.flip_xy(xyz) for xyz in line.coords]
+            flipped_geometries = flip_geometry_coordinates(geometries)
             # ISO 6709 specifies (latitude, longitude) coordinate order
-            grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
+            grid_mv_line_geotable['wkt'] = [x.wkt for x in flipped_geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}
 
 
@@ -467,9 +467,8 @@ def save_shapefile(target_path, geotable):
     # TODO: Save extra attributes
     geometries = [wkt.loads(x) for x in geotable['wkt']]
     # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
-    for geometry in geometries:
-        geometry.coords = [parsers.flip_xy(xyz) for xyz in geometry.coords]
-    geometryIO.save(target_path, geometryIO.proj4LL, geometries)
+    flipped_geometries = flip_geometry_coordinates(geometries)
+    geometryIO.save(target_path, geometryIO.proj4LL, flipped_geometries)
     return target_path
 
 
