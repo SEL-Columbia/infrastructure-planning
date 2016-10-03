@@ -543,6 +543,15 @@ We finished the new system sizing algorithm with a slight modification. Now we i
 
 It appears that the shapefile contains a MultiLineString.
 
+20161003-1145 - 20161003-1245: 60 minutes
+
+    + Find where the geometry coordinates are flipped
+        Line 422
+        Line 471
+        Line 149
+        Line 358
+    Draft code that will successfully flip the coordinates for the tanzania dataset
+
 # Tasks
 
 ## Important and easy
