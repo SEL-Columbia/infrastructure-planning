@@ -562,8 +562,8 @@ It appears that the shapefile contains a MultiLineString.
 
 20161007-1945 - 20161007-2015: 30 minutes
 
-    Option 1: Store coordinate tuple as node id
-    _ Option 2: Store wkb for each node and edge
+    _ Option 1: Store coordinate tuple as node id
+    Option 2: Store wkb for each node and edge
 
 Should we allow nodes to have identical coordinates?  If we don't allow it, then it will be much easier to save the shapefile.  Let me think.
 
@@ -573,7 +573,11 @@ I think we should be able to accept a wkt for each node, then we get the centroi
 
 The main question is whether we should allow nodes to have identical coordinates.  We should err on the side of having simpler code.  Therefore I vote for having only unique coordinates.
 
-    Make sure each node has unique coordinates
+    _ Make sure each node has unique coordinates
+
+20161007-2200 - 20161007-2230: 30 minutes
+
+Actually, we just explored the option of making sure each node has unique coordinates and we found that it would prevent allowing time series rows where there are multiple population years. It would also prevent the current usage of node_id as integer index, which we are currently assuming as returned by networker. Let's just go the wkb route.
 
     Separate Coster from Networker and Sequencer
     Separate Aggregator

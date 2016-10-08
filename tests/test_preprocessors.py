@@ -16,19 +16,21 @@ class TestNormalizeDemandPointTable():
             with raises(ValidationError):
                 normalize_demand_point_table(table)
 
-    def test_reject_duplicate_coordinates(self):
-        with raises(ValidationError):
-            normalize_demand_point_table(DataFrame([
-                ('a', '1', '1', '1'),
-                ('b', '2', '2', '2'),
-                ('c', '2', '2', '3'),
-            ], columns=DEMAND_POINT_TABLE_COLUMNS))
+    def test_reject_missing_value(self):
+        table = DataFrame([
+            ('a', 1, 2, 3),
+        ], columns=DEMAND_POINT_TABLE_COLUMNS)
+        for column in DEMAND_POINT_TABLE_COLUMNS:
+            t = table.copy()
+            t[column][0] = float('nan')
+            with raises(ValidationError):
+                normalize_demand_point_table(t)
 
     def test_rename_population_year(self):
         d = normalize_demand_point_table(DataFrame([
-            ('a', '1', '1', '1', '2000'),
-            ('b', '2', '2', '2', '2000'),
-            ('c', '3', '3', '3', '2000'),
+            ('a', 1, 1, 1, 2000),
+            ('b', 2, 2, 2, 2000),
+            ('c', 3, 3, 3, 2000),
         ], columns=DEMAND_POINT_TABLE_COLUMNS + ['year']))
         table = d['demand_point_table']
         assert 'year' not in table.columns
@@ -36,10 +38,10 @@ class TestNormalizeDemandPointTable():
 
     def test_flatten_population_year(self):
         d = normalize_demand_point_table(DataFrame([
-            ('a', '1', '1', '1', '2000'),
-            ('b', '2', '2', '2', '2000'),
-            ('c', '3', '3', '3', '2000'),
-            ('c', '3', '3', '4', '2001'),
+            ('a', 1, 1, 1, 2000),
+            ('b', 2, 2, 2, 2000),
+            ('c', 3, 3, 3, 2000),
+            ('c', 3, 3, 4, 2001),
         ], columns=DEMAND_POINT_TABLE_COLUMNS + ['population_year']))
         table = d['demand_point_table']
         assert table[table['name'] == 'c']['population'].values[0] == 4

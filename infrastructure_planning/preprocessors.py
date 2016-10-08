@@ -1,5 +1,6 @@
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.geometry import flip_geometry_coordinates
+from pandas import isnull
 from shapely import wkt
 from shapely.geometry import GeometryCollection
 
@@ -15,18 +16,18 @@ DEMAND_POINT_TABLE_COLUMNS = [
 
 
 def normalize_demand_point_table(demand_point_table):
-    # Check that we have required columns
+    # Check that required columns exist
     for column in DEMAND_POINT_TABLE_COLUMNS:
         if column not in demand_point_table.columns:
             raise ValidationError(
                 'demand_point_table', 'missing column (%s)' % column)
-    # Check that each point has unique coordinates
-    indices = index_duplicate_values(demand_point_table, [
-        'latitude', 'longitude'])
-    if indices:
-        raise ValidationError(
-            'demand_point_table',
-            'has rows with duplicate coordinates (indices=%s)' % indices)
+    # Check that required columns are not empty
+    for column in DEMAND_POINT_TABLE_COLUMNS:
+        for value in demand_point_table[column]:
+            if not isnull(value):
+                continue
+            raise ValidationError(
+                'demand_point_table', 'missing value (%s)' % column)
     # Rename year to population_year
     if 'year' in demand_point_table.columns:
         demand_point_table = demand_point_table.rename(columns={
@@ -95,15 +96,3 @@ def normalize_capacity_table(table_name, table, capacity_column):
         raise ValidationError(table_name, 'remove duplicate capacity values')
     # Sort table by ascending capacity
     return {table_name: table.sort_values(capacity_column)}
-
-
-def index_duplicate_values(table, columns, start_index=2):
-    xs = []
-    indices = []
-    for index, row in table.iterrows():
-        x = ' '.join(str(_) for _ in row[columns].values)
-        if x in xs:
-            indices.append(index)
-        else:
-            xs.append(x)
-    return [start_index + index for index in indices]

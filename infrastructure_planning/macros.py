@@ -1,15 +1,16 @@
+import geometryIO
 import inspect
 import simplejson as json
 import shutil
-from collections import OrderedDict
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from invisibleroads_macros.geometry import flip_geometry_coordinates
 from invisibleroads_macros.iterable import merge_dictionaries
 from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_column_name
-from networkx import Graph, write_gpickle
+from networkx import Graph
 from os.path import isabs, join, splitext
-from pandas import DataFrame, Series, concat, isnull
-from shapely.geometry import LineString, Point
+from pandas import DataFrame, isnull
+from shapely import wkt
 
 from .exceptions import (
     ExpectedPositive, InfrastructurePlanningError, ValidationError)
@@ -23,12 +24,9 @@ def load_and_run(normalization_functions, main_functions, argument_parser):
     try:
         g = load_files(g)
         g = normalize_arguments(normalization_functions, g)
-        d = run(main_functions, g)
+        run(main_functions, g)
     except InfrastructurePlanningError as e:
         exit(e)
-    for k, v in d.items():
-        print('%s = %s' % (k, v))
-    return d
 
 
 def load_arguments(value_by_key):
@@ -89,7 +87,6 @@ def normalize_arguments(normalization_functions, g):
 
 def run(main_functions, g):
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
-
     for f in main_functions:
         if '_total_' in f.func_name:
             g.update(compute(f, g))
@@ -101,147 +98,7 @@ def run(main_functions, g):
                 'node_id': node_id,
                 'local_overrides': dict(g['demand_point_table'].ix[node_id])})
             node_d.update(compute(f, l, g))
-
-    """
-    ls = [node_d for node_id, node_d in g[
-        'infrastructure_graph'
-    ].nodes_iter(data=True) if 'name' in node_d]  # Exclude fake nodes
-
-    # Save
-    target_folder = g['target_folder']
-    summary_folder = make_folder(join(target_folder, 'summary'))
-    save_summary(summary_folder, ls, g, VARIABLE_NAMES)
-
-    # Prepare summaries
-    d = OrderedDict()
-    graph = g['infrastructure_graph']
-    # TODO: Use JSON after we convert pandas series into dictionaries
-    write_gpickle(graph, join(target_folder, 'infrastructure_graph.pkl'))
-
-    # Map
-    technologies = g['selected_technologies']
-    color_by_technology = {
-        technology: COLORS[i] for i, technology in enumerate(technologies)
-    }
-    columns = [
-        'Name',
-        'Peak Demand (kW)',
-        'Proposed MV Line Length (m)',
-        'Proposed Technology',
-        'Levelized Cost Per kWh Consumed',
-        'Connection Order',
-        'WKT',
-        'FillColor',
-        'RadiusInPixelsRange5-10',
-    ]
-    rows = []
-    for node_id, node_d in graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # Exclude fake nodes
-        longitude, latitude = node_d['longitude'], node_d['latitude']
-        technology = node_d['proposed_technology']
-        rows.append({
-            'Name': node_d['name'],
-            'Peak Demand (kW)': node_d['peak_demand_in_kw'],
-            'Proposed MV Line Length (m)': node_d[
-                'grid_mv_line_adjusted_length_in_meters'],
-            'Proposed Technology': format_technology(technology),
-            'Levelized Cost Per kWh Consumed': node_d[
-                technology + '_local_levelized_cost_per_kwh_consumed'],
-            'Connection Order': node_d.get('order', ''),
-            'WKT': Point(latitude, longitude).wkt,
-            'FillColor': color_by_technology[technology],
-            'RadiusInPixelsRange5-10': node_d['peak_demand_in_kw'],
-        })
-    for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
-        node1_d, node2_d = graph.node[node1_id], graph.node[node2_id]
-        name = 'From %s to %s' % (
-            node1_d.get('name', 'the grid'),
-            node2_d.get('name', 'the grid'))
-        peak_demand = max(
-            node1_d['peak_demand_in_kw'],
-            node2_d['peak_demand_in_kw'])
-        line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
-        geometry_wkt = LineString([
-            (node1_d['latitude'], node1_d['longitude']),
-            (node2_d['latitude'], node2_d['longitude']),
-        ])
-        rows.append({
-            'Name': name,
-            'Peak Demand (kW)': peak_demand,
-            'Proposed MV Line Length (m)': line_length,
-            'Proposed Technology': 'Grid',
-            'WKT': geometry_wkt,
-            'FillColor': color_by_technology['grid'],
-        })
-    if 'grid_mv_line_geotable' in g:
-        for geometry_wkt in g['grid_mv_line_geotable']['wkt']:
-            rows.append({
-                'Name': '(Existing MV Line)',
-                'Proposed Technology': 'grid',
-                'WKT': geometry_wkt,
-                'FillColor': color_by_technology['grid'],
-            })
-    infrastructure_geotable_path = join(
-        target_folder, 'infrastructure_map.csv')
-    DataFrame(rows)[columns].to_csv(infrastructure_geotable_path, index=False)
-    d['infrastructure_streets_satellite_geotable_path'] = \
-        infrastructure_geotable_path
-
-    # Show executive summary
-    keys = [
-        'discounted_cost_by_technology',
-        'levelized_cost_by_technology',
-        'count_by_technology',
-    ]
-    table = concat((Series(g[key]) for key in keys), axis=1)
-    table.index.name = 'Technology'
-    table.index = [format_technology(x) for x in table.index]
-    table.columns = [
-        'Discounted Cost', 'Levelized Cost Per kWh Consumed', 'Count']
-    table_path = join(target_folder, 'executive_summary.csv')
-    table.to_csv(table_path)
-    d['executive_summary_table_path'] = table_path
-    # Show edge summary
-    rows = []
-    for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
-        node1_d = graph.node[node1_id]
-        node2_d = graph.node[node2_id]
-        name = 'From %s to %s' % (
-            node1_d.get('name', 'the grid'),
-            node2_d.get('name', 'the grid'))
-        line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
-        discounted_cost = edge_d['grid_mv_line_discounted_cost']
-        rows.append([name, line_length, discounted_cost])
-    table_path = join(target_folder, 'grid_mv_line.csv')
-    DataFrame(rows, columns=[
-        'Name', 'Length (m)', 'Discounted Cost']).sort_values(
-        'Length (m)',
-    ).to_csv(table_path, index=False)
-    d['grid_mv_line_table_path'] = table_path
-    # Show node summary
-    rows = []
-    for node_id, node_d in graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # We have a fake node
-        columns = [node_d['name'], node_d.get('order', '')]
-        columns.extend(node_d[
-            x + '_local_levelized_cost_per_kwh_consumed'
-        ] for x in technologies)
-        columns.append(format_technology(node_d['proposed_technology']))
-        rows.append(columns)
-    table_path = join(target_folder, 'levelized_cost_by_technology.csv')
-    DataFrame(rows, columns=[
-        'Name', 'Connection Order',
-    ] + [
-        format_technology(x) for x in technologies
-    ] + ['Proposed Technology']).sort_values(
-        'Connection Order',
-    ).to_csv(table_path, index=False)
-    d['levelized_cost_by_technology_table_path'] = table_path
-
-    return d
-    """
+    return g
 
 
 def save_summary(target_folder, ls, g, variable_names):
@@ -259,6 +116,15 @@ def save_summary(target_folder, ls, g, variable_names):
     example_table = table.reset_index().groupby(
         'proposed technology').first().reset_index().transpose()
     example_table.to_csv(join(target_folder, 'examples.csv'), header=False)
+
+
+def save_shapefile(target_path, geotable):
+    # TODO: Save extra attributes
+    geometries = [wkt.loads(x) for x in geotable['wkt']]
+    # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
+    flipped_geometries = flip_geometry_coordinates(geometries)
+    geometryIO.save(target_path, geometryIO.proj4LL, flipped_geometries)
+    return target_path
 
 
 def compute(f, l, g=None, prefix=''):
@@ -345,10 +211,6 @@ def rename_keys(value_by_key, prefix='', suffix=''):
             key = key + suffix
         d[key] = value
     return d
-
-
-def format_technology(x):
-    return x.replace('_', ' ').title()
 
 
 def _get_argument_file_name(k, v):
