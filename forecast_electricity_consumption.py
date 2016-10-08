@@ -120,8 +120,7 @@ def estimate_electricity_consumption_per_capita(target_year, country_name):
     t = ELECTRICITY_CONSUMPTION_PER_CAPITA_BY_YEAR_TABLE
     country_t = _get_country_table(t, 'Country Name', country_name)
     if not len(country_t):
-        raise InvalidData(
-            'missing electricity_consumption_per_capita country_name')
+        raise InvalidData('missing country_name')
     year_packs = []
     for column_name in country_t.columns:
         try:
@@ -133,8 +132,7 @@ def estimate_electricity_consumption_per_capita(target_year, country_name):
             continue
         year_packs.append((year, value))
     if not year_packs:
-        raise InvalidData(
-            'missing electricity_consumption_per_capita year_value')
+        raise InvalidData('missing year_value')
     estimate_electricity_consumption_per_capita = \
         get_interpolated_spline_extrapolated_linear_function(year_packs)
     return estimate_electricity_consumption_per_capita(target_year)

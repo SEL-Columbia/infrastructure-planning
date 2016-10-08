@@ -558,26 +558,49 @@ It appears that the shapefile contains a MultiLineString.
 
 20161004-1230 - 20161004-1300: 30 minutes
 
+20161007-1045 - 20161007-1115: 30 minutes
+
+20161007-1945 - 20161007-2015: 30 minutes
+
+    Option 1: Store coordinate tuple as node id
+    _ Option 2: Store wkb for each node and edge
+
+Should we allow nodes to have identical coordinates?  If we don't allow it, then it will be much easier to save the shapefile.  Let me think.
+
+If we allow duplicate coordinates, then we will need to attach a wkb for each node and edge.  The wkb for the edge will be constructed using the linestring.  Maybe that's not so hard either.
+
+I think we should be able to accept a wkt for each node, then we get the centroid of that and make a linestring for each edge. If there is no wkt, then just get the latitude and longitude.
+
+The main question is whether we should allow nodes to have identical coordinates.  We should err on the side of having simpler code.  Therefore I vote for having only unique coordinates.
+
+    Make sure each node has unique coordinates
+
+    Separate Coster from Networker and Sequencer
+    Separate Aggregator
+        Look at label for node and compute metrics by cluster
+    Write positive test
+
 # Tasks
 
 ## Important and easy
 
-    Add acknowledgments to separate tools
+    Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
 
     Test when there are demand points but no consumption
     Test when there are no demand points
     Add unelectrified option for zero consumption
 
+    Add acknowledgments to separate tools
     Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
-
-    Consider estimating population growth using projected population year
-    Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
 
 
+
+    Consider estimating population growth using projected population year
+    Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
 
     Report projected population count
     Report projected connection count
@@ -586,7 +609,6 @@ It appears that the shapefile contains a MultiLineString.
 
     Draft jupyter notebook that starts from the population of a single node
 
-    Check for required columns like name
     Add warning if peak_demand_in_kw is nan or zero
     Use global value if local value is nan
     Test that we only use most recent year if multiple years are given
@@ -649,13 +671,11 @@ It appears that the shapefile contains a MultiLineString.
     Add instructions on how to set up the system on a new machine
 
     Add household count and total and existing proposed grid length to summary
-    Make it easy to clone scenarios
     Remove unnecessary files in output
     Fix command line overriding JSON
         Add test
 
     Let user download table
-    Document ways that users can debug model
     Replace peak_demand with household and population info when clicking on node
     Explain that technologies chosen via networker not in coster #10
     Handle empty null values for number of people per household
@@ -667,13 +687,9 @@ It appears that the shapefile contains a MultiLineString.
     Convert tools into jupyter notebooks
     Add specification for model to jupyter notebooks
 
-    Separate Coster from Networker and Sequencer
-    Separate Aggregator
-        Look at label for node and compute metrics by cluster
-    Write positive test
-
 ## Unimportant and easy
 
+    Document ways that users can debug model
     Consider having different transformer tables for different locations
     Write test to make sure blank entries in local override columns use global value
     Write test to make sure local override for household consumption works

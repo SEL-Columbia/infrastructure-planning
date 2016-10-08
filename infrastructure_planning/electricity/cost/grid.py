@@ -1,7 +1,7 @@
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.math import divide_safely
 
-from ...exceptions import ExpectedPositive, InfrastructurePlanningError
+from ...exceptions import ExpectedPositive, ValidationError
 from ...finance.valuation import compute_discounted_cash_flow
 from ...production import adjust_for_losses, prepare_system_cost
 from .mini_grid import estimate_lv_connection_cost, estimate_lv_line_cost
@@ -56,10 +56,9 @@ def estimate_electricity_production_cost(
         grid_mv_transformer_load_power_factor,
         grid_electricity_production_cost_per_kwh):
     if not -1 <= grid_mv_transformer_load_power_factor <= 1:
-        raise InfrastructurePlanningError(
-            'grid_mv_transformer_load_power_factor', (
-                'power factor (%s) must be between '
-                '-1 and 1' % grid_mv_transformer_load_power_factor))
+        raise ValidationError(
+            'grid_mv_transformer_load_power_factor',
+            'must be between -1 and +1')
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
         grid_system_loss_as_percent_of_total_production / 100.,
