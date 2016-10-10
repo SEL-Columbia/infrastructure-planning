@@ -1,10 +1,10 @@
 from invisibleroads_macros.configuration import TerseArgumentParser
 
 from infrastructure_planning.macros import load_and_run
+from infrastructure_planning.preprocessors import (
+    normalize_demand_point_table)
 
-"""
 from infrastructure_planning.demography.exponential import estimate_population
-"""
 
 
 def add_arguments_for_estimate_population(x):
@@ -18,4 +18,8 @@ def add_arguments_for_estimate_population(x):
 if __name__ == '__main__':
     x = TerseArgumentParser()
     add_arguments_for_estimate_population(x)
-    load_and_run(x)
+    load_and_run([
+        normalize_demand_point_table,
+    ], [
+        estimate_population,
+    ], x)

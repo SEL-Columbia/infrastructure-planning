@@ -1,3 +1,4 @@
+import csv
 import geometryIO
 import inspect
 import simplejson as json
@@ -60,9 +61,12 @@ def save_arguments(g, script_path):
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
         d[k] = file_name
-    # Save global arguments
+    # Save global arguments as JSON
     json.dump(d, open(join(arguments_folder, 'arguments.json'), 'w'))
-    g['target_folder'] = target_folder
+    # Save global arguments as CSV
+    csv_writer = csv.writer(open(join(arguments_folder, 'arguments.csv'), 'w'))
+    for x in d.items():
+        csv_writer.writerow(x)
 
 
 def normalize_arguments(normalization_functions, g):
