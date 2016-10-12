@@ -579,14 +579,25 @@ The main question is whether we should allow nodes to have identical coordinates
 
 Actually, we just explored the option of making sure each node has unique coordinates and we found that it would prevent allowing time series rows where there are multiple population years. It would also prevent the current usage of node_id as integer index, which we are currently assuming as returned by networker. Let's just go the wkb route.
 
+We decided not to use networkx to save the shapefile because it doesn't save attributes.
+
+20161012-1245 - 20161012-1300: 15 minutes
+
+    + Record new feature requests
+
+# Tasks
+
     Separate Coster from Networker and Sequencer
     Separate Aggregator
         Look at label for node and compute metrics by cluster
     Write positive test
 
-# Tasks
-
 ## Important and easy
+
+    Explain that network minimum point is minimum size of grid network
+
+    Restore glossary
+    Check if we can override selected_technologies on a local basis
 
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
@@ -603,8 +614,18 @@ Actually, we just explored the option of making sure each node has unique coordi
 
 
 
+    Get default parameters for tanzania training
+
     Consider estimating population growth using projected population year
-    Consider total population and % connected to compute (unconnected) household count as suggested by Edwin
+    Consider total population and % connected to compute unconnected household count
+
+    Explain that electricity cost per kwh is the same as busbar cost
+
+
+
+    Check whether we can override selected technologies
+
+
 
     Report projected population count
     Report projected connection count
@@ -687,11 +708,17 @@ Actually, we just explored the option of making sure each node has unique coordi
 
 ## Important and hard
 
+    Consider simplified version
+        Has single rows replace tables
+        Ignore installation cost percents for parts that don't need them
+
     Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Convert tools into jupyter notebooks
     Add specification for model to jupyter notebooks
 
 ## Unimportant and easy
+
+    Get bullet points of possible components of system loss for documentation
 
     Document ways that users can debug model
     Consider having different transformer tables for different locations
@@ -726,6 +753,8 @@ Actually, we just explored the option of making sure each node has unique coordi
         Check whether different loan year affects breakeven time (whether we need to add loan year)
 
 ## Unimportant and hard
+
+    Consider splitting line_length_adjustment_factor for lv and mv
 
     Look into issues with live table override
         Fix table values on fly
