@@ -17,9 +17,9 @@ def estimate_lv_line_cost(
     raw_cost = line_length_in_meters * \
         lv_line_raw_cost_per_meter
     installation_cost = raw_cost * \
-        lv_line_installation_cost_as_percent_of_raw_cost / float(100)
+        lv_line_installation_cost_as_percent_of_raw_cost / 100.
     maintenance_cost_per_year = raw_cost * \
-        lv_line_maintenance_cost_per_year_as_percent_of_raw_cost / float(100)
+        lv_line_maintenance_cost_per_year_as_percent_of_raw_cost / 100.
     replacement_cost_per_year = divide_safely(
         raw_cost + installation_cost, lv_line_lifetime_in_years,
         ExpectedPositive('lv_line_lifetime_in_years'))
@@ -41,9 +41,9 @@ def estimate_lv_connection_cost(
     raw_cost = final_connection_count * \
         lv_connection_raw_cost
     installation_cost = raw_cost * \
-        lv_connection_installation_cost_as_percent_of_raw_cost / float(100)
+        lv_connection_installation_cost_as_percent_of_raw_cost / 100.
     maintenance_cost_per_year = raw_cost * \
-        lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost / float(100)  # noqa
+        lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost / 100.
     replacement_cost_per_year = divide_safely(
         raw_cost + installation_cost, lv_connection_lifetime_in_years,
         ExpectedPositive('lv_connection_lifetime_in_years'))

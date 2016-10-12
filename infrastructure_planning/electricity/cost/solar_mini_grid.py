@@ -22,11 +22,9 @@ def estimate_electricity_production_cost(**keywords):
         ('battery', estimate_solar_mini_grid_battery_cost),
         ('balance', estimate_solar_mini_grid_balance_cost),
     ], keywords, prefix='solar_mini_grid_')
-    solar_mini_grid_system_loss_as_percent_of_total_production = keywords[
-        'solar_mini_grid_system_loss_as_percent_of_total_production']
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         keywords['consumption_in_kwh_by_year'],
-        solar_mini_grid_system_loss_as_percent_of_total_production / 100.)
+        keywords['solar_mini_grid_system_loss_as_percent_of_total_production'])
     d['electricity_production_cost_by_year'] = d.pop('cost_by_year')
     return d
 

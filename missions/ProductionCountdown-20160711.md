@@ -585,6 +585,10 @@ We decided not to use networkx to save the shapefile because it doesn't save att
 
     + Record new feature requests
 
+    _ adjust_for_loss_percents
+    _ adjust_for_loss_fractions
+    adjust_for_losses
+
 # Tasks
 
     Separate Coster from Networker and Sequencer
@@ -593,6 +597,8 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     Write positive test
 
 ## Important and easy
+
+    Add technology cost multiplier
 
     Explain that network minimum point is minimum size of grid network
 
@@ -693,6 +699,8 @@ We decided not to use networkx to save the shapefile because it doesn't save att
         Show population count
         Show initial cost per connection
 
+        Show capacity per household
+
     Add instructions on how to set up the system on a new machine
 
     Add household count and total and existing proposed grid length to summary
@@ -717,6 +725,10 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     Add specification for model to jupyter notebooks
 
 ## Unimportant and easy
+
+    Note that diesel mini grid is night time
+    Note that solar home system might have all sun in summer and none in winter
+    Consider separating distribution loss and system loss
 
     Get bullet points of possible components of system loss for documentation
 

@@ -61,8 +61,8 @@ def estimate_electricity_production_cost(
             'must be between -1 and +1')
     production_in_kwh_by_year = adjust_for_losses(
         consumption_in_kwh_by_year,
-        grid_system_loss_as_percent_of_total_production / 100.,
-        1 - grid_mv_transformer_load_power_factor)
+        grid_system_loss_as_percent_of_total_production,
+        (1 - grid_mv_transformer_load_power_factor) * 100)
     d = {}
     d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
     d['electricity_production_cost_by_year'] = \
@@ -118,13 +118,13 @@ def estimate_grid_mv_line_cost_per_meter(
         grid_mv_line_lifetime_in_years):
     raw_cost_per_meter = grid_mv_line_raw_cost_per_meter
     installation_cost_per_meter = raw_cost_per_meter * \
-        grid_mv_line_installation_cost_as_percent_of_raw_cost
+        grid_mv_line_installation_cost_as_percent_of_raw_cost / 100.
     return {
         'raw_cost_per_meter': raw_cost_per_meter,
         'installation_cost_per_meter': installation_cost_per_meter,
         'maintenance_cost_per_meter_per_year':
             raw_cost_per_meter *
-            grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost,
+            grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost / 100.,  # noqa
         'replacement_cost_per_meter_per_year': divide_safely(
             raw_cost_per_meter + installation_cost_per_meter,
             grid_mv_line_lifetime_in_years,
@@ -140,8 +140,8 @@ def estimate_grid_mv_transformer_cost(
     # Estimate desired capacity
     desired_system_capacity_in_kva = adjust_for_losses(
         peak_demand_in_kw,
-        grid_system_loss_as_percent_of_total_production / 100.,
-        1 - grid_mv_transformer_load_power_factor)
+        grid_system_loss_as_percent_of_total_production,
+        (1 - grid_mv_transformer_load_power_factor) * 100)
     # Choose transformer type
     return prepare_system_cost(
         grid_mv_transformer_table, 'capacity_in_kva',

@@ -5,10 +5,11 @@ from ..exceptions import ExpectedPositive
 from ..macros import interpolate_values
 
 
-def adjust_for_losses(x, *fractional_losses):
+def adjust_for_losses(x, *loss_percents):
     y = x
-    for fractional_loss in fractional_losses:
-        y = divide_safely(y, 1 - fractional_loss, 0)
+    for loss_percent in loss_percents:
+        loss_fraction = loss_percent / 100.
+        y = divide_safely(y, 1 - loss_fraction, 0)
     return y
 
 
@@ -20,13 +21,13 @@ def prepare_system_cost(
     # Extrapolate
     raw_cost = desired_system_capacity * x['raw_cost_per_unit_capacity']
     installation_cost = raw_cost * x[
-        'installation_cost_as_percent_of_raw_cost'] / float(100)
+        'installation_cost_as_percent_of_raw_cost'] / 100.
     return {
         'actual_system_' + capacity_column: int(ceil(desired_system_capacity)),
         'raw_cost': raw_cost,
         'installation_cost': installation_cost,
         'maintenance_cost_per_year': raw_cost * x[
-            'maintenance_cost_per_year_as_percent_of_raw_cost'] / float(100),
+            'maintenance_cost_per_year_as_percent_of_raw_cost'] / 100.,
         'replacement_cost_per_year': divide_safely(
             raw_cost + installation_cost, x['lifetime_in_years'],
             ExpectedPositive('lifetime_in_years')),

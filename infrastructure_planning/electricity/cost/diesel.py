@@ -8,8 +8,7 @@ def estimate_generator_cost(
         peak_demand_in_kw, system_loss_as_percent_of_total_production,
         generator_table):
     desired_system_capacity_in_kw = adjust_for_losses(
-        peak_demand_in_kw,
-        system_loss_as_percent_of_total_production / float(100))
+        peak_demand_in_kw, system_loss_as_percent_of_total_production)
     return prepare_system_cost(
         generator_table, 'capacity_in_kw', desired_system_capacity_in_kw)
 
@@ -22,8 +21,7 @@ def estimate_fuel_cost(
         generator_fuel_liters_consumed_per_kwh,
         fuel_cost_per_liter):
     production_in_kwh_by_year = adjust_for_losses(
-        consumption_in_kwh_by_year,
-        system_loss_as_percent_of_total_production / 100.)
+        consumption_in_kwh_by_year, system_loss_as_percent_of_total_production)
     desired_hours_of_production_by_year = divide_safely(
         production_in_kwh_by_year,
         generator_actual_system_capacity_in_kw, float('inf'))

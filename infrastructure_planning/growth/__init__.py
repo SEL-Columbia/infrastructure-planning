@@ -6,7 +6,7 @@ from ..exceptions import InvalidData
 def get_default_slope(growth_percent, year_packs):
     if hasattr(year_packs, 'tolist'):
         year_packs = year_packs.tolist()
-    return sorted(year_packs)[-1][1] * growth_percent / float(100)
+    return sorted(year_packs)[-1][1] * growth_percent / 100.
 
 
 def get_future_years(target_year, year_packs):

@@ -11,7 +11,7 @@ def estimate_panel_cost(
         panel_table):
     final_production_in_kwh_per_year = adjust_for_losses(
         final_consumption_in_kwh_per_year,
-        system_loss_as_percent_of_total_production / 100.)
+        system_loss_as_percent_of_total_production)
     desired_system_capacity_in_kw = divide_safely(
         final_production_in_kwh_per_year, peak_hours_of_sun_per_year,
         float('inf'))
@@ -31,9 +31,9 @@ def estimate_battery_cost(
     raw_cost = battery_storage_in_kwh * \
         battery_raw_cost_per_battery_kwh
     installation_cost = raw_cost * \
-        battery_installation_cost_as_percent_of_raw_cost
+        battery_installation_cost_as_percent_of_raw_cost / 100.
     maintenance_cost_per_year = raw_cost * \
-        battery_maintenance_cost_per_year_as_percent_of_raw_cost
+        battery_maintenance_cost_per_year_as_percent_of_raw_cost / 100.
     replacement_cost_per_year = divide_safely(
         raw_cost + installation_cost, battery_lifetime_in_years,
         ExpectedPositive('battery_lifetime_in_years'))
@@ -54,9 +54,9 @@ def estimate_balance_cost(
     raw_cost = panel_actual_system_capacity_in_kw * \
         balance_raw_cost_per_panel_kw
     installation_cost = raw_cost * \
-        balance_installation_cost_as_percent_of_raw_cost
+        balance_installation_cost_as_percent_of_raw_cost / 100.
     maintenance_cost_per_year = raw_cost * \
-        balance_maintenance_cost_per_year_as_percent_of_raw_cost
+        balance_maintenance_cost_per_year_as_percent_of_raw_cost / 100.
     replacement_cost_per_year = divide_safely(
         raw_cost + installation_cost, balance_lifetime_in_years,
         ExpectedPositive('balance_lifetime_in_years'))
