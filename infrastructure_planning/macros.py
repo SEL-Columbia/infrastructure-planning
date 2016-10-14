@@ -133,7 +133,7 @@ def save_shapefile(target_path, geotable):
 
 def compute(f, l, g=None, prefix=''):
     'Compute the function using local arguments if possible'
-    value_by_key = rename_keys(compute_raw(f, l, g), prefix=prefix)
+    value_by_key = rename_keys(compute_raw(f, l, g) or {}, prefix=prefix)
     local_overrides = l.get('local_overrides', {})
     for key in local_overrides:
         local_value = local_overrides[key]

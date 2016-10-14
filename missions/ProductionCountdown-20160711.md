@@ -603,6 +603,7 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     Explain that network minimum point is minimum size of grid network
 
     Restore glossary
+        Make keys be separated by underscores
     Check if we can override selected_technologies on a local basis
 
     Check for required columns like name
