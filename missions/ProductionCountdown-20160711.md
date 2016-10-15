@@ -616,31 +616,32 @@ Last week, we discussed different ways to have the user override tables for diff
 
 20161015-1300 - 20161015-1330: 30 minutes
 
+    + Add unelectrified option for zero consumption
+
 # Tasks
+
+    Write test for unelectrified option
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
+    Add acknowledgments to separate tools
+
+## Important and easy
 
     Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Sort add_argument statements by function
-
     Split save_total_summary
     Split save_total_map
-
-## Important and easy
 
     Fix command line overriding JSON
         Add test
     Let user download example table for each table
 
-    Add acknowledgments to separate tools
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
 
     Test when there are demand points but no consumption
     Test when there are no demand points
-    Add unelectrified option for zero consumption
     Write positive test
-
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
 
     Restore glossary
         Make keys be separated by underscores
