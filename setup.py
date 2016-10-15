@@ -27,7 +27,7 @@ setup(
     install_requires=[
         'python-dateutil',
         'geopy',
-        'invisibleroads-macros>=0.7.1',
+        'invisibleroads-macros>=0.7.2',
         'simplejson',
     ],
     tests_require=[
