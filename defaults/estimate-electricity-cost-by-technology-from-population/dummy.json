@@ -1,6 +1,7 @@
 {
     "average_distance_between_buildings_in_meters": 25.0,
     "connection_type_table_path": "example-consumption-by-connection-type.csv",
+    "consumption_threshold_in_kwh": 0,
     "consumption_during_peak_hours_as_percent_of_total_consumption": 40.0,
     "demand_point_table_path": "leona-selected-demand-points.csv",
     "diesel_mini_grid_fuel_cost_per_liter": 1.08,

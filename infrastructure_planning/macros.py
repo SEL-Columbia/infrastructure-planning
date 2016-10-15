@@ -18,6 +18,15 @@ from .exceptions import (
 from .parsers import load_files
 
 
+class InfrastructureGraph(Graph):
+
+    def cycle_nodes(self):
+        for node_id, node_d in self.nodes_iter(data=True):
+            if 'name' not in node_d:
+                continue  # We have a fake node
+            yield node_id, node_d
+
+
 def load_and_run(normalization_functions, main_functions, argument_parser):
     args = argument_parser.parse_args()
     g = load_arguments(args.__dict__)
@@ -95,9 +104,7 @@ def run(main_functions, g):
         if '_total_' in f.func_name:
             g.update(compute(f, g))
             continue
-        for node_id, node_d in g['infrastructure_graph'].nodes_iter(data=True):
-            if 'name' not in node_d:
-                continue  # We have a fake node
+        for node_id, node_d in g['infrastructure_graph'].cycle_nodes():
             l = merge_dictionaries(node_d, {
                 'node_id': node_id,
                 'local_overrides': dict(g['demand_point_table'].ix[node_id])})
@@ -168,14 +175,14 @@ def get_by_prefix(value_by_key, prefix):
 
 
 def get_graph_from_table(table):
-    graph = Graph()
+    graph = InfrastructureGraph()
     for index, row in table.iterrows():
         graph.add_node(index, dict(row))
     return graph
 
 
 def get_table_from_graph(graph, keys=None):
-    index, rows = zip(*graph.nodes_iter(data=True))
+    index, rows = zip(*graph.cycle_nodes())
     if keys:
         rows = ({k: d[k] for k in keys} for d in rows)
     return DataFrame(rows, index=index)

@@ -44,6 +44,25 @@ def estimate_external_cost_by_technology(selected_technologies, **keywords):
     return d
 
 
+def estimate_discounted_cost(selected_technologies, **keywords):
+    d = {}
+    for technology in selected_technologies:
+        d[technology + '_local_discounted_cost'] = keywords[
+            technology + '_internal_discounted_cost'] + keywords[
+            technology + '_external_discounted_cost']
+    return d
+
+
+def estimate_levelized_cost(
+        selected_technologies, discounted_consumption_in_kwh, **keywords):
+    d = {}
+    for technology in selected_technologies:
+        discounted_cost = keywords[technology + '_local_discounted_cost']
+        d[technology + '_local_levelized_cost_per_kwh_consumed'] = \
+            divide_safely(discounted_cost, discounted_consumption_in_kwh, 0)
+    return d
+
+
 def prepare_component_cost_by_year(component_packs, keywords, prefix):
     d = {}
     cost_by_year_index = np.zeros(keywords['time_horizon_in_years'] + 1)

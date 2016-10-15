@@ -101,7 +101,6 @@ def estimate_grid_mv_line_budget(
         ExpectedPositive('grid_mv_line_discounted_cost_per_meter'))
     d['grid_mv_line_discounted_cost_per_meter'] = \
         grid_mv_line_discounted_cost_per_meter
-    # TODO: Update networker to accept line_length_adjustment_factor
     # Divide line distance by factor here, which should be equivalent to
     # multiplying line distance by factor when computing the network
     d['grid_mv_line_adjusted_budget_in_meters'] = divide_safely(

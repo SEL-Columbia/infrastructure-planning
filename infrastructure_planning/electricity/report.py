@@ -1,15 +1,9 @@
-from collections import OrderedDict
 from invisibleroads_macros.disk import make_folder
-from invisibleroads_macros.iterable import OrderedDefaultDict
-from invisibleroads_macros.math import divide_safely
 from os.path import join
 from pandas import DataFrame, Series, concat
 from shapely.geometry import LineString, Point
 
-from networker.networker_runner import NetworkerRunner
-from sequencer import NetworkPlan, Sequencer
-
-from .macros import get_table_from_graph, save_shapefile, save_summary
+from ..macros import save_summary
 
 
 VARIABLE_NAMES_TEXT = """\
@@ -103,143 +97,13 @@ solar_mini_grid_lv_line_replacement_cost_per_year
 VARIABLE_NAMES = VARIABLE_NAMES_TEXT.splitlines()
 
 
-def assemble_total_mv_line_network(
-        target_folder, infrastructure_graph, grid_mv_line_geotable,
-        grid_mv_network_minimum_point_count):
-    graph = infrastructure_graph
-    node_table = get_table_from_graph(graph, [
-        'longitude', 'latitude', 'grid_mv_line_adjusted_budget_in_meters'])
-    node_table_path = join(target_folder, 'nodes-networker.csv')
-    node_table.to_csv(node_table_path)
-    nwk_settings = {
-        'demand_nodes': {
-            'filename': node_table_path,
-            'x_column': 'longitude',
-            'y_column': 'latitude',
-            'budget_column': 'grid_mv_line_adjusted_budget_in_meters',
-        },
-        'network_algorithm': 'mod_boruvka',
-        'network_parameters': {
-            'minimum_node_count': grid_mv_network_minimum_point_count,
-        },
-    }
-    if len(grid_mv_line_geotable):
-        grid_mv_line_shapefile_path = join(
-            target_folder, 'existing_grid_mv_line.shp')
-        save_shapefile(grid_mv_line_shapefile_path, grid_mv_line_geotable)
-        nwk_settings['existing_networks'] = {
-            'filename': grid_mv_line_shapefile_path,
-            'budget_value': 0,
-        }
-    nwk = NetworkerRunner(nwk_settings, target_folder)
-    nwk.validate()
-    msf = nwk.run()
-    for node_id in msf.nodes_iter():
-        if node_id in graph:
-            continue
-        # Add fake nodes (I think that is what these are)
-        longitude, latitude = msf.coords[node_id]
-        graph.add_node(node_id, {
-            'longitude': longitude,
-            'latitude': latitude,
-            'population': 0,
-            'peak_demand_in_kw': 0,
-        })
-    graph.add_edges_from(msf.edges_iter())
-    return {'infrastructure_graph': graph}
-
-
-def sequence_total_mv_line_network(target_folder, infrastructure_graph):
-    graph = infrastructure_graph
-    if not graph.edges():
-        return {}  # The network is empty and there is nothing to sequence
-    node_table = get_table_from_graph(graph, [
-        'longitude', 'latitude', 'population', 'peak_demand_in_kw'])
-    node_table = node_table.rename(columns={'longitude': 'X', 'latitude': 'Y'})
-    node_table = node_table[node_table.population > 0]  # Ignore fake nodes
-    node_table_path = join(target_folder, 'nodes-sequencer.csv')
-    node_table.to_csv(node_table_path)
-    edge_shapefile_path = join(target_folder, 'edges.shp')
-    nwp = NetworkPlan.from_files(
-        edge_shapefile_path, node_table_path, prioritize='population',
-        proj='+proj=longlat +datum=WGS84 +no_defs')
-    model = Sequencer(nwp, 'peak.demand.in.kw')
-    model.sequence()
-    order_series = model.output_frame['Sequence..Far.sighted.sequence']
-    for index, order in order_series.iteritems():
-        node_id = model.output_frame['Unnamed..0'][index]
-        graph.node[node_id]['order'] = order
-    return {'infrastructure_graph': graph}
-
-
-def estimate_total_cost(infrastructure_graph, selected_technologies):
-    # Compute levelized costs for selected technology for each node
-    for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # We have a fake node
-        best_standalone_cost = float('inf')
-        best_standalone_technology = 'grid'
-        discounted_consumption = node_d['discounted_consumption_in_kwh']
-        for technology in selected_technologies:
-            discounted_cost = node_d[
-                technology + '_internal_discounted_cost'] + node_d[
-                technology + '_external_discounted_cost']
-            node_d[technology + '_local_discounted_cost'] = discounted_cost
-            node_d[technology + '_local_levelized_cost_per_kwh_consumed'] = \
-                divide_safely(discounted_cost, discounted_consumption, 0)
-            if technology != 'grid' and discounted_cost < best_standalone_cost:
-                best_standalone_cost = discounted_cost
-                best_standalone_technology = technology
-        if infrastructure_graph.edge[node_id]:
-            proposed_technology = 'grid'
-        else:
-            proposed_technology = best_standalone_technology
-            node_d['grid_local_discounted_cost'] = ''
-            node_d['grid_local_levelized_cost_per_kwh_consumed'] = ''
-        node_d['proposed_technology'] = proposed_technology
-        node_d['proposed_cost_per_connection'] = divide_safely(
-            node_d[proposed_technology + '_local_discounted_cost'],
-            node_d['final_connection_count'], 0)
-
-    # Compute levelized costs for selected technology across all nodes
-    count_by_technology = {x: 0 for x in selected_technologies}
-    discounted_cost_by_technology = OrderedDefaultDict(int)
-    discounted_consumption_by_technology = OrderedDefaultDict(int)
-    for node_id, node_d in infrastructure_graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # We have a fake node
-        technology = node_d['proposed_technology']
-        count_by_technology[technology] += 1
-        discounted_cost_by_technology[technology] += node_d[
-            technology + '_local_discounted_cost']
-        discounted_consumption_by_technology[technology] += node_d[
-            'discounted_consumption_in_kwh']
-    levelized_cost_by_technology = OrderedDict()
-    for technology in selected_technologies:
-        discounted_cost = discounted_cost_by_technology[
-            technology]
-        discounted_consumption = discounted_consumption_by_technology[
-            technology]
-        levelized_cost_by_technology[technology] = divide_safely(
-            discounted_cost, discounted_consumption, 0)
-    return {
-        'count_by_technology': count_by_technology,
-        'discounted_cost_by_technology': discounted_cost_by_technology,
-        'levelized_cost_by_technology': levelized_cost_by_technology,
-    }
-
-
 def save_total_summary(
         target_folder, infrastructure_graph, selected_technologies,
         **keywords):
     graph = infrastructure_graph
     g = keywords
 
-    ls = [
-        node_d for node_id, node_d in
-        infrastructure_graph.nodes_iter(data=True)
-        if 'name' in node_d]  # Exclude fake nodes
-
+    ls = [node_d for node_id, node_d in infrastructure_graph.cycle_nodes()]
     summary_folder = make_folder(join(target_folder, 'summary'))
     save_summary(summary_folder, ls, g, VARIABLE_NAMES)
 
@@ -280,9 +144,7 @@ def save_total_summary(
 
     # Show node summary
     rows = []
-    for node_id, node_d in graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # We have a fake node
+    for node_id, node_d in graph.cycle_nodes():
         columns = [node_d['name'], node_d.get('order', '')]
         columns.extend(node_d[
             x + '_local_levelized_cost_per_kwh_consumed'
@@ -320,9 +182,7 @@ def save_total_map(
         'RadiusInPixelsRange5-10',
     ]
     rows = []
-    for node_id, node_d in graph.nodes_iter(data=True):
-        if 'name' not in node_d:
-            continue  # Exclude fake nodes
+    for node_id, node_d in graph.cycle_nodes():
         longitude, latitude = node_d['longitude'], node_d['latitude']
         technology = node_d['proposed_technology']
         rows.append({

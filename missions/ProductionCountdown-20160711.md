@@ -589,6 +589,15 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     _ adjust_for_loss_fractions
     adjust_for_losses
 
+20161014-2100 - 20161014-2130: 30 minutes
+
+    + Review code
+
+20161015-0000 - 20161015-0030: 30 minutes
+
+    from infrastructure_planning.electricity.network import (assemble_total_mv_line_network, sequence_total_mv_line_network)
+    _ from infrastructure_planning.electricity.cost.grid import (assemble_total_mv_line_network, sequence_total_mv_line_network)
+
 # Tasks
 
     Separate Coster from Networker and Sequencer
@@ -727,12 +736,12 @@ We decided not to use networkx to save the shapefile because it doesn't save att
 
 ## Unimportant and easy
 
+    Consider splitting line_length_adjustment_factor for lv and mv
     Note that diesel mini grid is night time
     Note that solar home system might have all sun in summer and none in winter
     Consider separating distribution loss and system loss
 
     Get bullet points of possible components of system loss for documentation
-
     Document ways that users can debug model
     Consider having different transformer tables for different locations
     Write test to make sure blank entries in local override columns use global value
@@ -766,8 +775,6 @@ We decided not to use networkx to save the shapefile because it doesn't save att
         Check whether different loan year affects breakeven time (whether we need to add loan year)
 
 ## Unimportant and hard
-
-    Consider splitting line_length_adjustment_factor for lv and mv
 
     Look into issues with live table override
         Fix table values on fly

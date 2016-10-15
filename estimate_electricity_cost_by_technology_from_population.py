@@ -12,21 +12,25 @@ from infrastructure_planning.preprocessors import (
     normalize_grid_mv_line_geotable)
 
 from infrastructure_planning.demography.exponential import estimate_population
+from infrastructure_planning.electricity.analysis import (
+    estimate_proposed_cost_per_connection,
+    estimate_total_count_by_technology,
+    estimate_total_discounted_cost_by_technology,
+    estimate_total_levelized_cost_by_technology, pick_proposed_technology)
 from infrastructure_planning.electricity.consumption import (
     estimate_consumption_profile)
 from infrastructure_planning.electricity.consumption.linear import (
     estimate_consumption_from_connection_type)
-from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.cost import (
-    estimate_internal_cost_by_technology, estimate_external_cost_by_technology)
+    estimate_discounted_cost, estimate_external_cost_by_technology,
+    estimate_internal_cost_by_technology, estimate_levelized_cost)
 from infrastructure_planning.electricity.cost.grid import (
     estimate_grid_mv_line_budget)
-from infrastructure_planning.aggregators import (
-    assemble_total_mv_line_network,
-    sequence_total_mv_line_network,
-    estimate_total_cost,
-    save_total_summary,
-    save_total_map)
+from infrastructure_planning.electricity.demand import estimate_peak_demand
+from infrastructure_planning.electricity.network import (
+    assemble_total_grid_mv_line_network, sequence_total_grid_mv_line_network)
+from infrastructure_planning.electricity.report import (
+    save_total_summary, save_total_map)
 
 from estimate_grid_mv_line_budget_in_meters import (
     add_arguments_for_estimate_population)
@@ -69,6 +73,9 @@ if __name__ == '__main__':
         metavar='PATH')
     x.add_argument(
         '--number_of_people_per_household',
+        metavar='FLOAT', type=float)
+    x.add_argument(
+        '--consumption_threshold_in_kwh',
         metavar='FLOAT', type=float)
     x.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',
@@ -278,10 +285,16 @@ if __name__ == '__main__':
         estimate_peak_demand,
         estimate_internal_cost_by_technology,
         estimate_grid_mv_line_budget,
-        assemble_total_mv_line_network,
-        sequence_total_mv_line_network,
+        assemble_total_grid_mv_line_network,
+        sequence_total_grid_mv_line_network,
         estimate_external_cost_by_technology,
-        estimate_total_cost,
+        estimate_discounted_cost,
+        estimate_levelized_cost,
+        pick_proposed_technology,
+        estimate_proposed_cost_per_connection,
+        estimate_total_count_by_technology,
+        estimate_total_discounted_cost_by_technology,
+        estimate_total_levelized_cost_by_technology,
         save_total_summary,
         save_total_map,
     ], x)
