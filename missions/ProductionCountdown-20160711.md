@@ -614,12 +614,15 @@ Last week, we discussed different ways to have the user override tables for diff
     _ Ignore installation cost percents for parts that don't need them
     + Clean task list
 
+20161015-1300 - 20161015-1330: 30 minutes
+
 # Tasks
+
+    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
+    Sort add_argument statements by function
 
     Split save_total_summary
     Split save_total_map
-    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
-    Sort add_argument statements by function
 
 ## Important and easy
 

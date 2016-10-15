@@ -76,9 +76,9 @@ The following column names in the *Demand Point Table* will override market coun
 #### Number of People per Household
 {number_of_people_per_household}
 
-#### Consumption Threshold in kWh
-Specify the minimum consumption that a location must have in order to be considered for electrification.
-{consumption_threshold_in_kwh}
+#### Consumption Threshold in kWh per Year
+Specify the minimum consumption per year that a location must have in order to be considered for electrification.
+{consumption_threshold_in_kwh_per_year}
 
 #### Consumption during Peak Hours as Percent of Total Consumption
 {consumption_during_peak_hours_as_percent_of_total_consumption}

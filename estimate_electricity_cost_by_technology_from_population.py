@@ -75,7 +75,7 @@ if __name__ == '__main__':
         '--number_of_people_per_household',
         metavar='FLOAT', type=float)
     x.add_argument(
-        '--consumption_threshold_in_kwh',
+        '--consumption_threshold_in_kwh_per_year',
         metavar='FLOAT', type=float)
     x.add_argument(
         '--consumption_during_peak_hours_as_percent_of_total_consumption',

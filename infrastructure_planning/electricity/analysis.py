@@ -5,7 +5,7 @@ from invisibleroads_macros.math import divide_safely
 
 def pick_proposed_technology(
         infrastructure_graph, selected_technologies, node_id,
-        consumption_threshold_in_kwh, **keywords):
+        consumption_threshold_in_kwh_per_year, **keywords):
     d = {}
     # If the node is connected to the network, choose grid
     if infrastructure_graph.edge[node_id]:
@@ -13,10 +13,10 @@ def pick_proposed_technology(
         return d
     d['grid_local_discounted_cost'] = ''
     d['grid_local_levelized_cost_per_kwh_consumed'] = ''
-    # If the consumption is below threshold, choose unelectrified
+    # If the consumption is zero or below threshold, choose unelectrified
     proposed_technology = 'unelectrified'
-    discounted_consumption = keywords['discounted_consumption_in_kwh']
-    if discounted_consumption < consumption_threshold_in_kwh:
+    x = keywords['final_consumption_in_kwh_per_year']
+    if x == 0 or x < consumption_threshold_in_kwh_per_year:
         d['proposed_technology'] = proposed_technology
         return d
     # Choose best standalone technology
@@ -34,26 +34,28 @@ def pick_proposed_technology(
 
 def estimate_proposed_cost_per_connection(
         proposed_technology, final_connection_count, **keywords):
-    d = {}
-    d['proposed_cost_per_connection'] = divide_safely(
-        keywords[proposed_technology + '_local_discounted_cost'],
+    proposed_cost_per_connection = divide_safely(
+        keywords.get(proposed_technology + '_local_discounted_cost', 0),
         final_connection_count, 0)
-    return d
+    return {'proposed_cost_per_connection': proposed_cost_per_connection}
 
 
 def estimate_total_count_by_technology(
         infrastructure_graph, selected_technologies):
-    count_by_technology = {x: 0 for x in selected_technologies}
+    count_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.cycle_nodes():
         technology = node_d['proposed_technology']
         count_by_technology[technology] += 1
     return {'count_by_technology': count_by_technology}
 
 
-def estimate_total_discounted_cost_by_technology(infrastructure_graph):
+def estimate_total_discounted_cost_by_technology(
+        infrastructure_graph, selected_technologies):
     discounted_cost_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.cycle_nodes():
         technology = node_d['proposed_technology']
+        if technology not in selected_technologies:
+            continue
         discounted_cost_by_technology[technology] += node_d[
             technology + '_local_discounted_cost']
     return {'discounted_cost_by_technology': discounted_cost_by_technology}
@@ -65,6 +67,8 @@ def estimate_total_levelized_cost_by_technology(
     discounted_consumption_by_technology = OrderedDefaultDict(int)
     for node_id, node_d in infrastructure_graph.cycle_nodes():
         technology = node_d['proposed_technology']
+        if technology not in selected_technologies:
+            continue
         discounted_consumption_by_technology[technology] += node_d[
             'discounted_consumption_in_kwh']
     levelized_cost_by_technology = OrderedDict()

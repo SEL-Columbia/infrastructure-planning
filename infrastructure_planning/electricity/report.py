@@ -166,9 +166,8 @@ def save_total_map(
         grid_mv_line_geotable):
     graph = infrastructure_graph
     colors = 'bgrcmykw'
-    color_by_technology = {
-        x: colors[i] for i, x in enumerate(selected_technologies)
-    }
+    color_by_technology = {x: colors[i] for i, x in enumerate([
+        'unelectrified'] + selected_technologies)}
     columns = [
         'Name',
         'Peak Demand (kW)',
@@ -184,14 +183,15 @@ def save_total_map(
     for node_id, node_d in graph.cycle_nodes():
         longitude, latitude = node_d['longitude'], node_d['latitude']
         technology = node_d['proposed_technology']
+        levelized_cost = node_d.get(
+            technology + '_local_levelized_cost_per_kwh_consumed', 0)
         rows.append({
             'Name': node_d['name'],
             'Peak Demand (kW)': node_d['peak_demand_in_kw'],
             'Proposed MV Line Length (m)': node_d[
                 'grid_mv_line_adjusted_length_in_meters'],
             'Proposed Technology': format_technology(technology),
-            'Levelized Cost Per kWh Consumed': node_d[
-                technology + '_local_levelized_cost_per_kwh_consumed'],
+            'Levelized Cost Per kWh Consumed': levelized_cost,
             'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
