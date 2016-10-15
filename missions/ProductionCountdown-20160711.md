@@ -598,61 +598,59 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     from infrastructure_planning.electricity.network import (assemble_total_mv_line_network, sequence_total_mv_line_network)
     _ from infrastructure_planning.electricity.cost.grid import (assemble_total_mv_line_network, sequence_total_mv_line_network)
 
+20161015-0100 - 20161015-0130: 30 minutes
+
+    + Separate Coster from Networker and Sequencer
+    + Separate Aggregator
+
+Last week, we discussed different ways to have the user override tables for different locations. The solution that Modi proposed is to have a cost multiplier for each technology.
+
+    _ Consider having different transformer tables for different locations
+    _ Look through past np errors
+    _ Modify networker to accept line_length_adjustment_factor
+    _ Consider using classes for individual part computations for inheritance
+    _ Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
+    _ Add specification for model to jupyter notebooks
+    _ Ignore installation cost percents for parts that don't need them
+    + Clean task list
+
 # Tasks
 
-    Separate Coster from Networker and Sequencer
-    Separate Aggregator
-        Look at label for node and compute metrics by cluster
-    Write positive test
+    Split save_total_summary
+    Split save_total_map
+    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
+    Sort add_argument statements by function
 
 ## Important and easy
 
-    Add technology cost multiplier
+    Fix command line overriding JSON
+        Add test
+    Let user download example table for each table
 
-    Explain that network minimum point is minimum size of grid network
-
-    Restore glossary
-        Make keys be separated by underscores
-    Check if we can override selected_technologies on a local basis
-
+    Add acknowledgments to separate tools
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
 
     Test when there are demand points but no consumption
     Test when there are no demand points
     Add unelectrified option for zero consumption
-
-    Add acknowledgments to separate tools
-    Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
+    Write positive test
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
 
-
-
-    Get default parameters for tanzania training
-
-    Consider estimating population growth using projected population year
-    Consider total population and % connected to compute unconnected household count
-
+    Restore glossary
+        Make keys be separated by underscores
+    Explain that network minimum point is minimum size of grid network
     Explain that electricity cost per kwh is the same as busbar cost
+    Explain that technologies chosen via networker not in coster #10
 
-
-
-    Check whether we can override selected technologies
-
-
-
-    Report projected population count
-    Report projected connection count
-    Need total initial and total recurring costs
-    Need intermediate costs like diesel fuel cost per year
-
-    Draft jupyter notebook that starts from the population of a single node
 
     Add warning if peak_demand_in_kw is nan or zero
     Use global value if local value is nan
     Test that we only use most recent year if multiple years are given
+    Handle empty null values for number of people per household
+
 
     Generate points.csv
     Generate points.shp
@@ -699,6 +697,10 @@ We decided not to use networkx to save the shapefile because it doesn't save att
 
     Include essential properties in shapefile
         Check shapefile column name length limit
+    Report projected population count
+    Report projected connection count
+    Need total initial and total recurring costs
+    Need intermediate costs like diesel fuel cost per year
 
     Update executive summary by technology
         Show initial
@@ -708,55 +710,50 @@ We decided not to use networkx to save the shapefile because it doesn't save att
         Show connection count
         Show population count
         Show initial cost per connection
-
         Show capacity per household
-
-    Add instructions on how to set up the system on a new machine
-
     Add household count and total and existing proposed grid length to summary
     Remove unnecessary files in output
-    Fix command line overriding JSON
-        Add test
-
-    Let user download table
     Replace peak_demand with household and population info when clicking on node
-    Explain that technologies chosen via networker not in coster #10
-    Handle empty null values for number of people per household
-    Update installation requirements
+
+
+    Check if we can override selected_technologies on a local basis
+    Add technology cost multiplier
+    Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
+    Consider estimating population growth using projected population year
+    Consider total population and % connected to compute unconnected household count
+
+
+    Add instructions on how to set up the system on a new machine
+        Update installation requirements
+    Get default parameters for tanzania training
+    Draft jupyter notebook that starts from the population of a single node
 
 ## Important and hard
 
-    Consider simplified version
-        Has single rows replace tables
-        Ignore installation cost percents for parts that don't need them
-
-    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
+    Have single rows replace tables
     Convert tools into jupyter notebooks
-    Add specification for model to jupyter notebooks
+        Make notebook for each technology that models only that technology
 
 ## Unimportant and easy
 
-    Consider splitting line_length_adjustment_factor for lv and mv
+    Write test to make sure blank entries in local override columns use global value
+    Write test to make sure local override for household consumption works
+    Make sure that capacities in tables are greater than zero
+    Make sure that lifetimes in tables are greater than zero
+
     Note that diesel mini grid is night time
     Note that solar home system might have all sun in summer and none in winter
+    Consider splitting line_length_adjustment_factor for lv and mv
     Consider separating distribution loss and system loss
 
     Get bullet points of possible components of system loss for documentation
     Document ways that users can debug model
-    Consider having different transformer tables for different locations
-    Write test to make sure blank entries in local override columns use global value
-    Write test to make sure local override for household consumption works
-
-    Make sure that capacities in tables are greater than zero
-    Make sure that lifetimes in tables are greater than zero
 
     Show overrided columns
-    Let user download example table for each table
     Show simple map in addition to satellite map
     Adjust map colors to match old system
     Add legend to map
 
-    Make notebook for each technology that only does modelling for that technology
     Add meta tool to explore demand threshold by varying household demand to change mvMax
     Consider tools that fill certain values based on administrative boundary
     Consider tools that fill certain values based on urban vs rural
@@ -769,22 +766,16 @@ We decided not to use networkx to save the shapefile because it doesn't save att
     Cite "Electric Sales, Revenue, and Average Price"
         http://www.eia.gov/electricity/sales_revenue_cost/index.cfm
         http://www.eia.gov/electricity/sales_revenue_cost/xls/table10.xls
-
     Update compute-discounted-cost
         Define loan_year in compute discounted cost
         Check whether different loan year affects breakeven time (whether we need to add loan year)
 
 ## Unimportant and hard
 
-    Look into issues with live table override
-        Fix table values on fly
+    Look at label for node and compute metrics by cluster
+    Look into issues adjusting table values directly on page
     Show proposed network in different color or style from existing
+    Move grow_exponentially into growth
+    Make similar functions consistent with each other
     Consider letting user add row or column
-    Clean up
-        Move grow_exponentially into growth
-        Make similar functions consistent with each other
     Consider accepting net present value vs consumption curve for energy source X
-        Explain that net present value is a special case of discounted cash flow when there is spending in the first few years
-    Look through past np errors
-    Modify networker to accept line_length_adjustment_factor
-    Consider using classes for individual part computations for inheritance

@@ -6,7 +6,7 @@ from shapely.geometry import LineString, Point
 from ..macros import save_summary
 
 
-VARIABLE_NAMES_TEXT = """\
+VARIABLE_NAMES = """\
 latitude
 longitude
 population
@@ -93,8 +93,7 @@ solar_mini_grid_lv_line_raw_cost
 solar_mini_grid_lv_line_installation_cost
 solar_mini_grid_lv_line_maintenance_cost_per_year
 solar_mini_grid_lv_line_replacement_cost_per_year
-"""
-VARIABLE_NAMES = VARIABLE_NAMES_TEXT.splitlines()
+""".strip().splitlines()
 
 
 def save_total_summary(
