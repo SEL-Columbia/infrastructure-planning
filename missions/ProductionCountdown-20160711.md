@@ -617,24 +617,45 @@ Last week, we discussed different ways to have the user override tables for diff
 20161015-1300 - 20161015-1330: 30 minutes
 
     + Add unelectrified option for zero consumption
+    _ Restore glossary
+    _ Generate intermediate and yearly value files for debugging
 
 # Tasks
 
-    Write test for unelectrified option
+    Generate points.csv
+    Make keys be separated by underscores in csv
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
     Add acknowledgments to separate tools
+    Write test for unelectrified option
 
-## Important and easy
-
-    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Sort add_argument statements by function
     Split save_total_summary
     Split save_total_map
-
     Fix command line overriding JSON
         Add test
-    Let user download example table for each table
+
+    Need total initial and total recurring costs
+    Need intermediate costs like diesel fuel cost per year
+    Report projected population count
+    Report projected connection count
+
+    Generate points.shp
+    Generate lines.csv
+    Generate lines-existing.shp
+    Generate lines-proposed.shp
+    Include essential properties in shapefile
+        Check shapefile column name length limit
+
+    Update executive summary by technology
+        Show initial
+        Show projected recurring
+        Show levelized cost
+        Show location count
+        Show connection count
+        Show population count
+        Show initial cost per connection
+        Show capacity per household
 
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
@@ -643,30 +664,21 @@ Last week, we discussed different ways to have the user override tables for diff
     Test when there are no demand points
     Write positive test
 
-    Restore glossary
-        Make keys be separated by underscores
     Explain that network minimum point is minimum size of grid network
+    Fix consumption threshold to be before grid
+    Get default parameters for tanzania training
     Explain that electricity cost per kwh is the same as busbar cost
     Explain that technologies chosen via networker not in coster #10
-
 
     Add warning if peak_demand_in_kw is nan or zero
     Use global value if local value is nan
     Test that we only use most recent year if multiple years are given
     Handle empty null values for number of people per household
 
-
-    Generate points.csv
-    Generate points.shp
-    Generate lines.csv
-    Generate lines-existing.shp
-    Generate lines-proposed.shp
-
     Remove edges* intermediate files
     Remove grid_mv_line table
     Remove nodes* intermediate files
 
-    Generate intermediate and yearly value files for debugging
     Rename standard_output.log to stdout.log
     Rename standard_error.log to stderr.log
     Rename executive_summary to interface/summary.csv
@@ -699,37 +711,24 @@ Last week, we discussed different ways to have the user override tables for diff
         /interface/map.csv
         /interface/details.csv
 
-    Include essential properties in shapefile
-        Check shapefile column name length limit
-    Report projected population count
-    Report projected connection count
-    Need total initial and total recurring costs
-    Need intermediate costs like diesel fuel cost per year
-
-    Update executive summary by technology
-        Show initial
-        Show projected recurring
-        Show levelized cost
-        Show location count
-        Show connection count
-        Show population count
-        Show initial cost per connection
-        Show capacity per household
     Add household count and total and existing proposed grid length to summary
     Remove unnecessary files in output
+    Let user download example table for each table
     Replace peak_demand with household and population info when clicking on node
+    Adjust map colors to match old system
+    Add legend to map
 
+## Important and easy
 
-    Check if we can override selected_technologies on a local basis
+    Write estimate_grid_mv_line_budget_in_meters to duplicate the beginning part of the script
     Add technology cost multiplier
+    Check if we can override selected_technologies on a local basis
     Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
     Consider estimating population growth using projected population year
     Consider total population and % connected to compute unconnected household count
 
-
     Add instructions on how to set up the system on a new machine
         Update installation requirements
-    Get default parameters for tanzania training
     Draft jupyter notebook that starts from the population of a single node
 
 ## Important and hard
@@ -755,8 +754,6 @@ Last week, we discussed different ways to have the user override tables for diff
 
     Show overrided columns
     Show simple map in addition to satellite map
-    Adjust map colors to match old system
-    Add legend to map
 
     Add meta tool to explore demand threshold by varying household demand to change mvMax
     Consider tools that fill certain values based on administrative boundary
