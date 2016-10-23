@@ -11,8 +11,7 @@ setup(
     description='Infrastructure planning tools',
     long_description=DESCRIPTION,
     classifiers=[
-        'Programming Language :: Python',
-        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python'
     ],
     author='Roy Hyunjin Han',
     author_email='rhh@crosscompute.com',
