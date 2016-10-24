@@ -3,6 +3,7 @@ import geometryIO
 import inspect
 import simplejson as json
 import shutil
+from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
 from invisibleroads_macros.geometry import flip_geometry_coordinates
 from invisibleroads_macros.iterable import merge_dictionaries
@@ -16,6 +17,16 @@ from shapely import wkt
 from .exceptions import (
     ExpectedPositive, InfrastructurePlanningError, ValidationError)
 from .parsers import load_files
+
+
+class BasicArgumentParser(TerseArgumentParser):
+
+    def __init__(self, *args, **kw):
+        super(BasicArgumentParser, self).__init__(*args, **kw)
+        self.add_argument(
+            'configuration_path', metavar='CONFIGURATION_PATH', nargs='?')
+        self.add_argument('-w', '--source_folder', metavar='FOLDER')
+        self.add_argument('-o', '--target_folder', metavar='FOLDER')
 
 
 class InfrastructureGraph(Graph):
@@ -226,9 +237,6 @@ def rename_keys(value_by_key, prefix='', suffix=''):
 
 def _get_argument_file_name(k, v):
     file_base = k
-    file_base = file_base.replace('_geotable_path', 's')
-    file_base = file_base.replace('_table_path', 's')
-    file_base = file_base.replace('_text_path', '')
     file_base = file_base.replace('_path', '')
     file_extension = splitext(v)[1]
     return file_base.replace('_', '-') + file_extension

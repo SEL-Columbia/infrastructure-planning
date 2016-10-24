@@ -1,6 +1,4 @@
-from invisibleroads_macros.configuration import TerseArgumentParser
-
-from infrastructure_planning.macros import load_and_run
+from infrastructure_planning.macros import BasicArgumentParser, load_and_run
 from infrastructure_planning.preprocessors import (
     normalize_demand_point_table)
 
@@ -16,7 +14,7 @@ def add_arguments_for_estimate_population(x):
 
 
 if __name__ == '__main__':
-    x = TerseArgumentParser()
+    x = BasicArgumentParser()
     add_arguments_for_estimate_population(x)
     load_and_run([
         normalize_demand_point_table,

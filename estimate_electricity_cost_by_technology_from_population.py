@@ -1,7 +1,5 @@
-from invisibleroads_macros.configuration import TerseArgumentParser
-from invisibleroads_macros.disk import make_folder
 
-from infrastructure_planning.macros import load_and_run
+from infrastructure_planning.macros import BasicArgumentParser, load_and_run
 from infrastructure_planning.preprocessors import (
     normalize_demand_point_table,
     normalize_connection_type_table,
@@ -37,18 +35,8 @@ from estimate_grid_mv_line_budget_in_meters import (
 
 
 if __name__ == '__main__':
-    x = TerseArgumentParser()
+    x = BasicArgumentParser()
     add_arguments_for_estimate_population(x)
-
-    x.add_argument(
-        'configuration_path',
-        metavar='CONFIGURATION_PATH', nargs='?')
-    x.add_argument(
-        '-w', '--source_folder',
-        metavar='FOLDER')
-    x.add_argument(
-        '-o', '--target_folder',
-        metavar='FOLDER', type=make_folder)
 
     x.add_argument(
         '--selected_technologies_text_path',

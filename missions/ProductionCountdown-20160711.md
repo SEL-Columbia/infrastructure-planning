@@ -629,6 +629,12 @@ For some reason, I'm getting an error.
 
 Ok, it works now.
 
+20161024-1400 - 20161024-1430: 30 minutes
+
+    Add BasicArgumentParser
+    Check that everything still works
+    Check tests
+
 # Tasks
 
     Generate points.csv
