@@ -620,6 +620,15 @@ Last week, we discussed different ways to have the user override tables for diff
     _ Restore glossary
     _ Generate intermediate and yearly value files for debugging
 
+20161024-1300 - 20161024-1330: 30 minutes
+
+    + Check that everything still works
+    + Check that dummy.json still works for Chris's system
+
+For some reason, I'm getting an error.
+
+Ok, it works now.
+
 # Tasks
 
     Generate points.csv
