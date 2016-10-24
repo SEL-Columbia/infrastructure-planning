@@ -7,18 +7,18 @@ def pick_proposed_technology(
         infrastructure_graph, selected_technologies, node_id,
         consumption_threshold_in_kwh_per_year, **keywords):
     d = {}
+    proposed_technology = 'unelectrified'
+    # If the consumption is below the threshold, choose unelectrified
+    x = keywords['final_consumption_in_kwh_per_year']
+    if x < consumption_threshold_in_kwh_per_year:
+        d['proposed_technology'] = proposed_technology
+        return d
     # If the node is connected to the network, choose grid
     if infrastructure_graph.edge[node_id]:
         d['proposed_technology'] = 'grid'
         return d
     d['grid_local_discounted_cost'] = ''
     d['grid_local_levelized_cost_per_kwh_consumed'] = ''
-    # If the consumption is zero or below threshold, choose unelectrified
-    proposed_technology = 'unelectrified'
-    x = keywords['final_consumption_in_kwh_per_year']
-    if x == 0 or x < consumption_threshold_in_kwh_per_year:
-        d['proposed_technology'] = proposed_technology
-        return d
     # Choose best standalone technology
     proposed_cost = float('inf')
     for technology in selected_technologies:

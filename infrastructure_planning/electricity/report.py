@@ -96,6 +96,22 @@ solar_mini_grid_lv_line_replacement_cost_per_year
 """.strip().splitlines()
 
 
+def save_total_values_by_location():
+    pass
+
+
+def save_total_values_by_technology():
+    pass
+
+
+def save_total_edge_summary():
+    pass
+
+
+def save_total_node_summary():
+    pass
+
+
 def save_total_summary(
         target_folder, infrastructure_graph, selected_technologies,
         **keywords):

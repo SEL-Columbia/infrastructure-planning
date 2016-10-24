@@ -631,29 +631,58 @@ Ok, it works now.
 
 20161024-1400 - 20161024-1430: 30 minutes
 
-    Add BasicArgumentParser
-    Check that everything still works
-    Check tests
+    + Add BasicArgumentParser
+    + Check that everything still works
+    + Check tests
 
-# Tasks
+20161024-1430 - 20161024-1530: 60 minutes
 
+I forgot how outputs work.
+
+    _ A. Keep save_total_summary and make subfunctions
+
+        save_values_by_location
+        save_values_by_technology
+        save_edge_summary
+        save_node_summary
+
+    B. Remove save_total_summary and use multiple functions
+
+        save_total_values_by_location
+        save_total_values_by_technology
+        save_total_edge_summary
+        save_total_node_summary
+
+Let's pick option B so that we can have more independence with the requested parameters.
+
+20161024-1545 - 20161024-1645: 60 minutes
+
+    + Fix consumption threshold to be before grid
+    + Set default consumption threshold to be 1 kwh/year
+
+    Split save_total_summary
     Generate points.csv
     Make keys be separated by underscores in csv
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
-    Add acknowledgments to separate tools
-    Write test for unelectrified option
 
-    Sort add_argument statements by function
-    Split save_total_summary
-    Split save_total_map
-    Fix command line overriding JSON
-        Add test
+# Tasks
 
     Need total initial and total recurring costs
     Need intermediate costs like diesel fuel cost per year
     Report projected population count
     Report projected connection count
+
+    Add sequence order in proposed network shapefiles for edge
+    Add MV distance in proposed network shapefiles for edge
+    Add acknowledgments to separate tools
+
+
+
+
+    Sort add_argument statements by function
+    Split save_total_map
+
+    Test for unelectrified option
+    Test that command line argument can override json
 
     Generate points.shp
     Generate lines.csv
@@ -680,7 +709,6 @@ Ok, it works now.
     Write positive test
 
     Explain that network minimum point is minimum size of grid network
-    Fix consumption threshold to be before grid
     Get default parameters for tanzania training
     Explain that electricity cost per kwh is the same as busbar cost
     Explain that technologies chosen via networker not in coster #10
@@ -706,15 +734,16 @@ Ok, it works now.
         /stderr.log
         /infrastructure-graph.json
 
-        + /arguments/arguments.json
-        + /arguments/connection-types.csv
-        + /arguments/demand-points.csv
-        + /arguments/diesel-mini-grid-generators.csv
-        + /arguments/grid-mv-lines.csv
-        + /arguments/grid-mv-transformers.csv
-        + /arguments/selected-technologies.txt
-        + /arguments/solar-home-panels.csv
-        + /arguments/solar-mini-grid-panels.csv
+        + arguments/arguments.csv
+        + arguments/arguments.json
+        + arguments/connection-type-table.csv
+        + arguments/demand-point-table.csv
+        + arguments/diesel-mini-grid-generator-table.csv
+        + arguments/grid-mv-line-geotable.csv
+        + arguments/grid-mv-transformer-table.csv
+        + arguments/selected-technologies-text.txt
+        + arguments/solar-home-panel-table.csv
+        + arguments/solar-mini-grid-panel-table.csv
 
         /properties/points.csv
         /properties/points.shp

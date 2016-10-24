@@ -28,7 +28,8 @@ from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.network import (
     assemble_total_grid_mv_line_network, sequence_total_grid_mv_line_network)
 from infrastructure_planning.electricity.report import (
-    save_total_summary, save_total_map)
+    save_total_values_by_location, save_total_values_by_technology,
+    save_total_edge_summary, save_total_node_summary, save_total_map)
 
 from estimate_grid_mv_line_budget_in_meters import (
     add_arguments_for_estimate_population)
@@ -283,6 +284,9 @@ if __name__ == '__main__':
         estimate_total_count_by_technology,
         estimate_total_discounted_cost_by_technology,
         estimate_total_levelized_cost_by_technology,
-        save_total_summary,
+        save_total_values_by_location,
+        save_total_values_by_technology,
+        save_total_edge_summary,
+        save_total_node_summary,
         save_total_map,
     ], x)
