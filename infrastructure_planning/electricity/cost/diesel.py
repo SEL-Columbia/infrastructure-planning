@@ -1,6 +1,7 @@
 from invisibleroads_macros.math import divide_safely
 from pandas import DataFrame, Series
 
+from ...macros import get_final_value
 from ...production import adjust_for_losses, prepare_system_cost
 
 
@@ -29,16 +30,23 @@ def estimate_fuel_cost(
     minimum_hours_of_production_by_year = Series([
         generator_minimum_hours_of_production_per_year,
     ] * len(years), index=years)
-    effective_hours_of_production_by_year = DataFrame({
+    hours_of_production_by_year = DataFrame({
         'desired': desired_hours_of_production_by_year,
         'minimum': minimum_hours_of_production_by_year,
     }).max(axis=1)
-    return {
-        'effective_hours_of_production_by_year':
-            effective_hours_of_production_by_year,
-        'fuel_cost_by_year': fuel_cost_per_liter *
-            generator_fuel_liters_consumed_per_kwh *
-            generator_actual_system_capacity_in_kw *
-            effective_hours_of_production_by_year,
-        'electricity_production_in_kwh_by_year': production_in_kwh_by_year,
-    }
+    fuel_cost_by_year = fuel_cost_per_liter * \
+        generator_fuel_liters_consumed_per_kwh * \
+        generator_actual_system_capacity_in_kw * \
+        hours_of_production_by_year
+    d = {}
+    # Add yearly values
+    d['hours_of_production_by_year'] = hours_of_production_by_year
+    d['fuel_cost_by_year'] = fuel_cost_by_year
+    d['electricity_production_in_kwh_by_year'] = production_in_kwh_by_year
+    # Add final values
+    d['final_hours_of_production_per_year'] = get_final_value(
+        hours_of_production_by_year)
+    d['final_fuel_cost_per_year'] = get_final_value(fuel_cost_by_year)
+    d['final_electricity_production_in_kwh_per_year'] = get_final_value(
+        production_in_kwh_by_year)
+    return d

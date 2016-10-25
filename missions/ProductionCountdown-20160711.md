@@ -683,12 +683,78 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     + Add projected population count
     + Add projected connection count
 
+20161025-0730 - 20161025-0800: 30 minutes
+
+    diesel_mini_grid_effective_hours_of_production_by_year
+    _ diesel_mini_grid_final_effective_hours_of_production_per_year
+    diesel_mini_grid_final_hours_of_production_per_year
+
+    diesel_mini_grid_internal_distribution_cost_by_year
+    _ diesel_mini_grid_electricity_internal_distribution_cost_by_year
+    _ diesel_mini_grid_final_electricity_internal_distribution_cost_per_year
+    diesel_mini_grid_final_internal_distribution_cost_per_year
+    _ diesel_mini_grid_final_internal_electricity_distribution_cost_per_year
+
+    diesel_mini_grid_electricity_production_cost_by_year
+    diesel_mini_grid_final_electricity_production_cost_per_year
+    _ diesel_mini_grid_final_production_cost_per_year
+
+    diesel_mini_grid_electricity_production_in_kwh_by_year
+    diesel_mini_grid_final_electricity_production_in_kwh_per_year
+    _ diesel_mini_grid_final_production_in_kwh_per_year
+
+    diesel_mini_grid_fuel_cost_by_year
+    diesel_mini_grid_final_fuel_cost_per_year
+
+20161025-0800 - 20161025-0830: 30 minutes
+
+    + Add diesel_mini_grid_final_hours_of_production_per_year
+    + Add diesel_mini_grid_final_fuel_cost_per_year
+    + Add diesel_mini_grid_final_electricity_production_in_kwh_per_year
+    + Add diesel_mini_grid_final_electricity_production_cost_per_year
+    + Add diesel_mini_grid_final_internal_distribution_cost_per_year
+
+    + Add grid_final_electricity_production_in_kwh_per_year
+    + Add grid_final_electricity_production_cost_per_year
+    + Add grid_final_internal_distribution_cost_per_year
+
+    + Add solar_home_final_electricity_production_in_kwh_per_year
+    + Add solar_home_final_electricity_production_cost_per_year
+    + Add solar_home_final_internal_distribution_cost_per_year
+
+    + Add solar_mini_grid_final_electricity_production_in_kwh_per_year
+    + Add solar_mini_grid_final_electricity_production_cost_per_year
+    + Add solar_mini_grid_final_internal_distribution_cost_per_year
+
+20161025-1100 - 20161025-1200: 60 minutes
+
+    + Add external_distribution_cost_per_year for consistency
+    + Add intermediate costs like diesel fuel cost per year
+    + Summarize some by year parameters using final
+    + Exclude certain parameters
+        _ selected_technologies
+        _ population_by_year
+        _ connection_count_by_year
+        _ consumption_in_kwh_by_year
+        _ diesel_mini_grid_effective_hours_of_production_by_year
+        _ diesel_mini_grid_electricity_internal_distribution_cost_by_year
+        _ diesel_mini_grid_electricity_production_cost_by_year
+        _ diesel_mini_grid_electricity_production_in_kwh_by_year
+        _ diesel_mini_grid_fuel_cost_by_year
+        _ grid_electricity_internal_distribution_cost_by_year
+        _ grid_electricity_production_cost_by_year
+        _ grid_electricity_production_in_kwh_by_year
+        _ solar_home_electricity_internal_distribution_cost_by_year
+        _ solar_home_electricity_production_cost_by_year
+        _ solar_home_electricity_production_in_kwh_by_year
+        _ solar_mini_grid_electricity_internal_distribution_cost_by_year
+        _ solar_mini_grid_electricity_production_cost_by_year
+        _ solar_mini_grid_electricity_production_in_kwh_by_year
+
 # Tasks
 
     Add extra parameters
-        Add intermediate costs like diesel fuel cost per year
         Add total initial and total recurring costs
-        Summarize some by year parameters using final
     Add miscellaneous parameters automatically
         clinic_connection_count
         clinic_consumption_in_kwh_per_year_per_clinic
@@ -700,36 +766,17 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         market_consumption_in_kwh_per_year_per_market
         school_connection_count
         school_consumption_in_kwh_per_year_per_school
-    Exclude certain parameters
-        _ selected_technologies
-        _ population_by_year
-        _ connection_count_by_year
-        _ consumption_in_kwh_by_year
-        diesel_mini_grid_effective_hours_of_production_by_year
-        diesel_mini_grid_electricity_internal_distribution_cost_by_year
-        diesel_mini_grid_electricity_production_cost_by_year
-        diesel_mini_grid_electricity_production_in_kwh_by_year
-        diesel_mini_grid_fuel_cost_by_year
-        grid_electricity_internal_distribution_cost_by_year
-        grid_electricity_production_cost_by_year
-        grid_electricity_production_in_kwh_by_year
-        solar_home_electricity_internal_distribution_cost_by_year
-        solar_home_electricity_production_cost_by_year
-        solar_home_electricity_production_in_kwh_by_year
-        solar_mini_grid_electricity_internal_distribution_cost_by_year
-        solar_mini_grid_electricity_production_cost_by_year
-        solar_mini_grid_electricity_production_in_kwh_by_year
     Sort full list of properties
     Generate points.csv
 
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
+    Add acknowledgments to separate tools in README.md
 
 
 
 
-    Add acknowledgments to separate tools
     Generate points.shp
     Generate lines.csv
     Generate lines-existing.shp
@@ -738,6 +785,7 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     Remove edges* intermediate files
     Remove grid_mv_line table
     Remove nodes* intermediate files
+    Remove unnecessary files in output
 
     Rename standard_output.log to stdout.log
     Rename standard_error.log to stderr.log
@@ -771,8 +819,6 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         reports/summary-by-location.csv
         reports/summary-by-grid-mv-line.csv
         reports/report-by-location.csv
-
-    Remove unnecessary files in output
 
 
     Include essential properties in shapefile

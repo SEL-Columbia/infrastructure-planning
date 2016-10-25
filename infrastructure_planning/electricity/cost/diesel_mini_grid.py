@@ -7,31 +7,31 @@ from . import prepare_component_cost_by_year, prepare_internal_cost
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
         estimate_electricity_production_cost,
-        estimate_electricity_internal_distribution_cost,
+        estimate_internal_distribution_cost,
     ], keywords)
 
 
-def estimate_external_cost():
+def estimate_external_cost(**keywords):
     return {'external_discounted_cost': 0}
 
 
 def estimate_electricity_production_cost(**keywords):
-    d = prepare_component_cost_by_year([
+    component_cost_by_year, d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], keywords, prefix='diesel_mini_grid_')
     d.update(compute(estimate_diesel_mini_grid_fuel_cost, keywords, d))
-    d['electricity_production_cost_by_year'] = d.pop('cost_by_year') + d[
+    d['electricity_production_cost_by_year'] = component_cost_by_year + d[
         'fuel_cost_by_year']
     return d
 
 
-def estimate_electricity_internal_distribution_cost(
+def estimate_internal_distribution_cost(
         **keywords):
-    d = prepare_component_cost_by_year([
+    component_cost_by_year, d = prepare_component_cost_by_year([
         ('lv_line', estimate_diesel_mini_grid_lv_line_cost),
         ('lv_connection', estimate_diesel_mini_grid_lv_connection_cost),
     ], keywords, prefix='diesel_mini_grid_')
-    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
+    d['internal_distribution_cost_by_year'] = component_cost_by_year
     return d
 
 

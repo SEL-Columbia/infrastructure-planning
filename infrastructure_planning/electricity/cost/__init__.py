@@ -6,7 +6,7 @@ from itertools import product
 from pandas import Series
 
 from ...finance.valuation import compute_discounted_cash_flow
-from ...macros import compute, get_by_prefix
+from ...macros import compute, get_by_prefix, get_final_value
 
 
 def estimate_internal_cost_by_technology(selected_technologies, **keywords):
@@ -81,15 +81,16 @@ def prepare_component_cost_by_year(component_packs, keywords, prefix):
         # Save
         d.update(v_by_k)
     years = keywords['population_by_year'].index
-    d['cost_by_year'] = Series(cost_by_year_index, index=years)
-    return d
+    component_cost_by_year = Series(cost_by_year_index, index=years)
+    return component_cost_by_year, d
 
 
 def prepare_internal_cost(functions, keywords):
     """
     Each function must return a dictionary with these keys:
+        electricity_production_in_kwh_by_year
         electricity_production_cost_by_year
-        electricity_internal_distribution_cost_by_year
+        internal_distribution_cost_by_year
 
     The keywords dictionary must contain these keys:
         financing_year
@@ -100,16 +101,48 @@ def prepare_internal_cost(functions, keywords):
     # Compute
     for f in functions:
         d.update(compute(f, keywords))
-    cost_by_year = sum([
+    internal_cost_by_year = sum([
         d['electricity_production_cost_by_year'],
-        d['electricity_internal_distribution_cost_by_year'],
-    ])
+        d['internal_distribution_cost_by_year']])
     discounted_cost = compute_discounted_cash_flow(
-        cost_by_year, keywords['financing_year'],
+        internal_cost_by_year, keywords['financing_year'],
         keywords['discount_rate_as_percent_of_cash_flow_per_year'])
     levelized_cost = divide_safely(discounted_cost, keywords[
         'discounted_consumption_in_kwh'], 0)
+    # Record
+    d['final_electricity_production_in_kwh_per_year'] = get_final_value(d[
+        'electricity_production_in_kwh_by_year'])
+    d['final_electricity_production_cost_per_year'] = get_final_value(d[
+        'electricity_production_cost_by_year'])
+    d['final_internal_distribution_cost_per_year'] = get_final_value(d[
+        'internal_distribution_cost_by_year'])
     # Summarize
     d['internal_discounted_cost'] = discounted_cost
     d['internal_levelized_cost_per_kwh_consumed'] = levelized_cost
+    return d
+
+
+def prepare_external_cost(functions, keywords):
+    """
+    Each function must return a dictionary with these keys:
+        external_distribution_cost_by_year
+
+    The keywords dictionary must contain these keys:
+        financing_year
+        discount_rate_as_percent_of_cash_flow_per_year
+    """
+    d = {}
+    # Compute
+    for f in functions:
+        d.update(compute(f, keywords))
+    external_cost_by_year = sum([
+        d.get('external_distribution_cost_by_year', 0)])
+    discounted_cost = compute_discounted_cash_flow(
+        external_cost_by_year, keywords['financing_year'],
+        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
+    # Record
+    d['final_external_distribution_cost_per_year'] = get_final_value(d[
+        'external_distribution_cost_by_year'])
+    # Summarize
+    d['external_discounted_cost'] = discounted_cost
     return d

@@ -8,7 +8,7 @@ from . import prepare_component_cost_by_year, prepare_internal_cost
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
         estimate_electricity_production_cost,
-        estimate_electricity_internal_distribution_cost,
+        estimate_internal_distribution_cost,
     ], keywords)
 
 
@@ -17,7 +17,7 @@ def estimate_external_cost():
 
 
 def estimate_electricity_production_cost(**keywords):
-    d = prepare_component_cost_by_year([
+    component_cost_by_year, d = prepare_component_cost_by_year([
         ('panel', estimate_solar_mini_grid_panel_cost),
         ('battery', estimate_solar_mini_grid_battery_cost),
         ('balance', estimate_solar_mini_grid_balance_cost),
@@ -25,17 +25,16 @@ def estimate_electricity_production_cost(**keywords):
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         keywords['consumption_in_kwh_by_year'],
         keywords['solar_mini_grid_system_loss_as_percent_of_total_production'])
-    d['electricity_production_cost_by_year'] = d.pop('cost_by_year')
+    d['electricity_production_cost_by_year'] = component_cost_by_year
     return d
 
 
-def estimate_electricity_internal_distribution_cost(
-        **keywords):
-    d = prepare_component_cost_by_year([
+def estimate_internal_distribution_cost(**keywords):
+    component_cost_by_year, d = prepare_component_cost_by_year([
         ('lv_line', estimate_solar_mini_grid_lv_line_cost),
         ('lv_connection', estimate_solar_mini_grid_lv_connection_cost),
     ], keywords, prefix='solar_mini_grid_')
-    d['electricity_internal_distribution_cost_by_year'] = d.pop('cost_by_year')
+    d['internal_distribution_cost_by_year'] = component_cost_by_year
     return d
 
 

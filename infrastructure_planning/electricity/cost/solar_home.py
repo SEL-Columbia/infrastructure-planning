@@ -10,7 +10,7 @@ from . import prepare_component_cost_by_year, prepare_internal_cost
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
         estimate_electricity_production_cost,
-        estimate_electricity_internal_distribution_cost,
+        estimate_internal_distribution_cost,
     ], keywords)
 
 
@@ -19,7 +19,7 @@ def estimate_external_cost():
 
 
 def estimate_electricity_production_cost(**keywords):
-    d = prepare_component_cost_by_year([
+    component_cost_by_year, d = prepare_component_cost_by_year([
         ('panel', estimate_solar_home_panel_cost),
         ('battery', estimate_solar_home_battery_cost),
         ('balance', estimate_solar_home_balance_cost),
@@ -27,14 +27,14 @@ def estimate_electricity_production_cost(**keywords):
     d['electricity_production_in_kwh_by_year'] = adjust_for_losses(
         keywords['consumption_in_kwh_by_year'],
         keywords['solar_home_system_loss_as_percent_of_total_production'])
-    d['electricity_production_cost_by_year'] = d.pop('cost_by_year')
+    d['electricity_production_cost_by_year'] = component_cost_by_year
     return d
 
 
-def estimate_electricity_internal_distribution_cost(**keywords):
+def estimate_internal_distribution_cost(**keywords):
     years = keywords['population_by_year'].index
     cost_by_year = Series(np.zeros(len(years)), index=years)
-    return {'electricity_internal_distribution_cost_by_year': cost_by_year}
+    return {'internal_distribution_cost_by_year': cost_by_year}
 
 
 def estimate_solar_home_panel_cost(

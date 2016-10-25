@@ -172,6 +172,10 @@ def get_by_prefix(value_by_key, prefix):
             return value_by_key[key]
 
 
+def get_final_value(value_by_year):
+    return value_by_year.ix[sorted(value_by_year.index)[-1]]
+
+
 def get_graph_from_table(table):
     graph = InfrastructureGraph()
     for index, row in table.iterrows():
