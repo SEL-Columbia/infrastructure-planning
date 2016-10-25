@@ -671,6 +671,12 @@ Let's pick option B so that we can have more independence with the requested par
     + Add computed parameters
     + Make keys be separated by underscores in points.csv
 
+20161024-2330 - 20161025-0000: 30 minutes
+
+We're not going to be able to pass explicit node_ids the way the networker is currently written. So in case people want to screen by consumption, I say, just get rid of the ones you want to exclude and rerun the model.
+
+    Remove consumption_threshold_in_kwh_per_year
+
 # Tasks
 
     Add extra parameters

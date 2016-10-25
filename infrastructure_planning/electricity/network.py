@@ -21,11 +21,10 @@ NETWORKER_SETTINGS = {
 
 
 def assemble_total_grid_mv_line_network(
-        target_folder, infrastructure_graph,
-        consumption_threshold_in_kwh_per_year, grid_mv_line_geotable,
+        target_folder, infrastructure_graph, grid_mv_line_geotable,
         grid_mv_network_minimum_point_count):
-    node_table = get_node_table_for_networker(
-        infrastructure_graph, consumption_threshold_in_kwh_per_year)
+    node_table = get_table_from_graph(infrastructure_graph, [
+        'longitude', 'latitude', 'grid_mv_line_adjusted_budget_in_meters'])
     node_table_path = join(target_folder, 'nodes-networker.csv')
     node_table.to_csv(node_table_path)
     nwk_settings = deepcopy(NETWORKER_SETTINGS)
@@ -73,15 +72,3 @@ def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
         node_id = model.output_frame['Unnamed..0'][index]
         graph.node[node_id]['order'] = order
     return {'infrastructure_graph': graph}
-
-
-def get_node_table_for_networker(
-        infrastructure_graph, consumption_threshold_in_kwh_per_year):
-    node_table = get_table_from_graph(infrastructure_graph, [
-        'longitude', 'latitude', 'final_consumption_in_kwh_per_year',
-        'grid_mv_line_adjusted_budget_in_meters'])
-    node_table = node_table[node_table[
-        'final_consumption_in_kwh_per_year'
-    ] >= consumption_threshold_in_kwh_per_year]
-    del node_table['final_consumption_in_kwh_per_year']
-    return node_table
