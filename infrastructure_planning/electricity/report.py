@@ -4,7 +4,7 @@ from os.path import join
 from pandas import DataFrame, Series, concat
 from shapely.geometry import LineString, Point
 
-from ..macros import get_table_from_variables
+from ..macros import get_table_from_variables, save_shapefile
 
 
 BASE_KEYS = """\
@@ -18,7 +18,6 @@ population
 FULL_KEYS = """\
 proposed_technology
 proposed_cost_per_connection
-order
 financing_year
 time_horizon_in_years
 discount_rate_as_percent_of_cash_flow_per_year
@@ -38,6 +37,7 @@ discounted_consumption_in_kwh
 grid_electricity_production_cost_per_kwh
 grid_system_loss_as_percent_of_total_production
 grid_mv_network_minimum_point_count
+grid_mv_network_connection_order
 grid_mv_line_raw_cost_per_meter
 grid_mv_line_installation_cost_as_percent_of_raw_cost
 grid_mv_line_installation_cost_per_meter
@@ -213,7 +213,7 @@ final_consumption_in_kwh_per_year
 peak_demand_in_kw
 proposed_technology
 proposed_cost_per_connection
-order
+grid_mv_network_connection_order
 
 grid_local_levelized_cost_per_kwh_consumed
 diesel_mini_grid_local_levelized_cost_per_kwh_consumed
@@ -320,10 +320,16 @@ def save_total_points(
     ] + FULL_KEYS
     # Include miscellaneous variables
     miscellaneous_keys = _get_miscellaneous_keys(ls, g, keys)
-    # Save
+    # Save CSV
     t = get_table_from_variables(ls, g, keys=keys + miscellaneous_keys)
     t_path = join(properties_folder, 'points.csv')
     t.to_csv(t_path)
+    # Save SHP
+    save_shapefile(join(properties_folder, 'points.shp.zip'), t)
+
+
+def save_total_lines(target_folder, infrastructure_graph):
+    pass
 
 
 def save_total_report_by_location(
@@ -370,7 +376,9 @@ def save_total_summary_by_location(
         target_folder, infrastructure_graph, selected_technologies):
     rows = []
     for node_id, node_d in infrastructure_graph.cycle_nodes():
-        xs = [node_d['name'], node_d.get('order', '')]
+        xs = [
+            node_d['name'],
+            node_d.get('grid_mv_network_connection_order', '')]
         xs.extend(node_d[
             x + '_local_levelized_cost_per_kwh_consumed'
         ] for x in selected_technologies)
@@ -422,10 +430,10 @@ def save_total_map(
     columns = [
         'Name',
         'Peak Demand (kW)',
-        'Proposed MV Line Length (m)',
         'Proposed Technology',
+        'Proposed MV Network Connection Order',
+        'Proposed MV Line Length (m)',
         'Levelized Cost Per kWh Consumed',
-        'Connection Order',
         'WKT',
         'FillColor',
         'RadiusInPixelsRange5-10',
@@ -439,11 +447,12 @@ def save_total_map(
         rows.append({
             'Name': node_d['name'],
             'Peak Demand (kW)': node_d['peak_demand_in_kw'],
+            'Proposed Technology': format_technology(technology),
+            'Proposed MV Network Connection Order':
+                node_d.get('grid_mv_network_connection_order', ''),
             'Proposed MV Line Length (m)': node_d[
                 'grid_mv_line_adjusted_length_in_meters'],
-            'Proposed Technology': format_technology(technology),
             'Levelized Cost Per kWh Consumed': levelized_cost,
-            'Connection Order': node_d.get('order', ''),
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
             'RadiusInPixelsRange5-10': node_d['peak_demand_in_kw'],
@@ -464,8 +473,8 @@ def save_total_map(
         rows.append({
             'Name': name,
             'Peak Demand (kW)': peak_demand,
-            'Proposed MV Line Length (m)': line_length,
             'Proposed Technology': 'Grid',
+            'Proposed MV Line Length (m)': line_length,
             'WKT': geometry_wkt,
             'FillColor': color_by_technology['grid'],
         })
@@ -476,7 +485,7 @@ def save_total_map(
             'WKT': geometry_wkt,
             'FillColor': color_by_technology['grid'],
         })
-    target_path = join(target_folder, 'infrastructure_map.csv')
+    target_path = join(target_folder, 'infrastructure-map.csv')
     DataFrame(rows)[columns].to_csv(target_path, index=False)
     print('infrastructure_streets_satellite_geotable_path = %s' % target_path)
 

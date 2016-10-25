@@ -773,27 +773,27 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     + Sort full list of properties
     + Generate points.csv
 
+20161025-1430 - 20161025-1500: 30 minutes
+
+    + Generate points.shp.zip
+
+    Add some attributes to points.shp.zip
+
+    Generate lines.csv
+    Generate lines-existing.shp
+    Generate lines-proposed.shp
+
+
 # Tasks
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
-    Add acknowledgments to separate tools in README.md
-
-
-
-
-    Generate points.shp
-    Generate lines.csv
-    Generate lines-existing.shp
-    Generate lines-proposed.shp
+    Add acknowledgments to separate tools in tool.md
 
     Remove edges* intermediate files
     Remove grid_mv_line table
     Remove nodes* intermediate files
     Remove unnecessary files in output
-
-    Rename standard_output.log to stdout.log
-    Rename standard_error.log to stderr.log
 
     Clean up output folder
         + result.cfg
@@ -801,6 +801,7 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         stdout.log
         stderr.log
         infrastructure-graph.pkl
+        infrastructure-map.csv
 
         + arguments/arguments.csv
         + arguments/arguments.json
@@ -813,29 +814,26 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         + arguments/solar-home-panel-table.csv
         + arguments/solar-mini-grid-panel-table.csv
 
-        properties/points.csv
-        properties/points.shp
+        + properties/points.csv
+        properties/points.shp.zip
         properties/lines.csv
-        properties/lines-existing.shp
-        properties/lines-proposed.shp
+        properties/lines-existing.shp.zip
+        properties/lines-proposed.shp.zip
 
-        reports/map.csv
-        reports/summary-by-technology.csv
-        reports/summary-by-location.csv
-        reports/summary-by-grid-mv-line.csv
-        reports/report-by-location.csv
+        + reports/example-by-technology.csv
+        + reports/report-by-location.csv
+        + reports/summary-by-grid-mv-line.csv
+        + reports/summary-by-location.csv
+        + reports/summary-by-technology.csv
 
 
 
+
+    Rename standard_output.log to stdout.log
+    Rename standard_error.log to stderr.log
 
     Include essential properties in shapefile
         Check shapefile column name length limit
-
-    Sort add_argument statements by function
-    Split save_total_map
-
-    Test for unelectrified option
-    Test that command line argument can override json
 
     Update executive summary by technology
         Show initial cost
@@ -851,6 +849,11 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
 
+    Sort add_argument statements by function
+    Split save_total_map
+
+    Test for unelectrified option
+    Test that command line argument can override json
     Test when there are demand points but no consumption
     Test when there are no demand points
     Write positive test

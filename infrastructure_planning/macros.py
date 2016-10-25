@@ -1,5 +1,6 @@
 import csv
 import geometryIO
+import hashlib
 import inspect
 import simplejson as json
 import shutil
@@ -11,8 +12,10 @@ from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_column_name
 from networkx import Graph
 from os.path import isabs, join, splitext
+from osgeo.ogr import OFTInteger, OFTReal, OFTString
 from pandas import DataFrame, isnull
 from shapely import wkt
+from shapely.geometry import Point
 
 from .exceptions import (
     ExpectedPositive, InfrastructurePlanningError, ValidationError)
@@ -128,11 +131,42 @@ def run(main_functions, g):
 
 
 def save_shapefile(target_path, geotable):
-    # TODO: Save extra attributes
-    geometries = [wkt.loads(x) for x in geotable['wkt']]
-    # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
-    flipped_geometries = flip_geometry_coordinates(geometries)
-    geometryIO.save(target_path, geometryIO.proj4LL, flipped_geometries)
+    if 'wkt' in geotable:
+        geometries = [wkt.loads(x) for x in geotable['wkt']]
+        # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
+        geometries = flip_geometry_coordinates(geometries)
+    else:
+        xys = geotable[['longitude', 'latitude']].values
+        geometries = [Point(xy) for xy in xys]
+    # Collect name_packs
+    name_packs = []
+    for index, row in geotable.iterrows():
+        for column_name, column_value in row.iteritems():
+            if isinstance(column_value, float):
+                column_type = OFTReal
+            elif isinstance(column_value, int):
+                column_type = OFTInteger
+            elif hasattr(column_value, 'strip'):
+                column_type = OFTString
+            else:
+                continue
+            name_packs.append((column_name, column_type))
+        break
+    # Collect field_packs
+    field_packs = []
+    for index, row in geotable.iterrows():
+        field_pack = tuple(
+            row[column_name] for column_name, column_type in name_packs)
+        field_packs.append(field_pack)
+    # Set field_definitions
+    field_definitions = []
+    for column_name, column_type in name_packs:
+        field_name = get_field_name(column_name)
+        field_definitions.append((field_name, column_type))
+    # Save
+    geometryIO.save(
+        target_path, geometryIO.proj4LL, geometries, field_packs,
+        field_definitions)
     return target_path
 
 
@@ -226,6 +260,11 @@ def rename_keys(value_by_key, prefix='', suffix=''):
             key = key + suffix
         d[key] = value
     return d
+
+
+def get_field_name(column_name):
+    abbreviation = ''.join(x[0] for x in column_name.split('_'))[:5]
+    return '%s%s' % (abbreviation, hashlib.md5(column_name).hexdigest()[:5])
 
 
 def _get_argument_file_name(k, v):

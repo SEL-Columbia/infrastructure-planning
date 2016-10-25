@@ -70,5 +70,5 @@ def sequence_total_grid_mv_line_network(target_folder, infrastructure_graph):
     order_series = model.output_frame['Sequence..Far.sighted.sequence']
     for index, order in order_series.iteritems():
         node_id = model.output_frame['Unnamed..0'][index]
-        graph.node[node_id]['order'] = order
+        graph.node[node_id]['grid_mv_network_connection_order'] = order
     return {'infrastructure_graph': graph}
