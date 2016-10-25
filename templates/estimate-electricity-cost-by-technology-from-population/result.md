@@ -6,11 +6,11 @@ Color indicates **proposed technology**.
 
 {infrastructure_streets_satellite_geotable}
 
-## Executive Summary
-{executive_summary_table}
+## Summary by Technology
+{summary_by_technology_table}
 
-## Proposed Grid Medium Voltage Line Table
-{grid_mv_line_table}
+## Summary by Location
+{summary_by_location_table}
 
-## Levelized Cost Comparison by Location
-{levelized_cost_by_technology_table}
+## Summary by Proposed Grid Medium Voltage Line
+{summary_by_grid_mv_line_table}

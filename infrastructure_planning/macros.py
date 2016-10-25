@@ -37,6 +37,10 @@ class InfrastructureGraph(Graph):
                 continue  # We have a fake node
             yield node_id, node_d
 
+    def cycle_edges(self):
+        for node1_id, node2_id, edge_d in self.edges_iter(data=True):
+            yield node1_id, node2_id, edge_d
+
 
 def load_and_run(normalization_functions, main_functions, argument_parser):
     args = argument_parser.parse_args()
@@ -123,23 +127,6 @@ def run(main_functions, g):
     return g
 
 
-def save_summary(target_folder, ls, g, variable_names):
-    keys = []
-    for x in g['demand_point_table'].columns:
-        if x in variable_names:
-            continue
-        keys.append(x)
-    if len(keys) > 1:
-        keys.append('')
-    for x in variable_names:
-        keys.append(x)
-    table = get_table_from_variables(ls, g, keys)
-    table.to_csv(join(target_folder, 'costs.csv'))
-    example_table = table.reset_index().groupby(
-        'proposed technology').first().reset_index().transpose()
-    example_table.to_csv(join(target_folder, 'examples.csv'), header=False)
-
-
 def save_shapefile(target_path, geotable):
     # TODO: Save extra attributes
     geometries = [wkt.loads(x) for x in geotable['wkt']]
@@ -201,9 +188,7 @@ def get_table_from_graph(graph, keys=None):
 
 def get_table_from_variables(ls, g, keys):
     rows = [[l.get(x, g.get(x, '')) for x in keys] for l in ls]
-    # Encourage spreadsheet programs to include empty columns when sorting rows
-    columns = [x.replace('_', ' ') or '-' for x in keys]
-    return DataFrame(rows, columns=columns).set_index('name')
+    return DataFrame(rows, columns=keys).set_index('name')
 
 
 def interpolate_values(source_table, target_column, target_value):

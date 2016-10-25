@@ -43,6 +43,7 @@ Note that if you leave a blank entry in a local override column, then the system
 
 #### Line Length Adjustment Factor
 The length of line used to connect two locations is often greater than the distance between the two locations.
+
 {line_length_adjustment_factor}
 
 #### Average Distance Between Buildings in Meters
@@ -78,6 +79,7 @@ The following column names in the *Demand Point Table* will override market coun
 
 #### Consumption Threshold in kWh per Year
 Specify the minimum consumption per year that a location must have in order to be considered for electrification.
+
 {consumption_threshold_in_kwh_per_year}
 
 #### Consumption during Peak Hours as Percent of Total Consumption

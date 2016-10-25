@@ -660,16 +660,58 @@ Let's pick option B so that we can have more independence with the requested par
     + Fix consumption threshold to be before grid
     + Set default consumption threshold to be 1 kwh/year
 
-    Split save_total_summary
+20161024-1645 - 20161024-1745: 60 minutes
+
+    + Split save_total_summary
+
+20161024-1930 - 20161024-2000: 30 minutes
+
+    + Get full list of properties from computed node
+    + Add list of parameters from tool.md
+    + Add computed parameters
+
+    Add extra parameters
+        Add solar_home_battery_kwh
+        Add projected population count
+        Add projected connection count
+        Add total initial and total recurring costs
+        Add intermediate costs like diesel fuel cost per year
+        Summarize some by year parameters using final
+    Add miscellaneous parameters automatically
+        clinic_connection_count
+        clinic_consumption_in_kwh_per_year_per_clinic
+        street_lamp_connection_count
+        street_lamp_consumption_in_kwh_per_year_per_street_lamp
+        household_connection_count
+        household_consumption_in_kwh_per_year_per_household
+        market_connection_count
+        market_consumption_in_kwh_per_year_per_market
+        school_connection_count
+        school_consumption_in_kwh_per_year_per_school
+    Exclude certain parameters
+        selected_technologies
+        population_by_year
+        connection_count_by_year
+        consumption_in_kwh_by_year
+        diesel_mini_grid_effective_hours_of_production_by_year
+        diesel_mini_grid_electricity_internal_distribution_cost_by_year
+        diesel_mini_grid_electricity_production_cost_by_year
+        diesel_mini_grid_electricity_production_in_kwh_by_year
+        diesel_mini_grid_fuel_cost_by_year
+        grid_electricity_internal_distribution_cost_by_year
+        grid_electricity_production_cost_by_year
+        grid_electricity_production_in_kwh_by_year
+        solar_home_electricity_internal_distribution_cost_by_year
+        solar_home_electricity_production_cost_by_year
+        solar_home_electricity_production_in_kwh_by_year
+        solar_mini_grid_electricity_internal_distribution_cost_by_year
+        solar_mini_grid_electricity_production_cost_by_year
+        solar_mini_grid_electricity_production_in_kwh_by_year
+    Sort full list of properties
     Generate points.csv
-    Make keys be separated by underscores in csv
+    + Make keys be separated by underscores in points.csv
 
 # Tasks
-
-    Need total initial and total recurring costs
-    Need intermediate costs like diesel fuel cost per year
-    Report projected population count
-    Report projected connection count
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
@@ -692,7 +734,7 @@ Let's pick option B so that we can have more independence with the requested par
         Check shapefile column name length limit
 
     Update executive summary by technology
-        Show initial
+        Show initial cost
         Show projected recurring
         Show levelized cost
         Show location count
@@ -724,15 +766,13 @@ Let's pick option B so that we can have more independence with the requested par
 
     Rename standard_output.log to stdout.log
     Rename standard_error.log to stderr.log
-    Rename executive_summary to interface/summary.csv
-    Rename levelized_cost_by_technology to interface/details.csv
 
     Clean up output folder
-        + /result.cfg
-        + /run.sh
-        /stdout.log
-        /stderr.log
-        /infrastructure-graph.json
+        + result.cfg
+        + run.sh
+        stdout.log
+        stderr.log
+        infrastructure-graph.pkl
 
         + arguments/arguments.csv
         + arguments/arguments.json
@@ -745,15 +785,17 @@ Let's pick option B so that we can have more independence with the requested par
         + arguments/solar-home-panel-table.csv
         + arguments/solar-mini-grid-panel-table.csv
 
-        /properties/points.csv
-        /properties/points.shp
-        /properties/lines.csv
-        /properties/lines-existing.shp
-        /properties/lines-proposed.shp
-        /properties/costs.csv
-        /properties/summary.csv
-        /interface/map.csv
-        /interface/details.csv
+        properties/points.csv
+        properties/points.shp
+        properties/lines.csv
+        properties/lines-existing.shp
+        properties/lines-proposed.shp
+
+        reports/map.csv
+        reports/summary-by-technology.csv
+        reports/summary-by-location.csv
+        reports/summary-by-grid-mv-line.csv
+        reports/report-by-location.csv
 
     Add household count and total and existing proposed grid length to summary
     Remove unnecessary files in output
