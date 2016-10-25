@@ -1,4 +1,5 @@
 from invisibleroads_macros.disk import make_folder
+from invisibleroads_macros.iterable import merge_dictionaries
 from os.path import join
 from pandas import DataFrame, Series, concat
 from shapely.geometry import LineString, Point
@@ -123,8 +124,8 @@ solar_home_panel_raw_cost
 solar_home_panel_installation_cost
 solar_home_panel_maintenance_cost_per_year
 solar_home_panel_replacement_cost_per_year
-solar_home_battery_storage_in_kwh
 solar_home_battery_kwh_per_panel_kw
+solar_home_battery_storage_in_kwh
 solar_home_battery_raw_cost_per_battery_kwh
 solar_home_battery_raw_cost
 solar_home_battery_installation_cost_as_percent_of_raw_cost
@@ -158,8 +159,8 @@ solar_mini_grid_panel_raw_cost
 solar_mini_grid_panel_installation_cost
 solar_mini_grid_panel_maintenance_cost_per_year
 solar_mini_grid_panel_replacement_cost_per_year
-solar_mini_grid_battery_storage_in_kwh
 solar_mini_grid_battery_kwh_per_panel_kw
+solar_mini_grid_battery_storage_in_kwh
 solar_mini_grid_battery_raw_cost_per_battery_kwh
 solar_mini_grid_battery_raw_cost
 solar_mini_grid_battery_installation_cost_as_percent_of_raw_cost
@@ -313,9 +314,14 @@ def save_total_points(
 
     properties_folder = make_folder(join(target_folder, 'properties'))
 
-    t = get_table_from_variables(ls, g, keys=BASE_KEYS + [
+    # Preserve columns and column order from demand_point_table
+    keys = BASE_KEYS + [
         x for x in demand_point_table.columns if x not in BASE_KEYS + FULL_KEYS
-    ] + FULL_KEYS)
+    ] + FULL_KEYS
+    # Include miscellaneous variables
+    miscellaneous_keys = _get_miscellaneous_keys(ls, g, keys)
+    # Save
+    t = get_table_from_variables(ls, g, keys=keys + miscellaneous_keys)
     t_path = join(properties_folder, 'points.csv')
     t.to_csv(t_path)
 
@@ -484,3 +490,24 @@ def format_column_name(x):
 def format_technology(x):
     x = x.replace('_', ' ')
     return x.title()
+
+
+def _get_miscellaneous_keys(ls, g, keys):
+    miscellaneous_keys = []
+    try:
+        l = ls[0]
+    except IndexError:
+        l = {}
+    for k, v in merge_dictionaries(g, l).items():
+        if k in keys:
+            continue
+        if k in miscellaneous_keys:
+            continue
+        if k.endswith('_path'):
+            continue
+        if isinstance(v, Series) or isinstance(v, DataFrame):
+            continue
+        if isinstance(v, list) or isinstance(v, dict):
+            continue
+        miscellaneous_keys.append(k)
+    return sorted(miscellaneous_keys)

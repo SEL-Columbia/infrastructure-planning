@@ -26,9 +26,9 @@ def estimate_battery_cost(
         battery_installation_cost_as_percent_of_raw_cost,
         battery_maintenance_cost_per_year_as_percent_of_raw_cost,
         battery_lifetime_in_years):
-    battery_storage_in_kwh = panel_actual_system_capacity_in_kw * \
+    storage_in_kwh = panel_actual_system_capacity_in_kw * \
         battery_kwh_per_panel_kw
-    raw_cost = battery_storage_in_kwh * \
+    raw_cost = storage_in_kwh * \
         battery_raw_cost_per_battery_kwh
     installation_cost = raw_cost * \
         battery_installation_cost_as_percent_of_raw_cost / 100.
@@ -38,7 +38,7 @@ def estimate_battery_cost(
         raw_cost + installation_cost, battery_lifetime_in_years,
         ExpectedPositive('battery_lifetime_in_years'))
     return {
-        'battery_storage_in_kwh': battery_storage_in_kwh,
+        'storage_in_kwh': storage_in_kwh,
         'raw_cost': raw_cost,
         'installation_cost': installation_cost,
         'maintenance_cost_per_year': maintenance_cost_per_year,

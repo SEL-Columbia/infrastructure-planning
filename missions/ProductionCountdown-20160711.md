@@ -756,20 +756,22 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     + Add total initial and total recurring costs
     + Add extra parameters
 
+20161025-1245 - 20161025-1315: 30 minutes
 
-    Add miscellaneous parameters automatically
-        clinic_connection_count
-        clinic_consumption_in_kwh_per_year_per_clinic
-        street_lamp_connection_count
-        street_lamp_consumption_in_kwh_per_year_per_street_lamp
-        household_connection_count
-        household_consumption_in_kwh_per_year_per_household
-        market_connection_count
-        market_consumption_in_kwh_per_year_per_market
-        school_connection_count
-        school_consumption_in_kwh_per_year_per_school
-    Sort full list of properties
-    Generate points.csv
+    + Check why battery_storage_in_kwh is empty
+    + Add miscellaneous parameters automatically
+        + clinic_connection_count
+        + clinic_consumption_in_kwh_per_year_per_clinic
+        + household_connection_count
+        + household_consumption_in_kwh_per_year_per_household
+        + market_connection_count
+        + market_consumption_in_kwh_per_year_per_market
+        + school_connection_count
+        + school_consumption_in_kwh_per_year_per_school
+        + street_lamp_connection_count
+        + street_lamp_consumption_in_kwh_per_year_per_street_lamp
+    + Sort full list of properties
+    + Generate points.csv
 
 # Tasks
 
