@@ -1,5 +1,7 @@
-
-from infrastructure_planning.macros import BasicArgumentParser, load_and_run
+from infrastructure_planning.macros import (
+    BasicArgumentParser, load_and_run,
+    # save_total_graph,
+    wash_total_folder)
 from infrastructure_planning.preprocessors import (
     normalize_demand_point_table,
     normalize_connection_type_table,
@@ -31,9 +33,9 @@ from infrastructure_planning.electricity.demand import estimate_peak_demand
 from infrastructure_planning.electricity.network import (
     assemble_total_grid_mv_line_network, sequence_total_grid_mv_line_network)
 from infrastructure_planning.electricity.report import (
-    save_total_points, save_total_report_by_location,
-    save_total_summary_by_technology, save_total_summary_by_location,
-    save_total_summary_by_grid_mv_line, save_total_map)
+    save_total_lines, save_total_map, save_total_points,
+    save_total_report_by_location, save_total_summary_by_grid_mv_line,
+    save_total_summary_by_location, save_total_summary_by_technology)
 
 from estimate_grid_mv_line_budget_in_meters import (
     add_arguments_for_estimate_population)
@@ -289,9 +291,12 @@ if __name__ == '__main__':
         estimate_total_discounted_cost_by_technology,
         estimate_total_levelized_cost_by_technology,
         save_total_points,
+        save_total_lines,
         save_total_report_by_location,
         save_total_summary_by_technology,
         save_total_summary_by_location,
         save_total_summary_by_grid_mv_line,
         save_total_map,
+        # save_total_graph,
+        wash_total_folder,
     ], x)

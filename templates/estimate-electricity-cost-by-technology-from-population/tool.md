@@ -1,4 +1,12 @@
 # Estimate Electricity Cost by Technology from Population
+
+- Principal Investigator: Professor Vijay Modi
+- Project Managers: Edwin Adkins, Matt Berg, Alex Hofmann, Dana Pillai
+- Software Engineers: Roy Hyunjin Han, Chris Natali, Brandon Ogle, Jonathan Carbajal, Po-Han Freeza Huang, Andrew Doro, Viktor Roytman, Shashank Mohan
+- Spatial Analysts: Shaky Sherpa, Susan Kum
+- Econometric Analysts: Naichen Zhao, Sahil Shah, Aly Sanoh, Lily Parshall
+- Operation Research Analysts: Ayse Selin Kocaman, Alex Zvoleff, Arnaud Algrin
+
 Each technology has initial installation costs and recurring production, maintenance and replacement costs.
 
 Mini-grid technologies include a central production facility and a low-voltage distribution network.

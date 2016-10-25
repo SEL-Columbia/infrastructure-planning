@@ -776,33 +776,31 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
 20161025-1430 - 20161025-1500: 30 minutes
 
     + Generate points.shp.zip
+    + Add attributes to points.shp.zip
+    + Check shapefile column name length limit
+    + Include essential properties in shapefile
 
-    Add some attributes to points.shp.zip
+20161025-1630 - 20161025-1700: 30 minutes
 
-    Generate lines.csv
-    Generate lines-existing.shp
-    Generate lines-proposed.shp
+    + Generate lines.csv
+    + Generate lines-existing.shp
+    + Generate lines-proposed.shp
 
+20161025-1700 - 20161025-1800: 60 minutes
 
-# Tasks
-
-    Add sequence order in proposed network shapefiles for edge
-    Add MV distance in proposed network shapefiles for edge
-    Add acknowledgments to separate tools in tool.md
-
-    Remove edges* intermediate files
-    Remove grid_mv_line table
-    Remove nodes* intermediate files
-    Remove unnecessary files in output
-
-    Clean up output folder
+    + Add sequence order in proposed network shapefiles for edge
+    + Add MV distance in proposed network shapefiles for edge
+    + Remove edges* intermediate files
+    + Remove grid_mv_line table
+    + Remove nodes* intermediate files
+    + Remove unnecessary files in output
+    + Clean up output folder
         + result.cfg
         + run.sh
         stdout.log
         stderr.log
-        infrastructure-graph.pkl
-        infrastructure-map.csv
-
+        _ infrastructure-graph.pkl (too big)
+        + infrastructure-map.csv
         + arguments/arguments.csv
         + arguments/arguments.json
         + arguments/connection-type-table.csv
@@ -813,27 +811,25 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         + arguments/selected-technologies-text.txt
         + arguments/solar-home-panel-table.csv
         + arguments/solar-mini-grid-panel-table.csv
-
         + properties/points.csv
-        properties/points.shp.zip
-        properties/lines.csv
-        properties/lines-existing.shp.zip
-        properties/lines-proposed.shp.zip
-
+        + properties/points.shp.zip
+        + properties/lines.csv
+        + properties/lines-existing.shp.zip
+        + properties/lines-proposed.shp.zip
         + reports/example-by-technology.csv
         + reports/report-by-location.csv
         + reports/summary-by-grid-mv-line.csv
         + reports/summary-by-location.csv
         + reports/summary-by-technology.csv
 
+20161025-1800 - 20161025-1830: 30 minutes
 
+    + Add acknowledgments to separate tools in tool.md
+    Merge with master
+    Deploy
+    Email
 
-
-    Rename standard_output.log to stdout.log
-    Rename standard_error.log to stderr.log
-
-    Include essential properties in shapefile
-        Check shapefile column name length limit
+# Tasks
 
     Update executive summary by technology
         Show initial cost
@@ -845,6 +841,9 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         Show initial cost per connection
         Show capacity per household
     Add household count and total and existing proposed grid length to summary
+
+    Rename standard_output.log to stdout.log
+    Rename standard_error.log to stderr.log
 
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude

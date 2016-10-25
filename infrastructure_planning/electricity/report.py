@@ -311,7 +311,6 @@ def save_total_points(
         target_folder, infrastructure_graph, demand_point_table, **keywords):
     ls = [node_d for node_id, node_d in infrastructure_graph.cycle_nodes()]
     g = keywords
-
     properties_folder = make_folder(join(target_folder, 'properties'))
 
     # Preserve columns and column order from demand_point_table
@@ -328,15 +327,44 @@ def save_total_points(
     save_shapefile(join(properties_folder, 'points.shp.zip'), t)
 
 
-def save_total_lines(target_folder, infrastructure_graph):
-    pass
+def save_total_lines(
+        target_folder, infrastructure_graph, grid_mv_line_geotable):
+    rows = []
+    for node1_id, node2_id, edge_d in infrastructure_graph.cycle_edges():
+        node1_d = infrastructure_graph.node[node1_id]
+        node2_d = infrastructure_graph.node[node2_id]
+        edge_order = edge_d['grid_mv_network_connection_order']
+        line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
+        discounted_cost = edge_d['grid_mv_line_discounted_cost']
+
+        node1_d, node2_d = order_nodes(node1_d, node2_d, edge_order)
+        wkt = LineString([(
+            node1_d['latitude'], node1_d['longitude'],
+        ), (
+            node2_d['latitude'], node2_d['longitude'],
+        )]).wkt
+        rows.append([line_length, discounted_cost, edge_order, wkt])
+    properties_folder = make_folder(join(target_folder, 'properties'))
+    # Save CSV
+    t = DataFrame(rows, columns=[
+        'grid_mv_line_adjusted_length_in_meters',
+        'grid_mv_line_discounted_cost',
+        'grid_mv_network_connection_order',
+        'wkt',
+    ]).sort_values('grid_mv_network_connection_order')
+    t_path = join(properties_folder, 'lines.csv')
+    t.to_csv(t_path, index=False)
+    # Save SHP
+    save_shapefile(join(
+        properties_folder, 'lines-proposed.shp.zip'), t)
+    save_shapefile(join(
+        properties_folder, 'lines-existing.shp.zip'), grid_mv_line_geotable)
 
 
 def save_total_report_by_location(
         target_folder, infrastructure_graph, **keywords):
     ls = [node_d for node_id, node_d in infrastructure_graph.cycle_nodes()]
     g = keywords
-
     reports_folder = make_folder(join(target_folder, 'reports'))
 
     t = get_table_from_variables(ls, g, keys=BASE_KEYS + SOME_KEYS)
@@ -386,10 +414,10 @@ def save_total_summary_by_location(
         rows.append(xs)
     t = DataFrame(rows, columns=[
         'Name',
-        'Connection Order',
+        'Proposed MV Network Connection Order',
     ] + [format_technology(x) for x in selected_technologies] + [
         'Proposed Technology',
-    ]).sort_values('Connection Order')
+    ]).sort_values('Proposed MV Network Connection Order')
 
     reports_folder = make_folder(join(target_folder, 'reports'))
     t_path = join(reports_folder, 'summary-by-location.csv')
@@ -402,17 +430,21 @@ def save_total_summary_by_grid_mv_line(target_folder, infrastructure_graph):
     for node1_id, node2_id, edge_d in infrastructure_graph.cycle_edges():
         node1_d = infrastructure_graph.node[node1_id]
         node2_d = infrastructure_graph.node[node2_id]
+        edge_order = edge_d['grid_mv_network_connection_order']
+        line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
+        discounted_cost = edge_d['grid_mv_line_discounted_cost']
+
+        node1_d, node2_d = order_nodes(node1_d, node2_d, edge_order)
         name = 'From %s to %s' % (
             node1_d.get('name', 'the grid'),
             node2_d.get('name', 'the grid'))
-        line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
-        discounted_cost = edge_d['grid_mv_line_discounted_cost']
-        rows.append([name, line_length, discounted_cost])
+        rows.append([name, line_length, discounted_cost, edge_order])
     t = DataFrame(rows, columns=[
         'Name',
         'Length (m)',
         'Discounted Cost',
-    ]).sort_values('Length (m)')
+        'Proposed MV Network Connection Order',
+    ]).sort_values('Proposed MV Network Connection Order')
 
     reports_folder = make_folder(join(target_folder, 'reports'))
     t_path = join(reports_folder, 'summary-by-grid-mv-line.csv')
@@ -459,6 +491,9 @@ def save_total_map(
         })
     for node1_id, node2_id, edge_d in graph.edges_iter(data=True):
         node1_d, node2_d = graph.node[node1_id], graph.node[node2_id]
+        edge_order = edge_d['grid_mv_network_connection_order']
+
+        node1_d, node2_d = order_nodes(node1_d, node2_d, edge_order)
         name = 'From %s to %s' % (
             node1_d.get('name', 'the grid'),
             node2_d.get('name', 'the grid'))
@@ -468,12 +503,12 @@ def save_total_map(
         line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
         geometry_wkt = LineString([
             (node1_d['latitude'], node1_d['longitude']),
-            (node2_d['latitude'], node2_d['longitude']),
-        ])
+            (node2_d['latitude'], node2_d['longitude'])]).wkt
         rows.append({
             'Name': name,
             'Peak Demand (kW)': peak_demand,
             'Proposed Technology': 'Grid',
+            'Proposed MV Network Connection Order': edge_order,
             'Proposed MV Line Length (m)': line_length,
             'WKT': geometry_wkt,
             'FillColor': color_by_technology['grid'],
@@ -499,6 +534,12 @@ def format_column_name(x):
 def format_technology(x):
     x = x.replace('_', ' ')
     return x.title()
+
+
+def order_nodes(node1_d, node2_d, edge_order):
+    if node2_d.get('grid_mv_network_connection_order') == edge_order:
+        return node2_d, node1_d
+    return node1_d, node2_d
 
 
 def _get_miscellaneous_keys(ls, g, keys):

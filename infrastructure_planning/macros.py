@@ -5,12 +5,13 @@ import inspect
 import simplejson as json
 import shutil
 from invisibleroads_macros.configuration import TerseArgumentParser
-from invisibleroads_macros.disk import make_enumerated_folder_for, make_folder
+from invisibleroads_macros.disk import (
+    make_enumerated_folder_for, make_folder, remove_safely)
 from invisibleroads_macros.geometry import flip_geometry_coordinates
 from invisibleroads_macros.iterable import merge_dictionaries
 from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_column_name
-from networkx import Graph
+from networkx import Graph, write_gpickle
 from os.path import isabs, join, splitext
 from osgeo.ogr import OFTInteger, OFTReal, OFTString
 from pandas import DataFrame, isnull
@@ -142,6 +143,8 @@ def save_shapefile(target_path, geotable):
     name_packs = []
     for index, row in geotable.iterrows():
         for column_name, column_value in row.iteritems():
+            if column_name in ('wkt', 'longitude', 'latitude'):
+                continue
             if isinstance(column_value, float):
                 column_type = OFTReal
             elif isinstance(column_value, int):
@@ -265,6 +268,17 @@ def rename_keys(value_by_key, prefix='', suffix=''):
 def get_field_name(column_name):
     abbreviation = ''.join(x[0] for x in column_name.split('_'))[:5]
     return '%s%s' % (abbreviation, hashlib.md5(column_name).hexdigest()[:5])
+
+
+def wash_total_folder(target_folder):
+    drafts_folder = join(target_folder, 'drafts')
+    remove_safely(drafts_folder)
+    remove_safely(drafts_folder + '.prj')
+
+
+def save_total_graph(target_folder, infrastructure_graph):
+    write_gpickle(infrastructure_graph, join(
+        target_folder, 'infrastructure-graph.pkl'))
 
 
 def _get_argument_file_name(k, v):
