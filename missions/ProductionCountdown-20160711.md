@@ -825,9 +825,6 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
 20161025-1800 - 20161025-1830: 30 minutes
 
     + Add acknowledgments to separate tools in tool.md
-    Merge with master
-    Deploy
-    Email
 
 # Tasks
 
