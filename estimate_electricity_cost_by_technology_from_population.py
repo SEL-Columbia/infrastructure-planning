@@ -9,6 +9,7 @@ from infrastructure_planning.preprocessors import (
     normalize_solar_mini_grid_panel_table,
     normalize_grid_mv_line_geotable)
 
+from infrastructure_planning.demography import estimate_population_profile
 from infrastructure_planning.demography.exponential import estimate_population
 from infrastructure_planning.electricity.analysis import (
     estimate_proposed_cost_per_connection,
@@ -267,6 +268,7 @@ if __name__ == '__main__':
         normalize_grid_mv_line_geotable,
     ], [
         estimate_population,
+        estimate_population_profile,
         estimate_consumption_from_connection_type,
         estimate_consumption_profile,
         estimate_peak_demand,

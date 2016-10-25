@@ -675,7 +675,7 @@ Let's pick option B so that we can have more independence with the requested par
 
 We're not going to be able to pass explicit node_ids the way the networker is currently written. So in case people want to screen by consumption, I say, just get rid of the ones you want to exclude and rerun the model.
 
-    Remove consumption_threshold_in_kwh_per_year
+    + Remove consumption_threshold_in_kwh_per_year
 
 # Tasks
 

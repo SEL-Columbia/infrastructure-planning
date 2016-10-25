@@ -38,6 +38,7 @@ def estimate_battery_cost(
         raw_cost + installation_cost, battery_lifetime_in_years,
         ExpectedPositive('battery_lifetime_in_years'))
     return {
+        'battery_storage_in_kwh': battery_storage_in_kwh,
         'raw_cost': raw_cost,
         'installation_cost': installation_cost,
         'maintenance_cost_per_year': maintenance_cost_per_year,
