@@ -3,6 +3,7 @@ from invisibleroads_macros.math import divide_safely
 
 from ...exceptions import ExpectedPositive, ValidationError
 from ...finance.valuation import compute_discounted_cash_flow
+from ...macros import get_final_value
 from ...production import adjust_for_losses, prepare_system_cost
 from .mini_grid import estimate_lv_connection_cost, estimate_lv_line_cost
 from . import (
@@ -98,10 +99,11 @@ def estimate_grid_mv_line_discounted_cost_per_meter(
     discounted_cost_per_meter = compute_discounted_cash_flow(
         component_cost_by_year, financing_year,
         discount_rate_as_percent_of_cash_flow_per_year)
-    return {
-        'grid_mv_line_cost_per_meter_by_year': component_cost_by_year,
-        'grid_mv_line_discounted_cost_per_meter': discounted_cost_per_meter,
-    }
+    d['grid_mv_line_cost_per_meter_by_year'] = component_cost_by_year
+    d['grid_mv_line_final_cost_per_meter_per_year'] = get_final_value(
+        component_cost_by_year)
+    d['grid_mv_line_discounted_cost_per_meter'] = discounted_cost_per_meter
+    return d
 
 
 def estimate_grid_mv_line_budget(

@@ -919,6 +919,8 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         Define loan_year in compute discounted cost
         Check whether different loan year affects breakeven time (whether we need to add loan year)
 
+    Check that time_horizon_in_years is positive
+
 ## Unimportant and hard
 
     Look at label for node and compute metrics by cluster

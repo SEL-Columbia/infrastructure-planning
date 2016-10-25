@@ -2,7 +2,9 @@ from ...production import adjust_for_losses
 from .solar import (
     estimate_panel_cost, estimate_battery_cost, estimate_balance_cost)
 from .mini_grid import estimate_lv_line_cost, estimate_lv_connection_cost
-from . import prepare_component_cost_by_year, prepare_internal_cost
+from . import (
+    prepare_component_cost_by_year, prepare_external_cost,
+    prepare_internal_cost)
 
 
 def estimate_internal_cost(**keywords):
@@ -12,8 +14,9 @@ def estimate_internal_cost(**keywords):
     ], keywords)
 
 
-def estimate_external_cost():
-    return {'external_discounted_cost': 0}
+def estimate_external_cost(**keywords):
+    return prepare_external_cost([
+    ], keywords)
 
 
 def estimate_electricity_production_cost(**keywords):

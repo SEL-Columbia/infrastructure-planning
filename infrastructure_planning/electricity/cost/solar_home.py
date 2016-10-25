@@ -1,21 +1,20 @@
-import numpy as np
-from pandas import Series
-
 from ...production import adjust_for_losses
 from .solar import (
     estimate_panel_cost, estimate_battery_cost, estimate_balance_cost)
-from . import prepare_component_cost_by_year, prepare_internal_cost
+from . import (
+    prepare_component_cost_by_year, prepare_external_cost,
+    prepare_internal_cost)
 
 
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
         estimate_electricity_production_cost,
-        estimate_internal_distribution_cost,
     ], keywords)
 
 
-def estimate_external_cost():
-    return {'external_discounted_cost': 0}
+def estimate_external_cost(**keywords):
+    return prepare_external_cost([
+    ], keywords)
 
 
 def estimate_electricity_production_cost(**keywords):
@@ -29,12 +28,6 @@ def estimate_electricity_production_cost(**keywords):
         keywords['solar_home_system_loss_as_percent_of_total_production'])
     d['electricity_production_cost_by_year'] = component_cost_by_year
     return d
-
-
-def estimate_internal_distribution_cost(**keywords):
-    years = keywords['population_by_year'].index
-    cost_by_year = Series(np.zeros(len(years)), index=years)
-    return {'internal_distribution_cost_by_year': cost_by_year}
 
 
 def estimate_solar_home_panel_cost(
