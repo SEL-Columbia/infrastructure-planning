@@ -172,6 +172,10 @@ def get_by_prefix(value_by_key, prefix):
             return value_by_key[key]
 
 
+def get_first_value(value_by_year):
+    return value_by_year.ix[sorted(value_by_year.index)[0]]
+
+
 def get_final_value(value_by_year):
     return value_by_year.ix[sorted(value_by_year.index)[-1]]
 

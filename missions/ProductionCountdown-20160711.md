@@ -751,10 +751,12 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         _ solar_mini_grid_electricity_production_cost_by_year
         _ solar_mini_grid_electricity_production_in_kwh_by_year
 
-# Tasks
+20161025-1200 - 20161025-1245: 45 minutes
 
-    Add extra parameters
-        Add total initial and total recurring costs
+    + Add total initial and total recurring costs
+    + Add extra parameters
+
+
     Add miscellaneous parameters automatically
         clinic_connection_count
         clinic_consumption_in_kwh_per_year_per_clinic
@@ -769,6 +771,7 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     Sort full list of properties
     Generate points.csv
 
+# Tasks
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
@@ -821,11 +824,10 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         reports/report-by-location.csv
 
 
+
+
     Include essential properties in shapefile
         Check shapefile column name length limit
-
-
-
 
     Sort add_argument statements by function
     Split save_total_map

@@ -11,8 +11,6 @@ def pick_proposed_technology(
     if infrastructure_graph.edge[node_id]:
         d['proposed_technology'] = 'grid'
         return d
-    d['grid_local_discounted_cost'] = ''
-    d['grid_local_levelized_cost_per_kwh_consumed'] = ''
     # If the consumption is zero, choose unelectrified
     proposed_technology = 'unelectrified'
     if final_consumption_in_kwh_per_year == 0:

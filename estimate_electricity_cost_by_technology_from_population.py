@@ -22,7 +22,8 @@ from infrastructure_planning.electricity.consumption.linear import (
     estimate_consumption_from_connection_type)
 from infrastructure_planning.electricity.cost import (
     estimate_discounted_cost, estimate_external_cost_by_technology,
-    estimate_internal_cost_by_technology, estimate_levelized_cost)
+    estimate_initial_and_recurring_cost, estimate_internal_cost_by_technology,
+    estimate_levelized_cost)
 from infrastructure_planning.electricity.cost.grid import (
     estimate_grid_mv_line_discounted_cost_per_meter,
     estimate_grid_mv_line_budget)
@@ -279,6 +280,7 @@ if __name__ == '__main__':
         assemble_total_grid_mv_line_network,
         sequence_total_grid_mv_line_network,
         estimate_external_cost_by_technology,
+        estimate_initial_and_recurring_cost,
         estimate_discounted_cost,
         estimate_levelized_cost,
         pick_proposed_technology,

@@ -6,7 +6,7 @@ from itertools import product
 from pandas import Series
 
 from ...finance.valuation import compute_discounted_cash_flow
-from ...macros import compute, get_by_prefix, get_final_value
+from ...macros import compute, get_by_prefix, get_final_value, get_first_value
 
 
 def estimate_internal_cost_by_technology(selected_technologies, **keywords):
@@ -44,12 +44,27 @@ def estimate_external_cost_by_technology(selected_technologies, **keywords):
     return d
 
 
+def estimate_initial_and_recurring_cost(selected_technologies, **keywords):
+    d = {}
+    for technology in selected_technologies:
+        local_cost_by_year = sum([
+            keywords[technology + '_internal_cost_by_year'],
+            keywords[technology + '_external_cost_by_year'],
+        ])
+        d[technology + '_local_cost_by_year'] = local_cost_by_year
+        d[technology + '_local_initial_cost'] = get_first_value(
+            local_cost_by_year)
+        d[technology + '_local_recurring_cost'] = get_final_value(
+            local_cost_by_year)
+    return d
+
+
 def estimate_discounted_cost(selected_technologies, **keywords):
     d = {}
     for technology in selected_technologies:
-        d[technology + '_local_discounted_cost'] = keywords[
-            technology + '_internal_discounted_cost'] + keywords[
-            technology + '_external_discounted_cost']
+        d[technology + '_local_discounted_cost'] = sum([
+            keywords[technology + '_internal_discounted_cost'],
+            keywords[technology + '_external_discounted_cost']])
     return d
 
 
@@ -124,6 +139,7 @@ def prepare_internal_cost(functions, keywords):
     d['final_internal_distribution_cost_per_year'] = get_final_value(
         internal_distribution_cost_by_year)
     # Summarize
+    d['internal_cost_by_year'] = internal_cost_by_year
     d['internal_discounted_cost'] = discounted_cost
     d['internal_levelized_cost_per_kwh_consumed'] = levelized_cost
     return d
@@ -145,7 +161,6 @@ def prepare_external_cost(functions, keywords):
         d.update(compute(f, keywords))
     external_distribution_cost_by_year = d.get(
         'external_distribution_cost_by_year', zero_by_year)
-
     external_cost_by_year = sum([
         external_distribution_cost_by_year])
     discounted_cost = compute_discounted_cash_flow(
@@ -155,5 +170,6 @@ def prepare_external_cost(functions, keywords):
     d['final_external_distribution_cost_per_year'] = get_final_value(
         external_distribution_cost_by_year)
     # Summarize
+    d['external_cost_by_year'] = external_cost_by_year
     d['external_discounted_cost'] = discounted_cost
     return d
