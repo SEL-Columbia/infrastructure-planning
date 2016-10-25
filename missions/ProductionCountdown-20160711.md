@@ -669,6 +669,9 @@ Let's pick option B so that we can have more independence with the requested par
     + Get full list of properties from computed node
     + Add list of parameters from tool.md
     + Add computed parameters
+    + Make keys be separated by underscores in points.csv
+
+# Tasks
 
     Add extra parameters
         Add solar_home_battery_kwh
@@ -709,9 +712,9 @@ Let's pick option B so that we can have more independence with the requested par
         solar_mini_grid_electricity_production_in_kwh_by_year
     Sort full list of properties
     Generate points.csv
-    + Make keys be separated by underscores in points.csv
 
-# Tasks
+
+
 
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
@@ -720,45 +723,10 @@ Let's pick option B so that we can have more independence with the requested par
 
 
 
-    Sort add_argument statements by function
-    Split save_total_map
-
-    Test for unelectrified option
-    Test that command line argument can override json
-
     Generate points.shp
     Generate lines.csv
     Generate lines-existing.shp
     Generate lines-proposed.shp
-    Include essential properties in shapefile
-        Check shapefile column name length limit
-
-    Update executive summary by technology
-        Show initial cost
-        Show projected recurring
-        Show levelized cost
-        Show location count
-        Show connection count
-        Show population count
-        Show initial cost per connection
-        Show capacity per household
-
-    Check for required columns like name
-    Replace geopy geocoding with error message about expected longitude latitude
-
-    Test when there are demand points but no consumption
-    Test when there are no demand points
-    Write positive test
-
-    Explain that network minimum point is minimum size of grid network
-    Get default parameters for tanzania training
-    Explain that electricity cost per kwh is the same as busbar cost
-    Explain that technologies chosen via networker not in coster #10
-
-    Add warning if peak_demand_in_kw is nan or zero
-    Use global value if local value is nan
-    Test that we only use most recent year if multiple years are given
-    Handle empty null values for number of people per household
 
     Remove edges* intermediate files
     Remove grid_mv_line table
@@ -797,8 +765,49 @@ Let's pick option B so that we can have more independence with the requested par
         reports/summary-by-grid-mv-line.csv
         reports/report-by-location.csv
 
-    Add household count and total and existing proposed grid length to summary
     Remove unnecessary files in output
+
+
+    Include essential properties in shapefile
+        Check shapefile column name length limit
+
+
+
+
+    Sort add_argument statements by function
+    Split save_total_map
+
+    Test for unelectrified option
+    Test that command line argument can override json
+
+    Update executive summary by technology
+        Show initial cost
+        Show projected recurring
+        Show levelized cost
+        Show location count
+        Show connection count
+        Show population count
+        Show initial cost per connection
+        Show capacity per household
+    Add household count and total and existing proposed grid length to summary
+
+    Check for required columns like name
+    Replace geopy geocoding with error message about expected longitude latitude
+
+    Test when there are demand points but no consumption
+    Test when there are no demand points
+    Write positive test
+
+    Get default parameters for tanzania training
+    Explain that network minimum point is minimum size of grid network
+    Explain that electricity cost per kwh is the same as busbar cost
+    Explain that technologies chosen via networker not in coster #10
+
+    Add warning if peak_demand_in_kw is nan or zero
+    Use global value if local value is nan
+    Test that we only use most recent year if multiple years are given
+    Handle empty null values for number of people per household
+
     Let user download example table for each table
     Replace peak_demand with household and population info when clicking on node
     Adjust map colors to match old system
