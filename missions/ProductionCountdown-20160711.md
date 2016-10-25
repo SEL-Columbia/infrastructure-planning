@@ -677,14 +677,17 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
 
     + Remove consumption_threshold_in_kwh_per_year
 
+20161025-0030 - 20161025-0100: 30 minutes
+
+    + Add solar_home_battery_kwh
+    + Add projected population count
+    + Add projected connection count
+
 # Tasks
 
     Add extra parameters
-        Add solar_home_battery_kwh
-        Add projected population count
-        Add projected connection count
-        Add total initial and total recurring costs
         Add intermediate costs like diesel fuel cost per year
+        Add total initial and total recurring costs
         Summarize some by year parameters using final
     Add miscellaneous parameters automatically
         clinic_connection_count
@@ -698,10 +701,10 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
         school_connection_count
         school_consumption_in_kwh_per_year_per_school
     Exclude certain parameters
-        selected_technologies
-        population_by_year
-        connection_count_by_year
-        consumption_in_kwh_by_year
+        _ selected_technologies
+        _ population_by_year
+        _ connection_count_by_year
+        _ consumption_in_kwh_by_year
         diesel_mini_grid_effective_hours_of_production_by_year
         diesel_mini_grid_electricity_internal_distribution_cost_by_year
         diesel_mini_grid_electricity_production_cost_by_year
@@ -720,15 +723,13 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
     Generate points.csv
 
 
-
-
     Add sequence order in proposed network shapefiles for edge
     Add MV distance in proposed network shapefiles for edge
+
+
+
+
     Add acknowledgments to separate tools
-
-
-
-
     Generate points.shp
     Generate lines.csv
     Generate lines-existing.shp
