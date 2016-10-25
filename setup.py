@@ -16,7 +16,7 @@ setup(
     author='Roy Hyunjin Han',
     author_email='rhh@crosscompute.com',
     url='https://crosscompute.com/docs',
-    keywords='crosscompute',
+    keywords='infrastructure-planning networkplanner crosscompute',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
