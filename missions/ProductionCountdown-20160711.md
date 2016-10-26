@@ -990,6 +990,7 @@ Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not 
         Check whether different loan year affects breakeven time (whether we need to add loan year)
 
     Check that time_horizon_in_years is positive
+    Make grid.estimate_electricity_production_cost consistent
 
 ## Unimportant and hard
 

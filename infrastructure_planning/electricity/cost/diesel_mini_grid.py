@@ -8,6 +8,7 @@ from . import (
 
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
+        estimate_system_capacity_cost,
         estimate_electricity_production_cost,
         estimate_internal_distribution_cost,
     ], keywords)
@@ -18,13 +19,22 @@ def estimate_external_cost(**keywords):
     ], keywords)
 
 
-def estimate_electricity_production_cost(**keywords):
+def estimate_system_capacity_cost(**keywords):
     component_cost_by_year, d = prepare_component_cost_by_year([
         ('generator', estimate_diesel_mini_grid_generator_cost),
     ], keywords, prefix='diesel_mini_grid_')
-    d.update(compute(estimate_diesel_mini_grid_fuel_cost, keywords, d))
-    d['electricity_production_cost_by_year'] = component_cost_by_year + d[
-        'fuel_cost_by_year']
+    d['system_capacity_cost_by_year'] = component_cost_by_year
+    return d
+
+
+def estimate_electricity_production_cost(**keywords):
+    functions = [
+        estimate_diesel_mini_grid_fuel_cost,
+    ]
+    d = {}
+    for f in functions:
+        d.update(compute(f, keywords, d))
+    d['electricity_production_cost_by_year'] = d['fuel_cost_by_year']
     return d
 
 

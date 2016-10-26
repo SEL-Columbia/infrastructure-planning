@@ -13,7 +13,7 @@ def adjust_for_losses(x, *loss_percents):
     return y
 
 
-def prepare_system_cost(
+def prepare_system_capacity_cost(
         option_table, capacity_column, desired_system_capacity):
     t = option_table.copy()
     t['raw_cost_per_unit_capacity'] = t['raw_cost'] / t[capacity_column]

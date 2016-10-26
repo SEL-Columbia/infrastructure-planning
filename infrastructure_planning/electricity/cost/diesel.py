@@ -2,7 +2,7 @@ from invisibleroads_macros.math import divide_safely
 from pandas import DataFrame, Series
 
 from ...macros import get_final_value
-from ...production import adjust_for_losses, prepare_system_cost
+from ...production import adjust_for_losses, prepare_system_capacity_cost
 
 
 def estimate_generator_cost(
@@ -10,7 +10,7 @@ def estimate_generator_cost(
         generator_table):
     desired_system_capacity_in_kw = adjust_for_losses(
         peak_demand_in_kw, system_loss_as_percent_of_total_production)
-    return prepare_system_cost(
+    return prepare_system_capacity_cost(
         generator_table, 'capacity_in_kw', desired_system_capacity_in_kw)
 
 

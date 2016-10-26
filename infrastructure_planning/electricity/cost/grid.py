@@ -5,7 +5,7 @@ from invisibleroads_macros.math import divide_safely
 from ...exceptions import ExpectedPositive, ValidationError
 from ...finance.valuation import compute_discounted_cash_flow
 from ...macros import get_final_value
-from ...production import adjust_for_losses, prepare_system_cost
+from ...production import adjust_for_losses, prepare_system_capacity_cost
 from .mini_grid import estimate_lv_connection_cost, estimate_lv_line_cost
 from . import (
     prepare_component_cost_by_year, prepare_external_cost,
@@ -14,6 +14,7 @@ from . import (
 
 def estimate_internal_cost(**keywords):
     return prepare_internal_cost([
+        estimate_system_capacity_cost,
         estimate_electricity_production_cost,
         estimate_internal_distribution_cost,
     ], keywords)
@@ -23,6 +24,14 @@ def estimate_external_cost(**keywords):
     return prepare_external_cost([
         estimate_external_distribution_cost,
     ], keywords)
+
+
+def estimate_system_capacity_cost(**keywords):
+    component_cost_by_year, d = prepare_component_cost_by_year([
+        ('mv_transformer', estimate_grid_mv_transformer_cost),
+    ], keywords, prefix='grid_')
+    d['system_capacity_cost_by_year'] = component_cost_by_year
+    return d
 
 
 def estimate_external_distribution_cost(
@@ -39,6 +48,7 @@ def estimate_electricity_production_cost(
         grid_system_loss_as_percent_of_total_production,
         grid_mv_transformer_load_power_factor,
         grid_electricity_production_cost_per_kwh):
+    # TODO: Make code structure consistent with other technologies
     if not -1 <= grid_mv_transformer_load_power_factor <= 1:
         raise ValidationError(
             'grid_mv_transformer_load_power_factor',
@@ -57,7 +67,6 @@ def estimate_electricity_production_cost(
 
 def estimate_internal_distribution_cost(**keywords):
     component_cost_by_year, d = prepare_component_cost_by_year([
-        ('mv_transformer', estimate_grid_mv_transformer_cost),
         ('lv_line', estimate_grid_lv_line_cost),
         ('lv_connection', estimate_grid_lv_connection_cost),
     ], keywords, prefix='grid_')
@@ -171,7 +180,7 @@ def estimate_grid_mv_transformer_cost(
         grid_system_loss_as_percent_of_total_production,
         (1 - grid_mv_transformer_load_power_factor) * 100)
     # Choose transformer type
-    return prepare_system_cost(
+    return prepare_system_capacity_cost(
         grid_mv_transformer_table, 'capacity_in_kva',
         desired_system_capacity_in_kva)
 

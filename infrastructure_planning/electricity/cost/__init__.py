@@ -101,7 +101,9 @@ def prepare_internal_cost(functions, keywords):
     zero_by_year = keywords['zero_by_year']
     # Compute
     for f in functions:
-        d.update(compute(f, keywords))
+        d.update(compute(f, d, keywords))
+    system_capacity_cost_by_year = d.get(
+        'system_capacity_cost_by_year', zero_by_year)
     electricity_production_in_kwh_by_year = d.get(
         'electricity_production_in_kwh_by_year', zero_by_year)
     electricity_production_cost_by_year = d.get(
@@ -109,9 +111,12 @@ def prepare_internal_cost(functions, keywords):
     internal_distribution_cost_by_year = d.get(
         'internal_distribution_cost_by_year', zero_by_year)
     cost_by_year = sum([
+        system_capacity_cost_by_year,
         electricity_production_cost_by_year,
         internal_distribution_cost_by_year])
     # Record
+    d['final_system_capacity_cost_per_year'] = get_final_value(
+        system_capacity_cost_by_year)
     d['final_electricity_production_in_kwh_per_year'] = get_final_value(
         electricity_production_in_kwh_by_year)
     d['final_electricity_production_cost_per_year'] = get_final_value(
@@ -134,7 +139,7 @@ def prepare_external_cost(functions, keywords):
     zero_by_year = keywords['zero_by_year']
     # Compute
     for f in functions:
-        d.update(compute(f, keywords))
+        d.update(compute(f, d, keywords))
     external_distribution_cost_by_year = d.get(
         'external_distribution_cost_by_year', zero_by_year)
     cost_by_year = sum([
