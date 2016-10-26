@@ -47,10 +47,21 @@ def estimate_external_cost_by_technology(selected_technologies, **keywords):
 def estimate_initial_and_recurring_cost(selected_technologies, **keywords):
     d = {}
     for technology in selected_technologies:
+        # Internal
+        internal_cost_by_year = keywords[technology + '_internal_cost_by_year']
+        d[technology + '_internal_initial_cost'] = get_first_value(
+            internal_cost_by_year)
+        d[technology + '_internal_recurring_cost'] = get_final_value(
+            internal_cost_by_year)
+        # External
+        external_cost_by_year = keywords[technology + '_external_cost_by_year']
+        d[technology + '_external_initial_cost'] = get_first_value(
+            external_cost_by_year)
+        d[technology + '_external_recurring_cost'] = get_final_value(
+            external_cost_by_year)
+        # Local
         local_cost_by_year = sum([
-            keywords[technology + '_internal_cost_by_year'],
-            keywords[technology + '_external_cost_by_year'],
-        ])
+            internal_cost_by_year, external_cost_by_year])
         d[technology + '_local_cost_by_year'] = local_cost_by_year
         d[technology + '_local_initial_cost'] = get_first_value(
             local_cost_by_year)

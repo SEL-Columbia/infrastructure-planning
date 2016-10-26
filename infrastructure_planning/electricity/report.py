@@ -74,8 +74,12 @@ grid_final_electricity_production_in_kwh_per_year
 grid_final_electricity_production_cost_per_year
 grid_final_internal_distribution_cost_per_year
 grid_final_external_distribution_cost_per_year
+grid_internal_initial_cost
+grid_internal_recurring_cost
 grid_internal_discounted_cost
 grid_internal_levelized_cost_per_kwh_consumed
+grid_external_initial_cost
+grid_external_recurring_cost
 grid_external_discounted_cost
 grid_local_initial_cost
 grid_local_recurring_cost
@@ -111,8 +115,12 @@ diesel_mini_grid_final_electricity_production_in_kwh_per_year
 diesel_mini_grid_final_electricity_production_cost_per_year
 diesel_mini_grid_final_internal_distribution_cost_per_year
 diesel_mini_grid_final_external_distribution_cost_per_year
+diesel_mini_grid_internal_initial_cost
+diesel_mini_grid_internal_recurring_cost
 diesel_mini_grid_internal_discounted_cost
 diesel_mini_grid_internal_levelized_cost_per_kwh_consumed
+diesel_mini_grid_external_initial_cost
+diesel_mini_grid_external_recurring_cost
 diesel_mini_grid_external_discounted_cost
 diesel_mini_grid_local_initial_cost
 diesel_mini_grid_local_recurring_cost
@@ -146,8 +154,12 @@ solar_home_final_electricity_production_in_kwh_per_year
 solar_home_final_electricity_production_cost_per_year
 solar_home_final_internal_distribution_cost_per_year
 solar_home_final_external_distribution_cost_per_year
+solar_home_internal_initial_cost
+solar_home_internal_recurring_cost
 solar_home_internal_discounted_cost
 solar_home_internal_levelized_cost_per_kwh_consumed
+solar_home_external_initial_cost
+solar_home_external_recurring_cost
 solar_home_external_discounted_cost
 solar_home_local_initial_cost
 solar_home_local_recurring_cost
@@ -196,8 +208,12 @@ solar_mini_grid_final_electricity_production_in_kwh_per_year
 solar_mini_grid_final_electricity_production_cost_per_year
 solar_mini_grid_final_internal_distribution_cost_per_year
 solar_mini_grid_final_external_distribution_cost_per_year
+solar_mini_grid_internal_initial_cost
+solar_mini_grid_internal_recurring_cost
 solar_mini_grid_internal_discounted_cost
 solar_mini_grid_internal_levelized_cost_per_kwh_consumed
+solar_mini_grid_external_initial_cost
+solar_mini_grid_external_recurring_cost
 solar_mini_grid_external_discounted_cost
 solar_mini_grid_local_initial_cost
 solar_mini_grid_local_recurring_cost
@@ -312,6 +328,7 @@ def save_total_points(
     ls = [node_d for node_id, node_d in infrastructure_graph.cycle_nodes()]
     g = keywords
     properties_folder = make_folder(join(target_folder, 'properties'))
+    reports_folder = make_folder(join(target_folder, 'reports'))
 
     # Preserve columns and column order from demand_point_table
     keys = BASE_KEYS + [
@@ -319,12 +336,18 @@ def save_total_points(
     ] + FULL_KEYS
     # Include miscellaneous variables
     miscellaneous_keys = _get_miscellaneous_keys(ls, g, keys)
-    # Save CSV
+    # Save properties/points.csv
     t = get_table_from_variables(ls, g, keys=keys + miscellaneous_keys)
     t_path = join(properties_folder, 'points.csv')
     t.to_csv(t_path)
-    # Save SHP
+    # Save properties/points.shp.zip
     save_shapefile(join(properties_folder, 'points.shp.zip'), t)
+    # Save reports/examples-by-technology.csv
+    table = t.reset_index().groupby(
+        'proposed_technology').first().reset_index()
+    table.columns = [format_column_name(x) for x in table.columns]
+    table_path = join(reports_folder, 'example-by-technology.csv')
+    table.transpose().to_csv(table_path, header=False)
 
 
 def save_total_lines(
@@ -371,11 +394,6 @@ def save_total_report_by_location(
     t.columns = [format_column_name(x) for x in t.columns]
     t_path = join(reports_folder, 'report-by-location.csv')
     t.to_csv(t_path)
-
-    table = t.reset_index().groupby(
-        'proposed technology').first().reset_index().transpose()
-    table_path = join(reports_folder, 'example-by-technology.csv')
-    table.to_csv(table_path, header=False)
 
 
 def save_total_summary_by_technology(
