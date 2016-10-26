@@ -1,5 +1,4 @@
 from invisibleroads_macros.disk import make_folder
-from invisibleroads_macros.iterable import merge_dictionaries
 from os.path import join
 from pandas import DataFrame, Series, concat
 from shapely.geometry import LineString, Point
@@ -39,14 +38,20 @@ grid_system_loss_as_percent_of_total_production
 grid_mv_network_minimum_point_count
 grid_mv_network_connection_order
 grid_mv_line_raw_cost_per_meter
+grid_mv_line_raw_cost
 grid_mv_line_installation_cost_as_percent_of_raw_cost
 grid_mv_line_installation_cost_per_meter
+grid_mv_line_installation_cost
 grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost
 grid_mv_line_maintenance_cost_per_meter_per_year
+grid_mv_line_maintenance_cost_per_year
 grid_mv_line_lifetime_in_years
 grid_mv_line_replacement_cost_per_meter_per_year
+grid_mv_line_replacement_cost_per_year
 grid_mv_line_final_cost_per_meter_per_year
+grid_mv_line_final_cost_per_year
 grid_mv_line_discounted_cost_per_meter
+grid_mv_line_discounted_cost
 grid_mv_line_adjusted_length_in_meters
 grid_mv_line_adjusted_budget_in_meters
 grid_mv_transformer_load_power_factor
@@ -75,14 +80,18 @@ grid_final_electricity_production_cost_per_year
 grid_final_internal_distribution_cost_per_year
 grid_final_external_distribution_cost_per_year
 grid_internal_initial_cost
-grid_internal_recurring_cost
+grid_internal_recurring_fixed_cost_per_year
+grid_internal_recurring_variable_cost_per_year
 grid_internal_discounted_cost
 grid_internal_levelized_cost_per_kwh_consumed
 grid_external_initial_cost
-grid_external_recurring_cost
+grid_external_recurring_fixed_cost_per_year
+grid_external_recurring_variable_cost_per_year
 grid_external_discounted_cost
+grid_external_levelized_cost_per_kwh_consumed
 grid_local_initial_cost
-grid_local_recurring_cost
+grid_local_recurring_fixed_cost_per_year
+grid_local_recurring_variable_cost_per_year
 grid_local_discounted_cost
 grid_local_levelized_cost_per_kwh_consumed
 diesel_mini_grid_system_loss_as_percent_of_total_production
@@ -116,14 +125,18 @@ diesel_mini_grid_final_electricity_production_cost_per_year
 diesel_mini_grid_final_internal_distribution_cost_per_year
 diesel_mini_grid_final_external_distribution_cost_per_year
 diesel_mini_grid_internal_initial_cost
-diesel_mini_grid_internal_recurring_cost
+diesel_mini_grid_internal_recurring_fixed_cost_per_year
+diesel_mini_grid_internal_recurring_variable_cost_per_year
 diesel_mini_grid_internal_discounted_cost
 diesel_mini_grid_internal_levelized_cost_per_kwh_consumed
 diesel_mini_grid_external_initial_cost
-diesel_mini_grid_external_recurring_cost
+diesel_mini_grid_external_recurring_fixed_cost_per_year
+diesel_mini_grid_external_recurring_variable_cost_per_year
 diesel_mini_grid_external_discounted_cost
+diesel_mini_grid_external_levelized_cost_per_kwh_consumed
 diesel_mini_grid_local_initial_cost
-diesel_mini_grid_local_recurring_cost
+diesel_mini_grid_local_recurring_fixed_cost_per_year
+diesel_mini_grid_local_recurring_variable_cost_per_year
 diesel_mini_grid_local_discounted_cost
 diesel_mini_grid_local_levelized_cost_per_kwh_consumed
 solar_home_system_loss_as_percent_of_total_production
@@ -155,14 +168,18 @@ solar_home_final_electricity_production_cost_per_year
 solar_home_final_internal_distribution_cost_per_year
 solar_home_final_external_distribution_cost_per_year
 solar_home_internal_initial_cost
-solar_home_internal_recurring_cost
+solar_home_internal_recurring_fixed_cost_per_year
+solar_home_internal_recurring_variable_cost_per_year
 solar_home_internal_discounted_cost
 solar_home_internal_levelized_cost_per_kwh_consumed
 solar_home_external_initial_cost
-solar_home_external_recurring_cost
+solar_home_external_recurring_fixed_cost_per_year
+solar_home_external_recurring_variable_cost_per_year
 solar_home_external_discounted_cost
+solar_home_external_levelized_cost_per_kwh_consumed
 solar_home_local_initial_cost
-solar_home_local_recurring_cost
+solar_home_local_recurring_fixed_cost_per_year
+solar_home_local_recurring_variable_cost_per_year
 solar_home_local_discounted_cost
 solar_home_local_levelized_cost_per_kwh_consumed
 solar_mini_grid_system_loss_as_percent_of_total_production
@@ -209,14 +226,18 @@ solar_mini_grid_final_electricity_production_cost_per_year
 solar_mini_grid_final_internal_distribution_cost_per_year
 solar_mini_grid_final_external_distribution_cost_per_year
 solar_mini_grid_internal_initial_cost
-solar_mini_grid_internal_recurring_cost
+solar_mini_grid_internal_recurring_fixed_cost_per_year
+solar_mini_grid_internal_recurring_variable_cost_per_year
 solar_mini_grid_internal_discounted_cost
 solar_mini_grid_internal_levelized_cost_per_kwh_consumed
 solar_mini_grid_external_initial_cost
-solar_mini_grid_external_recurring_cost
+solar_mini_grid_external_recurring_fixed_cost_per_year
+solar_mini_grid_external_recurring_variable_cost_per_year
 solar_mini_grid_external_discounted_cost
+solar_mini_grid_external_levelized_cost_per_kwh_consumed
 solar_mini_grid_local_initial_cost
-solar_mini_grid_local_recurring_cost
+solar_mini_grid_local_recurring_fixed_cost_per_year
+solar_mini_grid_local_recurring_variable_cost_per_year
 solar_mini_grid_local_discounted_cost
 solar_mini_grid_local_levelized_cost_per_kwh_consumed
 """.strip().splitlines()
@@ -241,10 +262,15 @@ diesel_mini_grid_local_initial_cost
 solar_home_local_initial_cost
 solar_mini_grid_local_initial_cost
 
-grid_local_recurring_cost
-diesel_mini_grid_local_recurring_cost
-solar_home_local_recurring_cost
-solar_mini_grid_local_recurring_cost
+grid_local_recurring_fixed_cost_per_year
+diesel_mini_grid_local_recurring_fixed_cost_per_year
+solar_home_local_recurring_fixed_cost_per_year
+solar_mini_grid_local_recurring_fixed_cost_per_year
+
+grid_local_recurring_variable_cost_per_year
+diesel_mini_grid_local_recurring_variable_cost_per_year
+solar_home_local_recurring_variable_cost_per_year
+solar_mini_grid_local_recurring_variable_cost_per_year
 
 grid_local_discounted_cost
 diesel_mini_grid_local_discounted_cost
@@ -500,8 +526,8 @@ def save_total_map(
             'Proposed Technology': format_technology(technology),
             'Proposed MV Network Connection Order':
                 node_d.get('grid_mv_network_connection_order', ''),
-            'Proposed MV Line Length (m)': node_d[
-                'grid_mv_line_adjusted_length_in_meters'],
+            'Proposed MV Line Length (m)': node_d.get(
+                'grid_mv_line_adjusted_length_in_meters'),
             'Levelized Cost Per kWh Consumed': levelized_cost,
             'WKT': Point(latitude, longitude).wkt,
             'FillColor': color_by_technology[technology],
@@ -562,11 +588,11 @@ def order_nodes(node1_d, node2_d, edge_order):
 
 def _get_miscellaneous_keys(ls, g, keys):
     miscellaneous_keys = []
-    try:
-        l = ls[0]
-    except IndexError:
-        l = {}
-    for k, v in merge_dictionaries(g, l).items():
+    d = {}
+    d.update(g)
+    for l in ls:
+        d.update(l)
+    for k, v in d.items():
         if k in keys:
             continue
         if k in miscellaneous_keys:

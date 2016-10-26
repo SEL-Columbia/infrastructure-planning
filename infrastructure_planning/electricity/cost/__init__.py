@@ -1,12 +1,13 @@
 import numpy as np
 from collections import defaultdict
 from importlib import import_module
+from invisibleroads_macros.iterable import merge_dictionaries
 from invisibleroads_macros.math import divide_safely
 from itertools import product
 from pandas import Series
 
 from ...finance.valuation import compute_discounted_cash_flow
-from ...macros import compute, get_by_prefix, get_final_value, get_first_value
+from ...macros import compute, get_by_prefix, get_final_value, sum_by_suffix
 
 
 def estimate_internal_cost_by_technology(selected_technologies, **keywords):
@@ -44,48 +45,21 @@ def estimate_external_cost_by_technology(selected_technologies, **keywords):
     return d
 
 
-def estimate_initial_and_recurring_cost(selected_technologies, **keywords):
+def estimate_cost_profile(selected_technologies, **keywords):
     d = {}
+    suffixes = [
+        '_initial_cost',
+        '_recurring_fixed_cost_per_year',
+        '_recurring_variable_cost_per_year',
+        '_discounted_cost',
+        '_levelized_cost_per_kwh_consumed',
+    ]
     for technology in selected_technologies:
-        # Internal
-        internal_cost_by_year = keywords[technology + '_internal_cost_by_year']
-        d[technology + '_internal_initial_cost'] = get_first_value(
-            internal_cost_by_year)
-        d[technology + '_internal_recurring_cost'] = get_final_value(
-            internal_cost_by_year)
-        # External
-        external_cost_by_year = keywords[technology + '_external_cost_by_year']
-        d[technology + '_external_initial_cost'] = get_first_value(
-            external_cost_by_year)
-        d[technology + '_external_recurring_cost'] = get_final_value(
-            external_cost_by_year)
-        # Local
-        local_cost_by_year = sum([
-            internal_cost_by_year, external_cost_by_year])
-        d[technology + '_local_cost_by_year'] = local_cost_by_year
-        d[technology + '_local_initial_cost'] = get_first_value(
-            local_cost_by_year)
-        d[technology + '_local_recurring_cost'] = get_final_value(
-            local_cost_by_year)
-    return d
-
-
-def estimate_discounted_cost(selected_technologies, **keywords):
-    d = {}
-    for technology in selected_technologies:
-        d[technology + '_local_discounted_cost'] = sum([
-            keywords[technology + '_internal_discounted_cost'],
-            keywords[technology + '_external_discounted_cost']])
-    return d
-
-
-def estimate_levelized_cost(
-        selected_technologies, discounted_consumption_in_kwh, **keywords):
-    d = {}
-    for technology in selected_technologies:
-        discounted_cost = keywords[technology + '_local_discounted_cost']
-        d[technology + '_local_levelized_cost_per_kwh_consumed'] = \
-            divide_safely(discounted_cost, discounted_consumption_in_kwh, 0)
+        for suffix in suffixes:
+            d[technology + '_local' + suffix] = sum([
+                keywords[technology + '_internal' + suffix],
+                keywords[technology + '_external' + suffix],
+            ])
     return d
 
 
@@ -134,14 +108,9 @@ def prepare_internal_cost(functions, keywords):
         'electricity_production_cost_by_year', zero_by_year)
     internal_distribution_cost_by_year = d.get(
         'internal_distribution_cost_by_year', zero_by_year)
-    internal_cost_by_year = sum([
+    cost_by_year = sum([
         electricity_production_cost_by_year,
         internal_distribution_cost_by_year])
-    discounted_cost = compute_discounted_cash_flow(
-        internal_cost_by_year, keywords['financing_year'],
-        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
-    levelized_cost = divide_safely(discounted_cost, keywords[
-        'discounted_consumption_in_kwh'], 0)
     # Record
     d['final_electricity_production_in_kwh_per_year'] = get_final_value(
         electricity_production_in_kwh_by_year)
@@ -149,11 +118,7 @@ def prepare_internal_cost(functions, keywords):
         electricity_production_cost_by_year)
     d['final_internal_distribution_cost_per_year'] = get_final_value(
         internal_distribution_cost_by_year)
-    # Summarize
-    d['internal_cost_by_year'] = internal_cost_by_year
-    d['internal_discounted_cost'] = discounted_cost
-    d['internal_levelized_cost_per_kwh_consumed'] = levelized_cost
-    return d
+    return prepare_cost_summary(cost_by_year, d, keywords, prefix='internal_')
 
 
 def prepare_external_cost(functions, keywords):
@@ -172,15 +137,33 @@ def prepare_external_cost(functions, keywords):
         d.update(compute(f, keywords))
     external_distribution_cost_by_year = d.get(
         'external_distribution_cost_by_year', zero_by_year)
-    external_cost_by_year = sum([
+    cost_by_year = sum([
         external_distribution_cost_by_year])
-    discounted_cost = compute_discounted_cash_flow(
-        external_cost_by_year, keywords['financing_year'],
-        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
     # Record
     d['final_external_distribution_cost_per_year'] = get_final_value(
         external_distribution_cost_by_year)
-    # Summarize
-    d['external_cost_by_year'] = external_cost_by_year
-    d['external_discounted_cost'] = discounted_cost
-    return d
+    return prepare_cost_summary(cost_by_year, d, keywords, prefix='external_')
+
+
+def prepare_cost_summary(cost_by_year, d, keywords, prefix):
+    discounted_cost = compute_discounted_cash_flow(
+        cost_by_year, keywords['financing_year'],
+        keywords['discount_rate_as_percent_of_cash_flow_per_year'])
+    levelized_cost = divide_safely(discounted_cost, keywords[
+        'discounted_consumption_in_kwh'], 0)
+    return merge_dictionaries(d, {
+        prefix + 'cost_by_year': cost_by_year,
+        prefix + 'initial_cost': sum([
+            sum_by_suffix(d, '_raw_cost'),
+            sum_by_suffix(d, '_installation_cost'),
+        ]),
+        prefix + 'recurring_fixed_cost_per_year': sum([
+            sum_by_suffix(d, '_maintenance_cost_per_year'),
+            sum_by_suffix(d, '_replacement_cost_per_year'),
+        ]),
+        prefix + 'recurring_variable_cost_per_year': sum([
+            d.get('final_electricity_production_cost_per_year', 0),
+        ]),
+        prefix + 'discounted_cost': discounted_cost,
+        prefix + 'levelized_cost_per_kwh_consumed': levelized_cost,
+    })

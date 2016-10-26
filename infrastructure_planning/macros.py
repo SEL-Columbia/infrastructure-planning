@@ -120,6 +120,7 @@ def normalize_arguments(normalization_functions, g):
 def run(main_functions, g):
     g['infrastructure_graph'] = get_graph_from_table(g['demand_point_table'])
     for f in main_functions:
+        print(f.func_name)
         if '_total_' in f.func_name:
             g.update(compute(f, g))
             continue
@@ -203,6 +204,14 @@ def compute_raw(f, l, g=None):
             raise ValidationError(argument_name, 'required')
         keywords[argument_name] = argument_value
     return f(**keywords)
+
+
+def sum_by_suffix(value_by_key, suffix):
+    x = 0
+    for k, v in value_by_key.items():
+        if k.endswith(suffix):
+            x += v
+    return x
 
 
 def get_by_prefix(value_by_key, prefix):

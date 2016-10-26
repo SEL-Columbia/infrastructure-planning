@@ -826,6 +826,73 @@ We're not going to be able to pass explicit node_ids the way the networker is cu
 
     + Add acknowledgments to separate tools in tool.md
 
+20161026-1330 - 20161026-1400: 30 minutes
+
+    _ initial fixed
+    _ recurring fixed
+    _ recurring variable
+
+    _ initial
+    _ fixed recurring
+    _ variable recurring
+
+    _ construction
+    _ distribution
+    _ production
+
+    _ initial distribution
+    _ recurring distribution
+    _ production
+
+    grid_initial_cost
+    grid_fixed_cost_per_year
+    grid_variable_cost_per_year
+    _ grid_volatile_cost_per_year
+
+    grid_initial_cost
+    grid_recurring_fixed_cost_per_year
+    grid_recurring_variable_cost_per_year
+
+    _ grid_capital_cost
+    _ grid_recurring_fixed_cost_per_year
+    _ grid_recurring_variable_cost_per_year
+
+20161026-1430 - 20161026-1500: 30 minutes
+
+    grid_internal_initial_cost
+    grid_internal_recurring_fixed_cost_per_year
+    grid_internal_recurring_variable_cost_per_year
+
+    grid_external_initial_cost
+    grid_external_recurring_fixed_cost_per_year
+    grid_external_recurring_variable_cost_per_year
+
+    grid_local_initial_cost
+    grid_local_recurring_fixed_cost_per_year
+    grid_local_recurring_variable_cost_per_year
+
+    initial = raw + installation
+    fixed = maintenance + replacement
+    variable = get_final_value(electricity_production_cost_by_year)
+
+    _ grid_mv_line_cost_by_year_per_meter
+    grid_mv_line_cost_per_meter_by_year
+
+    _ grid_mv_line_final_cost_per_year_per_meter
+    grid_mv_line_final_cost_per_meter_per_year
+
+    + Compute grid_mv_line_raw_cost
+
+20161026-1715 - 20161026-1745: 30 minutes
+
+Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not connected to the grid?  I don't think so.
+
+    + Compute internal and external summary costs
+
+20161026-1845 - 20161026-1900: 15 minutes
+
+    + Check that everything works
+
 # Tasks
 
     Update executive summary by technology
