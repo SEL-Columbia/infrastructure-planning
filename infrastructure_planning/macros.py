@@ -14,7 +14,7 @@ from invisibleroads_macros.table import normalize_column_name
 from networkx import Graph, write_gpickle
 from os.path import isabs, join, splitext
 from osgeo.ogr import OFTInteger, OFTReal, OFTString
-from pandas import DataFrame, isnull
+from pandas import DataFrame, Series, isnull
 from shapely import wkt
 from shapely.geometry import Point
 
@@ -158,18 +158,20 @@ def save_shapefile(target_path, geotable):
     # Collect field_packs
     field_packs = []
     for index, row in geotable.iterrows():
-        field_pack = tuple(
-            row[column_name] for column_name, column_type in name_packs)
-        field_packs.append(field_pack)
+        field_packs.append(tuple(row[x] for x, _ in name_packs))
     # Set field_definitions
-    field_definitions = []
+    field_definitions, field_name_by_column_name = [], {}
     for column_name, column_type in name_packs:
         field_name = get_field_name(column_name)
+        field_name_by_column_name[column_name] = field_name
         field_definitions.append((field_name, column_type))
     # Save
     geometryIO.save(
         target_path, geometryIO.proj4LL, geometries, field_packs,
         field_definitions)
+    if field_name_by_column_name:
+        Series(field_name_by_column_name).to_csv(
+            target_path.split('.')[0] + '-thesaurus.csv')
     return target_path
 
 
@@ -267,7 +269,8 @@ def rename_keys(value_by_key, prefix='', suffix=''):
 
 def get_field_name(column_name):
     abbreviation = ''.join(x[0] for x in column_name.split('_'))[:5]
-    return '%s%s' % (abbreviation, hashlib.md5(column_name).hexdigest()[:5])
+    column_name_hash = hashlib.md5(column_name).hexdigest()
+    return '%s%s' % (abbreviation, column_name_hash[:10 - len(abbreviation)])
 
 
 def wash_total_folder(target_folder):
