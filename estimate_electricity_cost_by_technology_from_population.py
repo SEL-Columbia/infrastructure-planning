@@ -26,7 +26,6 @@ from infrastructure_planning.electricity.cost import (
     estimate_cost_profile, estimate_external_cost_by_technology,
     estimate_internal_cost_by_technology)
 from infrastructure_planning.electricity.cost.grid import (
-    estimate_grid_mv_line_adjusted_length_in_meters,
     estimate_grid_mv_line_budget,
     estimate_grid_mv_line_discounted_cost_per_meter)
 from infrastructure_planning.electricity.demand import estimate_peak_demand
@@ -281,7 +280,6 @@ if __name__ == '__main__':
         estimate_grid_mv_line_budget,
         assemble_total_grid_mv_line_network,
         sequence_total_grid_mv_line_network,
-        estimate_grid_mv_line_adjusted_length_in_meters,
         estimate_external_cost_by_technology,
         estimate_cost_profile,
         pick_proposed_technology,

@@ -88,6 +88,7 @@ def prepare_component_cost_by_year(component_packs, keywords, prefix):
 def prepare_internal_cost(functions, keywords):
     """
     Each function can return a dictionary with these keys:
+        system_capacity_cost_by_year
         electricity_production_in_kwh_by_year
         electricity_production_cost_by_year
         internal_distribution_cost_by_year
@@ -151,6 +152,9 @@ def prepare_external_cost(functions, keywords):
 
 
 def prepare_cost_summary(cost_by_year, d, keywords, prefix):
+    """
+    Summarize costs using the values provided in *d*
+    """
     discounted_cost = compute_discounted_cash_flow(
         cost_by_year, keywords['financing_year'],
         keywords['discount_rate_as_percent_of_cash_flow_per_year'])

@@ -1,5 +1,6 @@
 from collections import defaultdict
 from geopy.distance import vincenty as get_distance
+from invisibleroads_macros.iterable import merge_dictionaries
 from invisibleroads_macros.math import divide_safely
 
 from ...exceptions import ExpectedPositive, ValidationError
@@ -35,12 +36,42 @@ def estimate_system_capacity_cost(**keywords):
 
 
 def estimate_external_distribution_cost(
-        grid_mv_line_cost_per_meter_by_year, **keywords):
-    return {
+        node_id, latitude, longitude, line_length_adjustment_factor,
+        grid_mv_line_cost_per_meter_by_year, infrastructure_graph, **keywords):
+    d = defaultdict(float)
+    key = 'grid_mv_line_adjusted_length_in_meters'
+    relative_keys = [
+        'grid_mv_line_raw_cost_per_meter',
+        'grid_mv_line_installation_cost_per_meter',
+        'grid_mv_line_maintenance_cost_per_meter_per_year',
+        'grid_mv_line_replacement_cost_per_meter_per_year',
+        'grid_mv_line_final_cost_per_meter_per_year',
+        'grid_mv_line_discounted_cost_per_meter',
+    ]
+    # Note that node_id is real but edge_node_id can be fake
+    for edge_node_id, edge_d in infrastructure_graph.edge[node_id].items():
+        edge_node_d = infrastructure_graph.node[edge_node_id]
+        edge_node_ll = edge_node_d['latitude'], edge_node_d['longitude']
+        line_length = get_distance((latitude, longitude), edge_node_ll).meters
+        if 'name' in edge_node_d:
+            # If both nodes are real, then the computation will reappear when
+            # we process the other node, so we halve it here
+            line_length /= 2.
+        line_adjusted_length = line_length * line_length_adjustment_factor
+        # Aggregate over each node that is connected to the edge
+        edge_d[key] = edge_d.get(key, 0) + line_adjusted_length
+        d[key] += line_adjusted_length
+        for relative_key in relative_keys:
+            cost_per_meter = keywords[relative_key]
+            x = cost_per_meter * line_adjusted_length
+            k = relative_key.replace('_per_meter', '')
+            edge_d[k] = edge_d.get(k, 0) + x
+            d[k] += x
+    line_adjusted_length = d.get(key, 0)
+    return merge_dictionaries(d, {
         'external_distribution_cost_by_year':
-            keywords.get('grid_mv_line_adjusted_length_in_meters', 0) *
-            grid_mv_line_cost_per_meter_by_year,
-    }
+            line_adjusted_length * grid_mv_line_cost_per_meter_by_year,
+    })
 
 
 def estimate_electricity_production_cost(
@@ -111,41 +142,6 @@ def estimate_grid_mv_line_budget(
         'grid_mv_line_adjusted_budget_in_meters':
             grid_mv_line_adjusted_budget_in_meters,
     }
-
-
-def estimate_grid_mv_line_adjusted_length_in_meters(
-        node_id, latitude, longitude, line_length_adjustment_factor,
-        infrastructure_graph, **keywords):
-    d = defaultdict(float)
-    key = 'grid_mv_line_adjusted_length_in_meters'
-    relative_keys = [
-        'grid_mv_line_raw_cost_per_meter',
-        'grid_mv_line_installation_cost_per_meter',
-        'grid_mv_line_maintenance_cost_per_meter_per_year',
-        'grid_mv_line_replacement_cost_per_meter_per_year',
-        'grid_mv_line_final_cost_per_meter_per_year',
-        'grid_mv_line_discounted_cost_per_meter',
-    ]
-    # Note that node_id is real but edge_node_id can be fake
-    for edge_node_id, edge_d in infrastructure_graph.edge[node_id].items():
-        edge_node_d = infrastructure_graph.node[edge_node_id]
-        edge_node_ll = edge_node_d['latitude'], edge_node_d['longitude']
-        line_length = get_distance((latitude, longitude), edge_node_ll).meters
-        if 'name' in edge_node_d:
-            # If both nodes are real, then the computation will reappear when
-            # we process the other node, so we halve it here
-            line_length /= 2.
-        line_adjusted_length = line_length * line_length_adjustment_factor
-        # Aggregate over each node that is connected to the edge
-        edge_d[key] = edge_d.get(key, 0) + line_adjusted_length
-        d[key] += line_adjusted_length
-        for relative_key in relative_keys:
-            cost_per_meter = keywords[relative_key]
-            x = cost_per_meter * line_adjusted_length
-            k = relative_key.replace('_per_meter', '')
-            edge_d[k] = edge_d.get(k, 0) + x
-            d[k] += x
-    return dict(d)
 
 
 def estimate_grid_mv_line_cost_per_meter(
