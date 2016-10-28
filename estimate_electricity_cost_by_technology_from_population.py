@@ -34,7 +34,8 @@ from infrastructure_planning.electricity.network import (
 from infrastructure_planning.electricity.report import (
     save_total_lines, save_total_map, save_total_points,
     save_total_report_by_location, save_total_summary_by_grid_mv_line,
-    save_total_summary_by_location, save_total_summary_by_technology)
+    save_total_summary_by_location, save_total_summary_by_technology,
+    FULL_KEYS)
 
 from estimate_grid_mv_line_budget_in_meters import (
     add_arguments_for_estimate_population)
@@ -296,4 +297,4 @@ if __name__ == '__main__':
         save_total_map,
         # save_total_graph,
         wash_total_folder,
-    ], x)
+    ], x.parse_args().__dict__, FULL_KEYS)

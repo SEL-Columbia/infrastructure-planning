@@ -8,7 +8,7 @@ from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
     make_enumerated_folder_for, make_folder, remove_safely)
 from invisibleroads_macros.geometry import flip_geometry_coordinates
-from invisibleroads_macros.iterable import merge_dictionaries
+from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
 from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_column_name
 from networkx import Graph, write_gpickle
@@ -46,10 +46,10 @@ class InfrastructureGraph(Graph):
             yield node1_id, node2_id, edge_d
 
 
-def load_and_run(normalization_functions, main_functions, argument_parser):
-    args = argument_parser.parse_args()
-    g = load_arguments(args.__dict__)
-    save_arguments(g, __file__)
+def load_and_run(
+        normalization_functions, main_functions, arguments, keys):
+    g = load_arguments(arguments)
+    save_arguments(g, __file__, keys)
     try:
         g = load_files(g)
         g = normalize_arguments(normalization_functions, g)
@@ -75,7 +75,7 @@ def load_arguments(value_by_key):
     return g
 
 
-def save_arguments(g, script_path):
+def save_arguments(g, script_path, keys):
     d = g.copy()
     target_folder = d.pop('target_folder')
     if not target_folder:
@@ -89,10 +89,14 @@ def save_arguments(g, script_path):
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
         d[k] = file_name
+    # Sort arguments using keys
+    d = sort_dictionary(d, keys)
     # Save global arguments as JSON
-    json.dump(d, open(join(arguments_folder, 'arguments.json'), 'w'))
+    target_file = open(join(arguments_folder, 'arguments.json'), 'w')
+    json.dump(d, target_file, indent=4, separators=(',', ': '))
     # Save global arguments as CSV
-    csv_writer = csv.writer(open(join(arguments_folder, 'arguments.csv'), 'w'))
+    target_file = open(join(arguments_folder, 'arguments.csv'), 'w')
+    csv_writer = csv.writer(target_file)
     for x in d.items():
         csv_writer.writerow(x)
 
