@@ -76,7 +76,7 @@ def load_arguments(value_by_key):
 
 
 def save_arguments(g, script_path, keys):
-    d = g.copy()
+    d = sort_dictionary(g.copy(), keys)
     target_folder = d.pop('target_folder')
     if not target_folder:
         target_folder = make_enumerated_folder_for(script_path)
@@ -89,8 +89,6 @@ def save_arguments(g, script_path, keys):
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
         d[k] = file_name
-    # Sort arguments using keys
-    d = sort_dictionary(d, keys)
     # Save global arguments as JSON
     target_file = open(join(arguments_folder, 'arguments.json'), 'w')
     json.dump(d, target_file, indent=4, separators=(',', ': '))
