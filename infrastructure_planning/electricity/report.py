@@ -415,12 +415,14 @@ def save_total_lines(
 
 
 def save_total_report_by_location(
-        target_folder, infrastructure_graph, **keywords):
+        target_folder, infrastructure_graph, demand_point_table, **keywords):
     ls = [node_d for node_id, node_d in infrastructure_graph.cycle_nodes()]
     g = keywords
     reports_folder = make_folder(join(target_folder, 'reports'))
 
-    t = get_table_from_variables(ls, g, keys=BASE_KEYS + SOME_KEYS)
+    t = get_table_from_variables(ls, g, keys=BASE_KEYS + [
+        x for x in demand_point_table.columns if x not in BASE_KEYS + SOME_KEYS
+    ] + SOME_KEYS)
     t.columns = [format_column_name(x) for x in t.columns]
     t_path = join(reports_folder, 'report-by-location.csv')
     t.to_csv(t_path)
