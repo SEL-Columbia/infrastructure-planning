@@ -4,6 +4,7 @@ import hashlib
 import inspect
 import simplejson as json
 import shutil
+from collections import OrderedDict
 from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
     make_enumerated_folder_for, make_folder, remove_safely)
@@ -76,11 +77,13 @@ def load_arguments(value_by_key):
 
 
 def save_arguments(g, script_path, keys):
-    d = sort_dictionary(g.copy(), keys)
+    d = g.copy()
     target_folder = d.pop('target_folder')
     if not target_folder:
         target_folder = make_enumerated_folder_for(script_path)
     arguments_folder = make_folder(join(target_folder, 'arguments'))
+    # Migrate paths
+    path_by_key = OrderedDict()
     for k, v in d.items():
         if not k.endswith('_path'):
             continue
@@ -88,7 +91,9 @@ def save_arguments(g, script_path, keys):
         # Save a copy of each file
         shutil.copy(v, join(arguments_folder, file_name))
         # Make the reference point to the local copy
-        d[k] = file_name
+        path_by_key[k] = file_name
+    d = sort_dictionary(d, keys)
+    d.update(path_by_key)
     # Save global arguments as JSON
     target_file = open(join(arguments_folder, 'arguments.json'), 'w')
     json.dump(d, target_file, indent=4, separators=(',', ': '))
