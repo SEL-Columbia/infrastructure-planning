@@ -948,6 +948,7 @@ Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not 
     Add instructions on how to set up the system on a new machine
         Update installation requirements
     Draft jupyter notebook that starts from the population of a single node
+    Check that name supports unicode
 
 ## Important and hard
 
