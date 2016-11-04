@@ -1,5 +1,7 @@
 from geopy.distance import vincenty as get_distance
-from invisibleroads_macros.geometry import flip_geometry_coordinates
+from invisibleroads_macros.geometry import (
+    drop_z, flip_xy, transform_geometries)
+from logging import NullHandler, getLogger
 from pandas import isnull
 from shapely import wkt
 from shapely.geometry import GeometryCollection
@@ -13,6 +15,8 @@ DEMAND_POINT_TABLE_COLUMNS = [
     'longitude',
     'population',
 ]
+LOG = getLogger(__name__)
+LOG.addHandler(NullHandler())
 
 
 def normalize_demand_point_table(demand_point_table):
@@ -72,7 +76,21 @@ def normalize_solar_mini_grid_panel_table(solar_mini_grid_panel_table):
 
 def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
-    geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
+    raw_geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
+    # Remove incompatible geometries
+    geometries, xs = []
+    for x, geometry in enumerate(raw_geometries):
+        if geometry.type.endswith('LineString'):
+            geometries.append(geometry)
+        else:
+            LOG.warn(
+                'Ignoring incompatible geometry '
+                'in grid_mv_line_geotable (%s)' % geometry.wkt)
+            xs.append(x)
+    grid_mv_line_geotable.drop(grid_mv_line_geotable.index[xs])
+    # Remove elevation
+    geometries = transform_geometries(geometries, drop_z)
+    # Match coordinate order
     if geometries:
         regular = tuple(GeometryCollection(geometries).centroid.coords[0])[:2]
         flipped = regular[1], regular[0]
@@ -80,9 +98,8 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
         # If the flipped coordinates are closer,
         if get_distance(reference, flipped) < get_distance(reference, regular):
             # Flip coordinates to get (latitude, longitude) coordinate order
-            flipped_geometries = flip_geometry_coordinates(geometries)
-            # ISO 6709 specifies (latitude, longitude) coordinate order
-            grid_mv_line_geotable['wkt'] = [x.wkt for x in flipped_geometries]
+            geometries = transform_geometries(geometries, flip_xy)
+    grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}
 
 
