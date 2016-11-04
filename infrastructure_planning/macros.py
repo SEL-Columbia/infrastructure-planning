@@ -8,7 +8,7 @@ from collections import OrderedDict
 from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
     make_enumerated_folder_for, make_folder, remove_safely)
-from invisibleroads_macros.geometry import flip_geometry_coordinates
+from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
 from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_column_name
@@ -143,7 +143,7 @@ def save_shapefile(target_path, geotable):
     if 'wkt' in geotable:
         geometries = [wkt.loads(x) for x in geotable['wkt']]
         # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
-        geometries = flip_geometry_coordinates(geometries)
+        geometries = transform_geometries(geometries, flip_xy)
     else:
         xys = geotable[['longitude', 'latitude']].values
         geometries = [Point(xy) for xy in xys]

@@ -78,7 +78,7 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     'Make sure that grid mv lines use (latitude, longitude) coordinate order'
     raw_geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
     # Remove incompatible geometries
-    geometries, xs = []
+    geometries, xs = [], []
     for x, geometry in enumerate(raw_geometries):
         if geometry.type.endswith('LineString'):
             geometries.append(geometry)

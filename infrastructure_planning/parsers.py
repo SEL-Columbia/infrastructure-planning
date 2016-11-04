@@ -1,6 +1,6 @@
 import geometryIO
 import re
-from invisibleroads_macros.geometry import flip_geometry_coordinates
+from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries
 from pandas import DataFrame, read_csv
 
@@ -50,9 +50,9 @@ def load_geotable(path):
         # Convert to (longitude, latitude)
         geometries = [normalize_geometry(x) for x in geometries]
         # Convert to (latitude, longitude)
-        flipped_geometries = flip_geometry_coordinates(geometries)
+        geometries = transform_geometries(geometries, flip_xy)
         table = DataFrame(fields, columns=[x[0] for x in definitions])
-        table['WKT'] = [x.wkt for x in flipped_geometries]
+        table['WKT'] = [x.wkt for x in geometries]
     else:
         raise UnsupportedFormat('cannot load geotable (%s)' % path)
     return table
