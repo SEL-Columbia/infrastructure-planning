@@ -11,7 +11,7 @@ from invisibleroads_macros.disk import (
 from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
 from invisibleroads_macros.math import divide_safely
-from invisibleroads_macros.table import normalize_column_name
+from invisibleroads_macros.table import normalize_key
 from networkx import Graph, write_gpickle
 from os.path import isabs, join, splitext
 from osgeo.ogr import OFTInteger, OFTReal, OFTString
@@ -110,7 +110,7 @@ def normalize_arguments(normalization_functions, g):
     for k, v in g.items():
         if not hasattr(v, 'columns'):
             continue
-        v.columns = [normalize_column_name(x, '_') for x in v.columns]
+        v.columns = [normalize_key(x, '_') for x in v.columns]
     # Normalize tables
     for normalize_argument in normalization_functions:
         try:
