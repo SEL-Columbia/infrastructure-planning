@@ -7,7 +7,8 @@ import shutil
 from collections import OrderedDict
 from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
-    make_enumerated_folder_for, make_folder, remove_safely)
+    make_enumerated_folder_for, make_folder, remove_safely,
+    replace_file_extension)
 from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
 from invisibleroads_macros.math import divide_safely
@@ -179,7 +180,7 @@ def save_shapefile(target_path, geotable):
         field_definitions)
     if field_name_by_column_name:
         Series(field_name_by_column_name).to_csv(
-            target_path.split('.')[0] + '-thesaurus.csv')
+            replace_file_extension(target_path, '-thesaurus.csv'))
     return target_path
 
 
