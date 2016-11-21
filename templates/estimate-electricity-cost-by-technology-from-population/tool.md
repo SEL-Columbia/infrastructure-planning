@@ -1,9 +1,31 @@
 # Estimate Electricity Cost by Technology from Population
 
-- Version 3 (2016) Professor Vijay Modi, Edwin Adkins, Chris Natali, Naichen Zhao, Shaky Sherpa, Roy Hyunjin Han, Viktor Roytman
-- Version 2 (2013) Professor Vijay Modi, Edwin Adkins, Chris Natali, Brandon Ogle, Shaky Sherpa, Jonathan Carbajal
-- Version 1 (2010) Professor Vijay Modi, Edwin Adkins, Ayse Selin Kocaman, Alex Zvoleff, Alex Hofmann, Sahil Shah, Roy Hyunjin Han, Po-Han Freeza Huang, Andrew Doro, Susan Kum, Aly Sanoh, Matt Berg
-- Version 0 (2008) Professor Vijay Modi, Lily Parshall, Aly Sanoh, Shashank Mohan, Dana Pillai, Arnaud Algrin
+- Version 3 (2016)
+    - Principal Investigator: Professor Vijay Modi
+    - Project Manager: Edwin Adkins
+    - Econometric Analyst: Naichen Zhao
+    - Spatial Analyst: Shaky Sherpa
+    - Software Engineers: Chris Natali, Roy Hyunjin Han, Viktor Roytman
+- Version 2 (2013)
+    - Principal Investigator: Professor Vijay Modi
+    - Project Manager: Edwin Adkins
+    - Operations Research Analyst: Ayse Selin Kocaman
+    - Econometric Analyst: Jonathan Carbajal
+    - Spatial Analyst: Shaky Sherpa
+    - Software Engineers: Chris Natali, Brandon Ogle
+- Version 1 (2010)
+    - Principal Investigator: Professor Vijay Modi
+    - Project Managers: Edwin Adkins, Alex Hofmann, Matt Berg
+    - Operations Research Analyst: Alex Zvoleff, Ayse Selin Kocaman
+    - Econometric Analysts: Sahil Shah, Aly Sanoh
+    - Spatial Analyst: Susan Kum
+    - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang, Andrew Doro
+- Version 0 (2008)
+    - Principal Investigator: Professor Vijay Modi
+    - Researchers: Lily Parshall, Aly Sanoh
+    - Econometric Analyst: Arnaud Algrin
+    - Spatial Analyst: Dana Pillai
+    - Software Engineer: Shashank Mohan
 
 Each technology has initial installation costs and recurring production, maintenance and replacement costs.
 
