@@ -22,7 +22,7 @@
     - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang, Andrew Doro
 - Version 0 (2008)
     - Principal Investigator: Professor Vijay Modi
-    - Researchers: Lily Parshall, Aly Sanoh
+    - Doctoral Researchers: Lily Parshall, Aly Sanoh
     - Econometric Analyst: Arnaud Algrin
     - Spatial Analyst: Dana Pillai
     - Software Engineer: Shashank Mohan
