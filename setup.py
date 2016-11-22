@@ -7,7 +7,7 @@ DESCRIPTION = '\n\n'.join(open(join(FOLDER, x)).read().strip() for x in [
     'README.rst', 'CHANGES.rst'])
 setup(
     name='infrastructure-planning',
-    version='3.0.0',
+    version='3.0.1',
     description='Infrastructure planning tools',
     long_description=DESCRIPTION,
     classifiers=[
@@ -24,10 +24,22 @@ setup(
         'pytest-runner',
     ],
     install_requires=[
-        'python-dateutil',
+        # 'GDAL',
+        'geometryIO>=0.9.7.2',
         'geopy',
-        'invisibleroads-macros>=0.7.3',
+        'invisibleroads-macros>=0.7.4',
+        'matplotlib',
+        # 'networker',
+        'networkx',
+        'numpy',
+        'pandas',
+        'python-dateutil',
+        'scikit-learn',
+        'scipy',
+        # 'sequencer',
+        'shapely',
         'simplejson',
+        'six',
     ],
     tests_require=[
         'pytest',
