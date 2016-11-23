@@ -25,7 +25,7 @@ setup(
     ],
     install_requires=[
         # 'GDAL',
-        'geometryIO>=0.9.7.2',
+        'geometryIO>=0.9.7.3',
         'geopy',
         'invisibleroads-macros>=0.7.4',
         'matplotlib',
