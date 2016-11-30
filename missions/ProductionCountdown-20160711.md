@@ -895,6 +895,13 @@ Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not 
 
 # Tasks
 
+    Use parameters from minimum capacity if actual is less than minimum
+    Consider total population and % connected to compute unconnected household count
+        Grow population using total population
+        Size capacity using unconnected household count
+
+
+
     Update executive summary by technology
         Show initial cost
         Show projected recurring
@@ -943,7 +950,6 @@ Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not 
     Check if we can override selected_technologies on a local basis
     Update estimate_diesel_mini_grid_fuel_cost to vary based on generator capacity
     Consider estimating population growth using projected population year
-    Consider total population and % connected to compute unconnected household count
 
     Add instructions on how to set up the system on a new machine
         Update installation requirements
