@@ -154,11 +154,10 @@ def save_shapefile(target_path, geotable):
         for column_name, column_value in row.iteritems():
             if column_name in ('wkt', 'longitude', 'latitude'):
                 continue
-            if hasattr(column_value, '__float__'):
-                if column_value >= -2147483648 and column_value <= 2147483647:
-                    column_type = OFTInteger
-                else:
-                    column_type = OFTReal
+            if isinstance(column_value, float):
+                column_type = OFTReal
+            elif isinstance(column_value, int):
+                column_type = OFTInteger
             elif hasattr(column_value, 'strip'):
                 column_type = OFTString
             else:
