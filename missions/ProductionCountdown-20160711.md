@@ -1009,3 +1009,4 @@ Should we include grid_mv_line_adjusted_budget_in_meters for nodes that are not 
     Consider letting user add row or column
     Consider accepting net present value vs consumption curve for energy source X
     Consider estimate line length more accurately using elevation if available via linestring z
+    Gather past datasets and write tests to make sure the models run successfully on each of them
