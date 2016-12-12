@@ -37,10 +37,12 @@ It is important to keep the project alive while it still has users.
 
 I found a serious bug in the way that values are being interpolated in `interpolate_values`.
 
-    Use parameters from minimum capacity if actual is less than minimum
+    + Use parameters from minimum capacity if actual is less than minimum
 
 # Tasks
 
+    Rename "proposed cost per connection" to "proposed discounted cost per connection"
+    Add "proposed initial cost per connection"
     Consider total population and % connected to compute unconnected household count
         Grow population using total population
         Size capacity using unconnected household count
