@@ -21,7 +21,8 @@ It is important to keep the project alive while it still has users.
 # Objectives
 
 1. Sort goals.
-2. Update model.
+2. Fix bugs.
+3. Update model.
 
 # Log
 
@@ -30,10 +31,16 @@ It is important to keep the project alive while it still has users.
     _ Rename standard_output.log to stdout.log
     _ Rename standard_error.log to stderr.log
     _ Get default parameters for tanzania training
+    + Check that everything still works
+
+20161212-1100 - 20161212-1200: 1 hour
+
+I found a serious bug in the way that values are being interpolated in `interpolate_values`.
+
+    Use parameters from minimum capacity if actual is less than minimum
 
 # Tasks
 
-    Use parameters from minimum capacity if actual is less than minimum
     Consider total population and % connected to compute unconnected household count
         Grow population using total population
         Size capacity using unconnected household count

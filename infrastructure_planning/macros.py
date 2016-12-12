@@ -255,22 +255,32 @@ def get_table_from_variables(ls, g, keys):
     return DataFrame(rows, columns=keys).set_index('name')
 
 
-def interpolate_values(source_table, target_column, target_value):
+def interpolate_values(source_table, source_column, target_value):
     t = source_table
-    assert len(t) > 0
-    assert len(t) == len(set(t[target_column]))
-    # Get indices of two rows nearest to target value
-    difference = t[target_column] - target_value
-    sorted_indices = difference.abs().argsort()
-    index0 = sorted_indices[0]
-    index1 = sorted_indices[1] if len(sorted_indices) > 1 else index0
-    # Compute fraction of difference in target column
+    source_values = t[source_column]
+    minimum_source_value = source_values.min()
+    maximum_source_value = source_values.max()
+    message_template = 'source_column (%s) values must be %%s' % source_column
+    assert len(t) > 0, 'table must have at least one row'
+    assert len(t) == len(set(source_values)), message_template % 'unique'
+    assert minimum_source_value >= 0, message_template % 'positive'
+    if len(t) == 1:
+        return t.ix[t.index[0]]
+    if target_value <= minimum_source_value:
+        return t.ix[source_values.argmin()]
+    if target_value >= maximum_source_value:
+        return t.ix[source_values.argmax()]
+    # Get two rows nearest to target value
+    sorted_indices = (source_values - target_value).abs().argsort()
+    row0 = t.ix[sorted_indices[0]]
+    row1 = t.ix[sorted_indices[1]]
+    # Compute fraction of interpolation
     fraction = divide_safely(
-        t[target_column].ix[index0],
-        t[target_column].ix[index1],
-        ExpectedPositive(target_column))
+        target_value - row0[source_column],
+        row1[source_column] - row0[source_column],
+        ExpectedPositive(message_template % 'unique and positive'))
     # Interpolate
-    return t.ix[index0] + (t.ix[index1] - t.ix[index0]) * fraction
+    return row0 + (row1 - row0) * fraction
 
 
 def rename_keys(value_by_key, prefix='', suffix=''):
