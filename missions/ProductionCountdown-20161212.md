@@ -46,7 +46,10 @@ I found a serious bug in the way that values are being interpolated in `interpol
     Consider total population and % connected to compute unconnected household count
         Grow population using total population
         Size capacity using unconnected household count
+        Add preconnected_technology
+        Add preconnected_rate_as_percent_of_population
     Consider estimating population growth using projected population year
     Let user download example table for each table
     Update executive summary by technology
         Show connection count
+    Consider renaming selected_technologies to ordered_technologies or ranked_technologies
