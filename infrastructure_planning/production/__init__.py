@@ -18,12 +18,17 @@ def prepare_system_capacity_cost(
     t = option_table.copy()
     t['raw_cost_per_unit_capacity'] = t['raw_cost'] / t[capacity_column]
     x = interpolate_values(t, capacity_column, desired_system_capacity)
+
+    minimum_system_capacity = t[capacity_column].min()
+    actual_system_capacity = int(ceil(max(
+        desired_system_capacity, minimum_system_capacity)))
+
     # Extrapolate
-    raw_cost = desired_system_capacity * x['raw_cost_per_unit_capacity']
+    raw_cost = actual_system_capacity * x['raw_cost_per_unit_capacity']
     installation_cost = raw_cost * x[
         'installation_cost_as_percent_of_raw_cost'] / 100.
     return {
-        'actual_system_' + capacity_column: int(ceil(desired_system_capacity)),
+        'actual_system_' + capacity_column: actual_system_capacity,
         'raw_cost': raw_cost,
         'installation_cost': installation_cost,
         'maintenance_cost_per_year': raw_cost * x[
