@@ -236,6 +236,10 @@ def get_final_value(value_by_year):
     return value_by_year.ix[sorted(value_by_year.index)[-1]]
 
 
+def make_zero_by_year(value_by_year):
+    return Series(0, index=value_by_year.index)
+
+
 def get_graph_from_table(table):
     graph = InfrastructureGraph()
     for index, row in table.iterrows():

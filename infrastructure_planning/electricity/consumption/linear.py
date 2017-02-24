@@ -2,8 +2,10 @@ from invisibleroads_macros.math import divide_safely
 from pandas import DataFrame, Series, concat, isnull, merge
 
 from ...growth import get_default_slope, get_future_years
-from ...growth.interpolated import get_interpolated_spline_extrapolated_linear_function as get_estimate_electricity_consumption  # noqa
-from ...macros import get_final_value
+from ...growth.interpolated import (
+    get_interpolated_spline_extrapolated_linear_function as
+    get_estimate_electricity_consumption)
+from ...macros import get_final_value, make_zero_by_year
 
 
 def estimate_consumption_from_connection_type(
@@ -14,10 +16,11 @@ def estimate_consumption_from_connection_type(
     if there is a local override for household_count.
     """
     d = {}
-    connection_count_by_year = Series(0, index=population_by_year.index)
-    consumption_by_year = Series(0, index=population_by_year.index)
+    connection_count_by_year = make_zero_by_year(population_by_year)
+    consumption_by_year = make_zero_by_year(population_by_year)
     estimated_household_connection_count_by_year = divide_safely(
-        population_by_year, number_of_people_per_household, 0)
+        population_by_year, number_of_people_per_household,
+        make_zero_by_year(population_by_year))
     for row_index, row in connection_type_table.iterrows():
         connection_type = row['connection_type']
         count_by_year = _get_connection_count_by_year(
