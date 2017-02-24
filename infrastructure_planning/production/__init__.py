@@ -1,5 +1,4 @@
 from invisibleroads_macros.math import divide_safely
-from math import ceil
 
 from ..exceptions import ExpectedPositive
 from ..macros import interpolate_values
@@ -20,8 +19,8 @@ def prepare_system_capacity_cost(
     x = interpolate_values(t, capacity_column, desired_system_capacity)
 
     minimum_system_capacity = t[capacity_column].min()
-    actual_system_capacity = int(ceil(max(
-        desired_system_capacity, minimum_system_capacity)))
+    actual_system_capacity = max(
+        desired_system_capacity, minimum_system_capacity)
 
     # Extrapolate
     raw_cost = actual_system_capacity * x['raw_cost_per_unit_capacity']
