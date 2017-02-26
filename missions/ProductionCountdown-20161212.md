@@ -68,3 +68,6 @@ I found a serious bug in the way that values are being interpolated in `interpol
         Show connection count
 
     Consider preserving datetime fields in shapefiles
+
+    Use same colours for technologies
+    Add legend for technologies
