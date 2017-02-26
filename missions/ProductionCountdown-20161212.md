@@ -71,3 +71,6 @@ I found a serious bug in the way that values are being interpolated in `interpol
 
     Use same colours for technologies
     Add legend for technologies
+
+    Consider supporting capacity and installation cost per kw override
+    Consider supporting multiple transformer table override
