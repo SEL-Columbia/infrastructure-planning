@@ -1,6 +1,6 @@
 Infrastructure Planning
 =======================
-Here is an updated infrastructure planning system based on `our earlier work <https://github.com/SEL-Columbia/networkplanner>`_.  
+Here is an updated infrastructure planning system based on `our earlier work <https://github.com/SEL-Columbia/networkplanner>`_.
 
 
 Install

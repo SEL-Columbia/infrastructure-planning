@@ -31,8 +31,7 @@ Each technology has initial installation costs and recurring production, mainten
 
 Mini-grid technologies include a central production facility and a low-voltage distribution network.
 
-#### Selected Technologies
-{selected_technologies_text}
+{technology_options}
 
 
 ## Finance
@@ -40,51 +39,47 @@ The amount of money needed to fund an infrastructure project includes both initi
 
 The net present value or discounted cost of an infrastructure project assumes that you will invest the money that you are not using now. For example, if a $110k project will start next year and if you are confident that you will earn at least 10% through investments, then you can request a loan for $100k one year in advance.
 
-#### Year of Financing
 {financing_year}
 
-#### Time Horizon in Years
 {time_horizon_in_years}
 
-#### Discount Rate as Percent of Cash Flow per Year
 {discount_rate_as_percent_of_cash_flow_per_year}
 
 
 ## Demography
 Assume that population grows at a fixed rate each year. If the population is 100 and the growth rate is 10%, then the population will be 110 after the first year and 121 after the second year.
 
-#### Demand Point Table
+{demand_point_table}
+
 To override a computed value for specific demand points, upload a CSV with an additional column. The column name should match the name of the variable that you are overriding. Variable names are available in the *glossary.csv* file that is generated after running this tool.
 
 Note that if you leave a blank entry in a local override column, then the system will not override the value for that demand point.
 
-{demand_point_table}
-
-#### Population Year
 {population_year}
 
-#### Population Growth Rate as Percent of Population per Year
 {population_growth_as_percent_of_population_per_year}
+
+{preconnected_rate_as_percent_of_population}
+
+{preconnected_technology}
 
 
 ## Geography
 
-#### Line Length Adjustment Factor
-The length of line used to connect two locations is often greater than the distance between the two locations.
-
 {line_length_adjustment_factor}
 
-#### Average Distance Between Buildings in Meters
+The length of line used to connect two locations is often greater than the distance between the two locations.
+
 {average_distance_between_buildings_in_meters}
 
-#### Peak Hours of Sun per Year
 {peak_hours_of_sun_per_year}
 
 
 ## Consumption
 Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
 
-#### Connection Type Table
+{connection_type_table}
+
 To override connection count and consumption by connection type for specific demand points, please use the following column name format in the *Demand Point Table* above:
 
 - xyz_connection_count
@@ -102,15 +97,10 @@ The following column names in the *Demand Point Table* will override market coun
 - market_connection_count
 - market_consumption_in_kwh_per_year_per_market
 
-{connection_type_table}
-
-#### Number of People per Household
 {number_of_people_per_household}
 
-#### Consumption during Peak Hours as Percent of Total Consumption
 {consumption_during_peak_hours_as_percent_of_total_consumption}
 
-#### Peak Hours of Consumption per Year
 {peak_hours_of_consumption_per_year}
 
 

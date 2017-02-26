@@ -39,17 +39,32 @@ I found a serious bug in the way that values are being interpolated in `interpol
 
     + Use parameters from minimum capacity if actual is less than minimum
 
+20170224-1715 - 20170224-1800: 45 minutes
+
+    _ Consider renaming selected_technologies to ordered_technologies or ranked_technologies
+    + Rename selected_technologies_text to technology_options
+
 # Tasks
+
+    Make sure technology_options work properly
+    Update template to display properly
 
     Rename "proposed cost per connection" to "proposed discounted cost per connection"
     Add "proposed initial cost per connection"
+
     Consider total population and % connected to compute unconnected household count
+        Rename household count to unconnected household count
+        Rename population count to unconnected population count
         Grow population using total population
         Size capacity using unconnected household count
         Add preconnected_technology
         Add preconnected_rate_as_percent_of_population
+
     Consider estimating population growth using projected population year
+
     Let user download example table for each table
+
     Update executive summary by technology
         Show connection count
-    Consider renaming selected_technologies to ordered_technologies or ranked_technologies
+
+    Consider preserving datetime fields in shapefiles
