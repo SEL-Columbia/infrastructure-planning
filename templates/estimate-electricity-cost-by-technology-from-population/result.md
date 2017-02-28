@@ -1,16 +1,10 @@
 # Electricity Cost by Technology from Population
 
-## Infrastructure Map
+{infrastructure_streets_satellite_geotable: infrastructure map}
+
 Radius indicates relative **peak demand**.
 Color indicates **proposed technology**.
 
-{infrastructure_streets_satellite_geotable}
-
-## Summary by Technology
-{summary_by_technology_table}
-
-## Summary by Location
-{summary_by_location_table}
-
-## Summary by Proposed Grid Medium Voltage Line
-{summary_by_grid_mv_line_table}
+{summary_by_technology_table: summary by technology}
+{summary_by_location_table: summary by location}
+{summary_by_grid_mv_line_table: summary by grid mv line (proposed)}

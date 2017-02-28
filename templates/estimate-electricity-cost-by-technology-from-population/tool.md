@@ -31,7 +31,9 @@ Each technology has initial installation costs and recurring production, mainten
 
 Mini-grid technologies include a central production facility and a low-voltage distribution network.
 
-{technology_options}
+{selected_technologies_text}
+
+
 
 
 ## Finance
@@ -40,28 +42,25 @@ The amount of money needed to fund an infrastructure project includes both initi
 The net present value or discounted cost of an infrastructure project assumes that you will invest the money that you are not using now. For example, if a $110k project will start next year and if you are confident that you will earn at least 10% through investments, then you can request a loan for $100k one year in advance.
 
 {financing_year}
-
 {time_horizon_in_years}
-
 {discount_rate_as_percent_of_cash_flow_per_year}
+
+
 
 
 ## Demography
 Assume that population grows at a fixed rate each year. If the population is 100 and the growth rate is 10%, then the population will be 110 after the first year and 121 after the second year.
 
-{demand_point_table}
+{demand_point_table: demand points}
 
 To override a computed value for specific demand points, upload a CSV with an additional column. The column name should match the name of the variable that you are overriding. Variable names are available in the *glossary.csv* file that is generated after running this tool.
 
 Note that if you leave a blank entry in a local override column, then the system will not override the value for that demand point.
 
 {population_year}
-
 {population_growth_as_percent_of_population_per_year}
 
-{preconnected_rate_as_percent_of_population}
 
-{preconnected_technology}
 
 
 ## Geography
@@ -71,14 +70,15 @@ Note that if you leave a blank entry in a local override column, then the system
 The length of line used to connect two locations is often greater than the distance between the two locations.
 
 {average_distance_between_buildings_in_meters}
-
 {peak_hours_of_sun_per_year}
+
+
 
 
 ## Consumption
 Assume that consumption is fixed per capita. Estimate consumption based on the projected population.
 
-{connection_type_table}
+{connection_type_table: connection types}
 
 To override connection count and consumption by connection type for specific demand points, please use the following column name format in the *Demand Point Table* above:
 
@@ -98,10 +98,10 @@ The following column names in the *Demand Point Table* will override market coun
 - market_consumption_in_kwh_per_year_per_market
 
 {number_of_people_per_household}
-
 {consumption_during_peak_hours_as_percent_of_total_consumption}
-
 {peak_hours_of_consumption_per_year}
+
+
 
 
 ## Technology: Grid
@@ -111,11 +111,9 @@ A remote source produces electricity that is distributed to consumers.
     * Assume that we must produce more than what we consume because of distribution losses.
     * Production cost is the loss-adjusted local consumption in kWh multiplied by the electricity production cost per kWh.
 
-#### Grid Electricity Production Cost per Kilowatt-Hour
 {grid_electricity_production_cost_per_kwh}
-
-#### Grid System Loss as Percent of Total Production
 {grid_system_loss_as_percent_of_total_production}
+
 
 ### Grid Medium Voltage Line
 Medium voltage lines carry electricity over large distances.
@@ -125,23 +123,13 @@ Medium voltage lines carry electricity over large distances.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Grid Medium Voltage Network Minimum Point Count
 {grid_mv_network_minimum_point_count}
-
-#### Grid Medium Voltage Line (Existing)
-{grid_mv_line_geotable}
-
-#### Grid Medium Voltage Line Raw Cost per Meter
+{grid_mv_line_geotable: grid mv lines (existing)}
 {grid_mv_line_raw_cost_per_meter}
-
-#### Grid Medium Voltage Line Installation Cost as Percent of Raw Cost
 {grid_mv_line_installation_cost_as_percent_of_raw_cost}
-
-#### Grid Medium Voltage Line Maintenance Cost per Year as Percent of Raw Cost
 {grid_mv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Grid Medium Voltage Line Lifetime in Years
 {grid_mv_line_lifetime_in_years}
+
 
 ### Grid Medium Voltage Transformer
 Medium voltage transformers convert medium voltage to low voltage.
@@ -157,11 +145,9 @@ Medium voltage transformers convert medium voltage to low voltage.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Grid Medium Voltage Transformer Load Power Factor
 {grid_mv_transformer_load_power_factor}
+{grid_mv_transformer_table: grid mv transformers}
 
-#### Grid Medium Voltage Transformer Table
-{grid_mv_transformer_table}
 
 ### Grid Low Voltage Line
 Low voltage lines distribute electricity over small distances.
@@ -173,17 +159,11 @@ Low voltage lines distribute electricity over small distances.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Grid Low Voltage Line Raw Cost per Meter
 {grid_lv_line_raw_cost_per_meter}
-
-#### Grid Low Voltage Line Installation Cost as Percent of Raw Cost
 {grid_lv_line_installation_cost_as_percent_of_raw_cost}
-
-#### Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
 {grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Grid Low Voltage Line Lifetime in Years
 {grid_lv_line_lifetime_in_years}
+
 
 ### Grid Low Voltage Connection
 The low voltage connection connects a building to low voltage line.
@@ -193,32 +173,24 @@ The low voltage connection connects a building to low voltage line.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Grid Low Voltage Connection Raw Cost
 {grid_lv_connection_raw_cost}
-
-#### Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
 {grid_lv_connection_installation_cost_as_percent_of_raw_cost}
-
-#### Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
 {grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Grid Low Voltage Connection Lifetime in Years
 {grid_lv_connection_lifetime_in_years}
+
+
 
 
 ## Technology: Diesel Mini Grid
 A local diesel generator produces electricity that is distributed to consumers.
 
-* Recurring Production Cost
-    * The cost of fuel consumed is the product of the fuel cost per liter, the fuel liters consumed per kilowatt-hour, the generator's capacity in kilowatts and its effective hours of production per year. The effective hours of production per year is the larger of either the loss-adjusted consumption per year divided by the system capacity or the minimum hours of production per year.
+* Recurring Production Cost is the cost of fuel consumed. Multiply the fuel cost per liter, the fuel liters consumed per kilowatt-hour, the generator's capacity in kilowatts and its effective hours of production per year. The effective hours of production per year is the larger of either the loss-adjusted consumption per year divided by the system capacity or the minimum hours of production per year.
 
-#### Diesel Mini Grid System Loss as Percent of Total Production
 {diesel_mini_grid_system_loss_as_percent_of_total_production}
-
-#### Diesel Mini Grid Fuel Cost per Liter
 {diesel_mini_grid_fuel_cost_per_liter}
 
-### Generator
+
+### Diesel Mini Grid Generator
 Generators consume fuel to produce electricity.
 
 * Initial Raw Cost
@@ -231,52 +203,38 @@ Generators consume fuel to produce electricity.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Diesel Mini Grid Generator
-{diesel_mini_grid_generator_table}
-
-#### Diesel Mini Grid Generator Minimum Hours of Production per Year
+{diesel_mini_grid_generator_table: diesel mini grid generators}
 {diesel_mini_grid_generator_minimum_hours_of_production_per_year}
-
-#### Diesel Mini Grid Generator Fuel Liters Consumed per Kilowatt-Hour
 {diesel_mini_grid_generator_fuel_liters_consumed_per_kwh}
+
 
 ### Diesel Mini Grid Low Voltage Line
 The cost model is identical to grid low voltage line.
 
-#### Diesel Mini Grid Low Voltage Line Raw Cost per Meter
 {diesel_mini_grid_lv_line_raw_cost_per_meter}
-
-#### Diesel Mini Grid Low Voltage Line Installation Cost as Percent of Raw Cost
 {diesel_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost}
-
-#### Diesel Mini Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
 {diesel_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Diesel Mini Grid Low Voltage Line Lifetime in Years
 {diesel_mini_grid_lv_line_lifetime_in_years}
 
+
 ### Diesel Mini Grid Low Voltage Connection
+The cost model is identical to grid low voltage connection.
 
-#### Diesel Mini Grid Low Voltage Connection Raw Cost
 {diesel_mini_grid_lv_connection_raw_cost}
-
-#### Diesel Mini Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
 {diesel_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost}
-
-#### Diesel Mini Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
 {diesel_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Diesel Mini Grid Low Voltage Connection Lifetime in Years
 {diesel_mini_grid_lv_connection_lifetime_in_years}
 
 
-## Technology: Solar Home System
+
+
+## Technology: Solar Home
 A photovoltaic system produces electricity from sunlight for each [building](https://vimeo.com/158065353).
 
-#### Solar Home System Loss as Percent of Total Production
 {solar_home_system_loss_as_percent_of_total_production}
 
-### Panel
+
+### Solar Home Panel
 The photovoltaic panel converts sunlight into electricity.
 
 * Initial Raw Cost
@@ -290,50 +248,37 @@ The photovoltaic panel converts sunlight into electricity.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Solar Home System Panel Table
-{solar_home_panel_table}
+{solar_home_panel_table: solar home panels}
 
-### Battery
+
+### Solar Home Battery
 Battery costs are proportional to panel costs.
 
-#### Solar Home System Battery Storage Size in Kilowatt-Hours per Panel Kilowatt
 {solar_home_battery_kwh_per_panel_kw}
-
-#### Solar Home System Battery Raw Cost per Battery Kilowatt-Hour
 {solar_home_battery_raw_cost_per_battery_kwh}
-
-#### Solar Home System Battery Installation Cost as Percent of Raw Cost
 {solar_home_battery_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Home System Battery Maintenance Cost per Year as Percent of Raw Cost
 {solar_home_battery_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Home System Battery Lifetime in Years
 {solar_home_battery_lifetime_in_years}
 
-### Balance
+
+### Solar Home Balance
 Balance costs are proportional to panel costs.
 
-#### Solar Home System Balance Raw Cost per Panel Kilowatt
 {solar_home_balance_raw_cost_per_panel_kw}
-
-#### Solar Home System Balance Installation Cost as Percent of Raw Cost
 {solar_home_balance_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Home System Balance Maintenance Cost per Year as Percent of Raw Cost
 {solar_home_balance_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Home System Balance Lifetime in Years
 {solar_home_balance_lifetime_in_years}
+
+
 
 
 ## Technology: Solar Mini Grid
 A photovoltaic system produces electricity that is distributed to consumers.
 
-#### Solar Mini Grid System Loss as Percent of Total Production
 {solar_mini_grid_system_loss_as_percent_of_total_production}
 
-### Panel
+
+### Solar Mini Grid Panel
 The photovoltaic panel converts sunlight into electricity.
 
 * Initial Raw Cost
@@ -347,67 +292,41 @@ The photovoltaic panel converts sunlight into electricity.
 * Recurring Maintenance Cost is proportional to the Raw Cost.
 * Recurring Replacement Cost is the Initial Cost divided by lifetime.
 
-#### Solar Mini Grid System Panel Table
-{solar_mini_grid_panel_table}
+{solar_mini_grid_panel_table: solar mini grid panels}
 
-### Battery
+
+### Solar Mini Grid Battery
 Battery costs are proportional to panel costs.
 
-#### Solar Mini Grid System Battery Storage Size in Kilowatt-Hours per Panel Kilowatt
 {solar_mini_grid_battery_kwh_per_panel_kw}
-
-#### Solar Mini Grid System Battery Raw Cost per Battery Kilowatt-Hour
 {solar_mini_grid_battery_raw_cost_per_battery_kwh}
-
-#### Solar Mini Grid System Battery Installation Cost as Percent of Raw Cost
 {solar_mini_grid_battery_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Mini Grid System Battery Maintenance Cost per Year as Percent of Raw Cost
 {solar_mini_grid_battery_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Mini Grid System Battery Lifetime in Years
 {solar_mini_grid_battery_lifetime_in_years}
 
-### Balance
+
+### Solar Mini Grid Balance
 Balance costs are proportional to panel costs.
 
-#### Solar Mini Grid System Balance Raw Cost per Panel Kilowatt
 {solar_mini_grid_balance_raw_cost_per_panel_kw}
-
-#### Solar Mini Grid System Balance Installation Cost as Percent of Raw Cost
 {solar_mini_grid_balance_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Mini Grid System Balance Maintenance Cost per Year as Percent of Raw Cost
 {solar_mini_grid_balance_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Mini Grid System Balance Lifetime in Years
 {solar_mini_grid_balance_lifetime_in_years}
+
 
 ### Solar Mini Grid Low Voltage Line
 The cost model is identical to grid low voltage line.
 
-#### Solar Mini Grid Low Voltage Line Raw Cost per Meter
 {solar_mini_grid_lv_line_raw_cost_per_meter}
-
-#### Solar Mini Grid Low Voltage Line Installation Cost as Percent of Raw Cost
 {solar_mini_grid_lv_line_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Mini Grid Low Voltage Line Maintenance Cost per Year as Percent of Raw Cost
 {solar_mini_grid_lv_line_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Mini Grid Low Voltage Line Lifetime in Years
 {solar_mini_grid_lv_line_lifetime_in_years}
 
+
 ### Solar Mini Grid Low Voltage Connection
+The cost model is identical to grid low voltage connection.
 
-#### Solar Mini Grid Low Voltage Connection Raw Cost
 {solar_mini_grid_lv_connection_raw_cost}
-
-#### Solar Mini Grid Low Voltage Connection Installation Cost as Percent of Raw Cost
 {solar_mini_grid_lv_connection_installation_cost_as_percent_of_raw_cost}
-
-#### Solar Mini Grid Low Voltage Connection Maintenance Cost per Year as Percent of Raw Cost
 {solar_mini_grid_lv_connection_maintenance_cost_per_year_as_percent_of_raw_cost}
-
-#### Solar Mini Grid Low Voltage Connection Lifetime in Years
 {solar_mini_grid_lv_connection_lifetime_in_years}

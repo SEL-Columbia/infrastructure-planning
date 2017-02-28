@@ -44,10 +44,13 @@ I found a serious bug in the way that values are being interpolated in `interpol
     _ Consider renaming selected_technologies to ordered_technologies or ranked_technologies
     + Rename selected_technologies_text to technology_options
 
+20170227-1600 - 20170227-1730: 90 minutes
+
+    + Update template to display properly
+
 # Tasks
 
     Make sure technology_options work properly
-    Update template to display properly
 
     Rename "proposed cost per connection" to "proposed discounted cost per connection"
     Add "proposed initial cost per connection"
@@ -74,3 +77,7 @@ I found a serious bug in the way that values are being interpolated in `interpol
 
     Consider supporting capacity and installation cost per kw override
     Consider supporting multiple transformer table override
+
+    Prepare Spanish Language template
+
+    Add grid local initial cost *per connection* to report by location
