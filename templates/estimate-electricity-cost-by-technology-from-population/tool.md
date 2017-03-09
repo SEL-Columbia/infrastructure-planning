@@ -1,6 +1,6 @@
 # Estimate Electricity Cost by Technology from Population
 
-- Version 3 (2016)
+- [Version 3 (2016)](https://github.com/sel-columbia/infrastructure-planning)
     - Principal Investigator: Professor Vijay Modi
     - Project Manager: Edwin Adkins
     - Econometric Analyst: Naichen Zhao

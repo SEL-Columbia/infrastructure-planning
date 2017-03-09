@@ -47,6 +47,7 @@ I found a serious bug in the way that values are being interpolated in `interpol
 20170227-1600 - 20170227-1730: 90 minutes
 
     + Update template to display properly
+    + Add github link to template
 
 # Tasks
 
