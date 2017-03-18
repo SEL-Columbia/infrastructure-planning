@@ -54,7 +54,7 @@ I found a serious bug in the way that values are being interpolated in `interpol
     Make sure technology_options work properly
 
     Rename "proposed cost per connection" to "proposed discounted cost per connection"
-    Add "proposed initial cost per connection"
+    Add "proposed initial cost per connection" to report by location
 
     Consider total population and % connected to compute unconnected household count
         Rename household count to unconnected household count
@@ -66,19 +66,5 @@ I found a serious bug in the way that values are being interpolated in `interpol
 
     Consider estimating population growth using projected population year
 
-    Let user download example table for each table
-
     Update executive summary by technology
         Show connection count
-
-    Consider preserving datetime fields in shapefiles
-
-    Use same colours for technologies
-    Add legend for technologies
-
-    Consider supporting capacity and installation cost per kw override
-    Consider supporting multiple transformer table override
-
-    Prepare Spanish Language template
-
-    Add grid local initial cost *per connection* to report by location

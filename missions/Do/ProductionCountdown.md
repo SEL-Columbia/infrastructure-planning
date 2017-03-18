@@ -1,5 +1,13 @@
 # Tasks
 
+    Let user download example table for each table
+    Prepare Spanish Language template
+    Consider supporting capacity and installation cost per kw override
+    Consider supporting multiple transformer table override
+    Use same colours for technologies
+    Add legend for technologies
+    Consider preserving datetime fields in shapefiles
+
 ## Important and easy
 
     Update executive summary by technology
