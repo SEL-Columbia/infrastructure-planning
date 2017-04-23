@@ -23,10 +23,10 @@
     - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang
 - Version 1 (2009)
     - Principal Investigator: Vijay Modi
-    - Project Managers: Matt Berg
+    - Project Managers: Alex Hofmann, Matt Berg
     - Project Advisors: Jonah Bossewitch, Rob Garfield
     - Operations Research Analysts: Alex Zvoleff, Ayse Selin Kocaman
-    - Econometric Analyst: Aly Sanoh
+    - Econometric Analyst: Sahil Shah, Aly Sanoh
     - Spatial Analyst: Susan Kum
     - Graphic Designer: Zarina Mustapha
     - Software Engineers: Roy Hyunjin Han, Anders Pearson, Ethan Jucovy
