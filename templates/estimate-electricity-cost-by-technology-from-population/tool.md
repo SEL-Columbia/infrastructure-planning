@@ -1,27 +1,36 @@
 # Estimate Electricity Cost by Technology from Population
 
-- [Version 3 (2016)](https://github.com/sel-columbia/infrastructure-planning)
-    - Principal Investigator: Professor Vijay Modi
+- [Version 4 (2016)](https://github.com/sel-columbia/infrastructure-planning)
+    - Principal Investigator: Vijay Modi
     - Project Manager: Edwin Adkins
     - Econometric Analyst: Naichen Zhao
     - Spatial Analyst: Shaky Sherpa
     - Software Engineers: Chris Natali, Roy Hyunjin Han, Viktor Roytman
-- Version 2 (2013)
-    - Principal Investigator: Professor Vijay Modi
+- Version 3 (2013)
+    - Principal Investigator: Vijay Modi
     - Project Manager: Edwin Adkins
     - Operations Research Analyst: Ayse Selin Kocaman
     - Econometric Analyst: Jonathan Carbajal
     - Spatial Analyst: Shaky Sherpa
     - Software Engineers: Chris Natali, Brandon Ogle
-- Version 1 (2010)
-    - Principal Investigator: Professor Vijay Modi
-    - Project Managers: Edwin Adkins, Alex Hofmann, Matt Berg
-    - Operations Research Analyst: Alex Zvoleff, Ayse Selin Kocaman
+- Version 2 (2010)
+    - Principal Investigator: Vijay Modi
+    - Project Managers: Edwin Adkins, Alex Hofmann
+    - Operations Research Analyst: Ayse Selin Kocaman
     - Econometric Analysts: Sahil Shah, Aly Sanoh
     - Spatial Analyst: Susan Kum
-    - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang, Andrew Doro
+    - Graphic Designer: Andrew Doro
+    - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang
+- Version 1 (2009)
+    - Principal Investigator: Vijay Modi
+    - Project Managers: Matt Berg
+    - Project Advisors: Jonah Bossewitch, Rob Garfield
+    - Operations Research Analyst: Alex Zvoleff
+    - Econometric Analyst: Aly Sanoh
+    - Graphic Designer: Zarina Mustapha
+    - Software Engineers: Roy Hyunjin Han, Anders Pearson, Ethan Jucovy
 - Version 0 (2008)
-    - Principal Investigator: Professor Vijay Modi
+    - Principal Investigator: Vijay Modi
     - Doctoral Researchers: Lily Parshall, Aly Sanoh
     - Econometric Analyst: Arnaud Algrin
     - Spatial Analyst: Dana Pillai
