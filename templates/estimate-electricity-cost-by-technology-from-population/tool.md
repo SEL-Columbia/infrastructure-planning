@@ -25,8 +25,9 @@
     - Principal Investigator: Vijay Modi
     - Project Managers: Matt Berg
     - Project Advisors: Jonah Bossewitch, Rob Garfield
-    - Operations Research Analyst: Alex Zvoleff
+    - Operations Research Analysts: Alex Zvoleff, Ayse Selin Kocaman
     - Econometric Analyst: Aly Sanoh
+    - Spatial Analyst: Susan Kum
     - Graphic Designer: Zarina Mustapha
     - Software Engineers: Roy Hyunjin Han, Anders Pearson, Ethan Jucovy
 - Version 0 (2008)
