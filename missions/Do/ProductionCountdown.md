@@ -1,9 +1,11 @@
 # Tasks
 
+    Consider supporting multiple transformer table override
+    Let user override transformer cost per kva
+
     Let user download example table for each table
     Prepare Spanish Language template
     Consider supporting capacity and installation cost per kw override
-    Consider supporting multiple transformer table override
     Use same colours for technologies
     Add legend for technologies
     Consider preserving datetime fields in shapefiles
@@ -22,6 +24,7 @@
 
     Adjust map colors to match old system
     Add legend to map
+    Allow striped stroke for map lines
 
     Check for required columns like name
     Replace geopy geocoding with error message about expected longitude latitude
