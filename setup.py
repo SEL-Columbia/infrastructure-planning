@@ -15,7 +15,7 @@ setup(
     ],
     author='Roy Hyunjin Han',
     author_email='rhh@crosscompute.com',
-    url='https://crosscompute.com/docs',
+    url='https://github.com/sel-columbia/infrastructure-planning',
     keywords='infrastructure-planning networkplanner crosscompute',
     packages=find_packages(),
     include_package_data=True,
