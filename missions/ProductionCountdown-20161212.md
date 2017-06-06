@@ -52,6 +52,7 @@ I found a serious bug in the way that values are being interpolated in `interpol
 # Tasks
 
     Make sure technology_options work properly
+    Add help text based on Shaky's data dictionary
 
     Rename "proposed cost per connection" to "proposed discounted cost per connection"
     Add "proposed initial cost per connection" to report by location
