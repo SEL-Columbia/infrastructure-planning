@@ -1,7 +1,7 @@
 from geopy.distance import vincenty as get_distance
 from invisibleroads_macros.geometry import (
     drop_z, flip_xy, transform_geometries)
-from logging import NullHandler, getLogger
+from invisibleroads_macros.log import get_log
 from pandas import isnull
 from shapely import wkt
 from shapely.geometry import GeometryCollection
@@ -15,8 +15,7 @@ DEMAND_POINT_TABLE_COLUMNS = [
     'longitude',
     'population',
 ]
-LOG = getLogger(__name__)
-LOG.addHandler(NullHandler())
+L = get_log(__name__)
 
 
 def normalize_demand_point_table(demand_point_table):
@@ -83,7 +82,7 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
         if geometry.type.endswith('LineString'):
             geometries.append(geometry)
         else:
-            LOG.warn(
+            L.warn(
                 'Ignoring incompatible geometry '
                 'in grid_mv_line_geotable (%s)' % geometry.wkt)
             xs.append(x)
