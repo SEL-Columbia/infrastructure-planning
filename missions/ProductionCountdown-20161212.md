@@ -63,8 +63,15 @@ I found a serious bug in the way that values are being interpolated in `interpol
         Grow population using total population
         Size capacity using unconnected household count
         Add preconnected_technology
+            Use grid if preconnected_technology or proposed_technology is grid
+            Use proposed technology if both are not grid
+            Include capital costs if there is a change
+            Exclude capital costs if there is no change
+            Include recurring costs in both cases
         Add preconnected_rate_as_percent_of_population
-
+            Compute unelectrified population
+            Grow the full population
+            Use unelectrified population for calculations
     Consider estimating population growth using projected population year
 
     Update executive summary by technology
