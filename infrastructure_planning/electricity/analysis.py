@@ -1,6 +1,6 @@
 from collections import OrderedDict
+from invisibleroads_macros.calculator import divide_safely
 from invisibleroads_macros.iterable import OrderedDefaultDict
-from invisibleroads_macros.math import divide_safely
 
 
 def pick_proposed_technology(

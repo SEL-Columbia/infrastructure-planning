@@ -1,4 +1,4 @@
-from invisibleroads_macros.math import divide_safely
+from invisibleroads_macros.calculator import divide_safely
 
 from ..exceptions import ExpectedPositive
 

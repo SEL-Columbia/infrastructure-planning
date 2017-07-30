@@ -5,13 +5,13 @@ import inspect
 import simplejson as json
 import shutil
 from collections import OrderedDict
+from invisibleroads_macros.calculator import divide_safely
 from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
     make_enumerated_folder_for, make_folder, remove_safely,
     replace_file_extension)
 from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
-from invisibleroads_macros.math import divide_safely
 from invisibleroads_macros.table import normalize_key
 from networkx import Graph, write_gpickle
 from os.path import isabs, join, splitext

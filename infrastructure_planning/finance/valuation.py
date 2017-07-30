@@ -21,7 +21,7 @@ def compute_discounted_cash_flow_xxx(time_value_packs, discount_rate_percent):
 
 def compute_break_even_time(time_value_packs, discount_rate_percent):
     time_value_packs = sort_time_packs(time_value_packs)
-    for end_index in xrange(1, len(time_value_packs) + 1):
+    for end_index in range(1, len(time_value_packs) + 1):
         discounted_cash_flow = compute_discounted_cash_flow_xxx(
             time_value_packs[:end_index], discount_rate_percent)
         if discounted_cash_flow >= 0:

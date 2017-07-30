@@ -1,8 +1,8 @@
 import numpy as np
 from collections import defaultdict
 from importlib import import_module
+from invisibleroads_macros.calculator import divide_safely
 from invisibleroads_macros.iterable import merge_dictionaries
-from invisibleroads_macros.math import divide_safely
 from itertools import product
 from pandas import Series
 

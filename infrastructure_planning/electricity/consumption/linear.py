@@ -1,4 +1,4 @@
-from invisibleroads_macros.math import divide_safely
+from invisibleroads_macros.calculator import divide_safely
 from pandas import DataFrame, Series, concat, isnull, merge
 
 from ...growth import get_default_slope, get_future_years

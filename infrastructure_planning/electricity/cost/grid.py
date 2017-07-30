@@ -1,7 +1,7 @@
 from collections import defaultdict
 from geopy.distance import vincenty as get_distance
+from invisibleroads_macros.calculator import divide_safely
 from invisibleroads_macros.iterable import merge_dictionaries
-from invisibleroads_macros.math import divide_safely
 
 from ...exceptions import ExpectedPositive, ValidationError
 from ...finance.valuation import compute_discounted_cash_flow
