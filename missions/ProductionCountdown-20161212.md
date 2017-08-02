@@ -76,3 +76,5 @@ I found a serious bug in the way that values are being interpolated in `interpol
 
     Update executive summary by technology
         Show connection count
+
+    Consider simplifying existing mv lines with line simplification
