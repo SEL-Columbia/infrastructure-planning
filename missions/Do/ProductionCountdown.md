@@ -1,5 +1,6 @@
 # Tasks
 
+    Consider including altitude for each point
     Consider supporting multiple transformer table override
     Let user override transformer cost per kva
 
