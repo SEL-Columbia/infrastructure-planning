@@ -78,3 +78,13 @@ I found a serious bug in the way that values are being interpolated in `interpol
         Show connection count
 
     Consider simplifying existing mv lines with line simplification
+    Speed up networker with line simplification
+
+    Rename tool to something shorter like Electrification Planning
+    Move parameter and argument descriptions into mouseover popups
+
+    Have population growth stop at a specific year
+    Show connection count in executive summary
+    Make it possible to specify single values as an alternative to tables
+    Implement % connected for electricity intensification
+    Rewrite sequencer
