@@ -88,3 +88,6 @@ I found a serious bug in the way that values are being interpolated in `interpol
     Make it possible to specify single values as an alternative to tables
     Implement % connected for electricity intensification
     Rewrite sequencer
+
+    Draw break even analysis graph with revenue, variable costs, fixed costs, gross profit
+    Highlight towns that could result in sustainable utility companies
