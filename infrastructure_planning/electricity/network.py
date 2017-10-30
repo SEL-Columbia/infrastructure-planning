@@ -42,12 +42,12 @@ def assemble_total_grid_mv_line_network(
     nwk = NetworkerRunner(nwk_settings, drafts_folder)
     nwk.validate()
     msf = nwk.run()
-    for node_id in msf.nodes_iter():
+    for node_id in msf.nodes():
         if node_id in infrastructure_graph:
             continue
         # Add fake nodes so we can add edges to fake nodes
         longitude, latitude = msf.coords[node_id]
-        infrastructure_graph.add_node(node_id, {
+        infrastructure_graph.add_node(node_id, **{
             'longitude': longitude, 'latitude': latitude, 'population': 0,
             'peak_demand_in_kw': 0})
     infrastructure_graph.add_edges_from(msf.edges_iter())

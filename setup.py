@@ -30,7 +30,7 @@ setup(
         'invisibleroads-macros>=0.7.4',
         'matplotlib',
         # 'networker',
-        'networkx',
+        'networkx<2',
         'numpy',
         'pandas',
         'python-dateutil',

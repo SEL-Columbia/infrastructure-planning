@@ -38,7 +38,7 @@ class BasicArgumentParser(TerseArgumentParser):
 class InfrastructureGraph(Graph):
 
     def cycle_nodes(self):
-        for node_id, node_d in self.nodes_iter(data=True):
+        for node_id, node_d in self.nodes(data=True):
             if 'name' not in node_d:
                 continue  # We have a fake node
             yield node_id, node_d
@@ -243,7 +243,7 @@ def make_zero_by_year(value_by_year):
 def get_graph_from_table(table):
     graph = InfrastructureGraph()
     for index, row in table.iterrows():
-        graph.add_node(index, dict(row))
+        graph.add_node(index, **dict(row))
     return graph
 
 

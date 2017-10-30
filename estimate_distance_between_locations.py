@@ -10,7 +10,7 @@ from pandas import read_csv
 def run(location_geotable):
     graph = Graph()
     for index, row in location_geotable.iterrows():
-        graph.add_node(index, {
+        graph.add_node(index, **{
             'lat': row['Latitude'], 'lon': row['Longitude']})
     for node1_id in range(min(graph), max(graph)):
         for node2_id in range(node1_id + 1, max(graph) + 1):
