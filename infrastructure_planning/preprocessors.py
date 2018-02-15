@@ -74,7 +74,7 @@ def normalize_solar_mini_grid_panel_table(solar_mini_grid_panel_table):
 
 
 def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
-    'Make sure that grid mv lines use (latitude, longitude) coordinate order'
+    'Make sure that grid mv lines use (longitude, latitude) coordinate order'
     raw_geometries = [wkt.loads(x) for x in grid_mv_line_geotable['wkt']]
     # Remove incompatible geometries
     geometries, xs = [], []
@@ -93,10 +93,10 @@ def normalize_grid_mv_line_geotable(grid_mv_line_geotable, demand_point_table):
     if geometries:
         regular = tuple(GeometryCollection(geometries).centroid.coords[0])[:2]
         flipped = regular[1], regular[0]
-        reference = tuple(demand_point_table[['latitude', 'longitude']].mean())
+        reference = tuple(demand_point_table[['longitude', 'latitude']].mean())
         # If the flipped coordinates are closer,
         if get_distance(reference, flipped) < get_distance(reference, regular):
-            # Flip coordinates to get (latitude, longitude) coordinate order
+            # Flip coordinates to get (longitude, latitude) coordinate order
             geometries = transform_geometries(geometries, flip_xy)
     grid_mv_line_geotable['wkt'] = [x.wkt for x in geometries]
     return {'grid_mv_line_geotable': grid_mv_line_geotable}

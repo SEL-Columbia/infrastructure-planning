@@ -10,7 +10,6 @@ from invisibleroads_macros.configuration import TerseArgumentParser
 from invisibleroads_macros.disk import (
     make_enumerated_folder_for, make_folder, remove_safely,
     replace_file_extension)
-from invisibleroads_macros.geometry import flip_xy, transform_geometries
 from invisibleroads_macros.iterable import merge_dictionaries, sort_dictionary
 from invisibleroads_macros.table import normalize_key
 from networkx import Graph, write_gpickle
@@ -133,18 +132,17 @@ def run(main_functions, g):
             g.update(compute(f, g))
             continue
         for node_id, node_d in g['infrastructure_graph'].cycle_nodes():
-            l = merge_dictionaries(node_d, {
+            v = merge_dictionaries(node_d, {
                 'node_id': node_id,
                 'local_overrides': dict(g['demand_point_table'].ix[node_id])})
-            node_d.update(compute(f, l, g))
+            node_d.update(compute(f, v, g))
     return g
 
 
 def save_shapefile(target_path, geotable):
     if 'wkt' in geotable:
-        geometries = [wkt.loads(x) for x in geotable['wkt']]
         # Shapefiles expect (x, y) or (longitude, latitude) coordinate order
-        geometries = transform_geometries(geometries, flip_xy)
+        geometries = [wkt.loads(x) for x in geotable['wkt']]
     else:
         xys = geotable[['longitude', 'latitude']].values
         geometries = [Point(xy) for xy in xys]

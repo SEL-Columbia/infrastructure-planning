@@ -392,9 +392,9 @@ def save_total_lines(
 
         node1_d, node2_d = order_nodes(node1_d, node2_d, edge_order)
         wkt = LineString([(
-            node1_d['latitude'], node1_d['longitude'],
+            node1_d['longitude'], node1_d['latitude'],
         ), (
-            node2_d['latitude'], node2_d['longitude'],
+            node2_d['longitude'], node2_d['latitude'],
         )]).wkt
         rows.append([line_length, discounted_cost, edge_order, wkt])
     properties_folder = make_folder(join(target_folder, 'properties'))
@@ -535,7 +535,7 @@ def save_total_map(
             'Proposed MV Line Length (m)': node_d.get(
                 'grid_mv_line_adjusted_length_in_meters'),
             'Levelized Cost Per kWh Consumed': levelized_cost,
-            'WKT': Point(latitude, longitude).wkt,
+            'WKT': Point(longitude, latitude).wkt,
             'FillColor': color_by_technology[technology],
             'RadiusInPixelsRange5-10': node_d['peak_demand_in_kw'],
         })
@@ -552,8 +552,8 @@ def save_total_map(
             node2_d['peak_demand_in_kw'])
         line_length = edge_d['grid_mv_line_adjusted_length_in_meters']
         geometry_wkt = LineString([
-            (node1_d['latitude'], node1_d['longitude']),
-            (node2_d['latitude'], node2_d['longitude'])]).wkt
+            (node1_d['longitude'], node1_d['latitude']),
+            (node2_d['longitude'], node2_d['latitude'])]).wkt
         rows.append({
             'Name': name,
             'Peak Demand (kW)': peak_demand,
