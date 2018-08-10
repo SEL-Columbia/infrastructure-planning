@@ -1,27 +1,34 @@
 # Estimate Electricity Cost by Technology from Population
 
-- [Version 3 (2016)](https://github.com/sel-columbia/infrastructure-planning)
+- [Version 4 (2016)](https://github.com/sel-columbia/infrastructure-planning)
     - Principal Investigator: Vijay Modi
     - Project Manager: Edwin Adkins
     - Econometric Analyst: Naichen Zhao
     - Spatial Analyst: Shaky Sherpa
     - Software Engineers: Chris Natali, Roy Hyunjin Han, Viktor Roytman
-- Version 2 (2013)
+- Version 3 (2013)
     - Principal Investigator: Vijay Modi
     - Project Manager: Edwin Adkins
     - Operations Research Analyst: Ayse Selin Kocaman
     - Econometric Analyst: Jonathan Carbajal
     - Spatial Analyst: Shaky Sherpa
     - Software Engineers: Chris Natali, Brandon Ogle
-- Version 1 (2010)
+- Version 2 (2010)
     - Principal Investigator: Vijay Modi
-    - Project Managers: Edwin Adkins, Alex Hofmann, Matt Berg
+    - Project Managers: Edwin Adkins, Alex Hofmann
     - Project Advisors: Jonah Bossewitch, Rob Garfield
     - Operations Research Analysts: Alex Zvoleff, Ayse Selin Kocaman
     - Econometric Analysts: Sahil Shah, Aly Sanoh
     - Spatial Analyst: Susan Kum
     - Graphic Designers: Andrew Doro, Zarina Mustapha
     - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang, Anders Pearson, Ethan Jucovy
+- Version 1 (2009)
+    - Principal Investigator: Vijay Modi
+    - Project Managers: Alex Hofmann, Matt Berg
+    - Operations Research Analysts: Alex Zvoleff, Ayse Selin Kocaman
+    - Econometric Analysts: Sahil Shah, Aly Sanoh
+    - Graphic Designers: Andrew Doro
+    - Software Engineers: Roy Hyunjin Han, Po-Han Freeza Huang
 - Version 0 (2008)
     - Principal Investigator: Vijay Modi
     - Doctoral Researchers: Lily Parshall, Aly Sanoh
