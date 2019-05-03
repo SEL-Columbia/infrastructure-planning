@@ -32,7 +32,7 @@ setup(
         # 'networker',
         'networkx<2',
         'numpy',
-        'pandas',
+        'pandas==v0.19.1',
         'python-dateutil',
         'scikit-learn',
         'scipy',
